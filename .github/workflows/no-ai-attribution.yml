@@ -1,0 +1,31 @@
+name: no-ai-attribution
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reject AI attribution in commits and PR text
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          pattern='co-authored-by:.*(claude|anthropic)|claude-session:|generated with \[?claude'
+          if git log "$BASE..$HEAD" --format='%B' | grep -iE "$pattern"; then
+            echo "::error::A commit message contains AI attribution. Amend it and push again."
+            exit 1
+          fi
+          if printf '%s\n%s\n' "$PR_TITLE" "$PR_BODY" | grep -iE "$pattern"; then
+            echo "::error::The PR title or body contains AI attribution."
+            exit 1
+          fi
+          echo "No AI attribution found."

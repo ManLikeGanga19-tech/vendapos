@@ -1,0 +1,50 @@
+# === OS ===
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# === IDEs ===
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# === PHP / Composer ===
+/vendor/
+**/vendor/
+
+# === Node ===
+node_modules/
+
+# === Laravel ===
+**/.env
+**/.env.backup
+**/.env.production
+**/storage/*.key
+**/storage/framework/cache/data/*
+**/storage/framework/sessions/*
+**/storage/framework/views/*
+**/storage/logs/*
+!**/storage/framework/cache/.gitkeep
+!**/storage/framework/sessions/.gitkeep
+!**/storage/framework/views/.gitkeep
+!**/storage/logs/.gitkeep
+
+# === Docker ===
+.docker-data/
+
+# === NativePHP build output ===
+**/dist/
+
+# === Claude Code local settings ===
+.claude/settings.local.json
+
+# === Misc ===
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.phpunit.result.cache
+.php-cs-fixer.cache
+phpstan-baseline.neon.bak
