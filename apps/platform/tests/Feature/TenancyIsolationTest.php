@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Domain\Tenancy\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use App\Domain\Tenancy\Models\Tenant;
 use Tests\TestCase;
 
 class TenancyIsolationTest extends TestCase
