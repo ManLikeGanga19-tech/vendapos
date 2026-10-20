@@ -39,6 +39,19 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: vendapos_test
+      DB_USERNAME: vendapos
+      DB_PASSWORD: vendapos
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+
     steps:
       - uses: actions/checkout@v4
 
@@ -53,9 +66,15 @@ jobs:
         working-directory: apps/platform
         run: composer install --no-interaction --prefer-dist
 
-      - name: Copy env
+      - name: Create test database
+        run: PGPASSWORD=vendapos psql -h 127.0.0.1 -U vendapos -c "CREATE DATABASE vendapos_test OWNER vendapos;"
+
+      - name: Prepare environment
         working-directory: apps/platform
-        run: cp .env.example .env && php artisan key:generate
+        run: |
+          cp .env.example .env
+          sed -i 's/DB_HOST=postgres/DB_HOST=127.0.0.1/' .env
+          php artisan key:generate
 
       - name: Pint (formatting)
         working-directory: apps/platform
@@ -65,18 +84,12 @@ jobs:
         working-directory: apps/platform
         run: ./vendor/bin/phpstan analyse --memory-limit=512M
 
+      - name: Run migrations
+        working-directory: apps/platform
+        run: php artisan migrate --force
+
       - name: Pest (tests)
         working-directory: apps/platform
-        env:
-          DB_CONNECTION: pgsql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 5432
-          DB_DATABASE: vendapos
-          DB_USERNAME: vendapos
-          DB_PASSWORD: vendapos
-          REDIS_HOST: 127.0.0.1
-          REDIS_PORT: 6379
-          CACHE_STORE: redis
         run: ./vendor/bin/pest
 
   core:
@@ -118,6 +131,13 @@ jobs:
       - name: Install Composer dependencies
         working-directory: apps/pos-terminal
         run: composer install --no-interaction --prefer-dist
+
+      - name: Prepare environment
+        working-directory: apps/pos-terminal
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          touch database/database.sqlite
 
       - name: Tests
         working-directory: apps/pos-terminal

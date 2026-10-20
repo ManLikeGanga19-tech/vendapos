@@ -19,7 +19,7 @@ class TenancyServiceProvider extends ServiceProvider
     // By default, no namespace is used to support the callable array syntax.
     public static string $controllerNamespace = '';
 
-    /** @return array<class-string, list<\Stancl\JobPipeline\JobPipeline|\Closure|class-string>> */
+    /** @return array<class-string, list<JobPipeline|\Closure|class-string>> */
     public function events(): array
     {
         return [
