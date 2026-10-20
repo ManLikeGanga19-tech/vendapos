@@ -5,6 +5,9 @@ services:
       dockerfile: Dockerfile
     volumes:
       - .:/app
+      - platform_vendor:/app/apps/platform/vendor
+      - terminal_vendor:/app/apps/pos-terminal/vendor
+      - core_vendor:/app/packages/core/vendor
     ports:
       - "8000:8000"
     depends_on:
@@ -54,6 +57,9 @@ services:
 volumes:
   pgdata:
   redisdata:
+  platform_vendor:
+  terminal_vendor:
+  core_vendor:
 
 networks:
   vendapos:
