@@ -36,6 +36,8 @@ Route::prefix('{locale}')
                 Route::view('/', 'pages.home')->name('home');
                 Route::view('product', 'pages.product')->name('product');
                 Route::view('pricing', 'pages.pricing')->name('pricing');
+                Route::view('compliance', 'pages.compliance')->name('compliance');
+                Route::view('solutions/restaurants', 'pages.solutions.restaurants')->name('solutions.restaurants');
             });
 
         // Form pages keep the session for CSRF protection and validation errors.

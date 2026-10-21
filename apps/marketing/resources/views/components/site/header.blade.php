@@ -1,32 +1,33 @@
 @props(['alternates'])
 
 @php
-    // Pages appear in the menu as soon as their route exists.
+    // route => [label, pattern that marks it active]. Solutions points at the first
+    // solution page until there are enough of them for a dropdown.
     $links = collect([
-        'product' => 'nav.product',
-        'solutions' => 'nav.solutions',
-        'pricing' => 'nav.pricing',
-        'compliance' => 'nav.compliance',
-    ])->filter(fn (string $label, string $route) => Route::has($route));
+        'product' => ['nav.product', 'product'],
+        'solutions.restaurants' => ['nav.solutions', 'solutions.*'],
+        'pricing' => ['nav.pricing', 'pricing'],
+        'compliance' => ['nav.compliance', 'compliance'],
+    ])->filter(fn (array $link, string $route) => Route::has($route));
 @endphp
 
 <header class="sticky top-0 z-50 border-b border-line bg-canvas/95">
     <div class="container-page flex h-16 items-center justify-between gap-4 lg:h-20">
-        <a href="{{ route('home') }}" class="" aria-label="{{ __('nav.home') }}">
+        <a href="{{ route('home') }}" aria-label="{{ __('nav.home') }}">
             <x-site.logo />
         </a>
 
         @if ($links->isNotEmpty())
             <nav class="hidden lg:block" aria-label="{{ __('nav.primary') }}">
                 <ul class="flex items-center gap-8">
-                    @foreach ($links as $route => $label)
+                    @foreach ($links as $route => [$label, $active])
                         <li>
                             <a href="{{ route($route) }}"
-                               @if (request()->routeIs($route)) aria-current="page" @endif
+                               @if (request()->routeIs($active)) aria-current="page" @endif
                                @class([
                                    'py-2 transition',
-                                   'border-b-2 border-coral text-ink' => request()->routeIs($route),
-                                   'text-muted hover:text-ink' => ! request()->routeIs($route),
+                                   'border-b-2 border-coral text-ink' => request()->routeIs($active),
+                                   'text-muted hover:text-ink' => ! request()->routeIs($active),
                                ])>{{ __($label) }}</a>
                         </li>
                     @endforeach
@@ -52,7 +53,7 @@
                 <div class="absolute inset-x-0 top-full border-b border-line bg-canvas shadow-float">
                     <nav class="container-page py-4" aria-label="{{ __('nav.primary') }}">
                         <ul class="divide-y divide-line">
-                            @foreach ($links as $route => $label)
+                            @foreach ($links as $route => [$label, $active])
                                 <li>
                                     <a href="{{ route($route) }}" class="flex min-h-12 items-center text-lg text-ink">{{ __($label) }}</a>
                                 </li>

@@ -37,6 +37,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | KRA eTIMS certification
+    |--------------------------------------------------------------------------
+    |
+    | Stays false until KRA lists VendaPOS as an approved eTIMS integrator.
+    | The compliance page then shows "Certified" instead of a TBC status.
+    |
+    */
+
+    'etims_certified' => (bool) env('MARKETING_ETIMS_CERTIFIED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Demo request leads
     |--------------------------------------------------------------------------
     |

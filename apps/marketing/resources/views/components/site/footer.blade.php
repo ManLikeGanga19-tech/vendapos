@@ -1,7 +1,7 @@
 @props(['alternates'])
 
 <footer class="border-t border-line bg-surface">
-    <div class="container-page grid gap-10 py-12 md:grid-cols-[2fr_1fr_1fr]">
+    <div class="container-page grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
         <div class="max-w-sm">
             <x-site.logo />
             <p class="mt-4 text-sm text-muted">{{ __('footer.tagline') }}</p>
@@ -11,8 +11,25 @@
         <div>
             <h2 class="text-sm font-semibold text-ink">{{ __('footer.solutions') }}</h2>
             <ul class="mt-4 space-y-3 text-sm text-muted">
-                @foreach (__('footer.verticals') as $vertical)
-                    <li>{{ $vertical }}</li>
+                @foreach (__('footer.verticals') as $key => $vertical)
+                    <li>
+                        @if (Route::has("solutions.{$key}"))
+                            <a href="{{ route("solutions.{$key}") }}" class="transition-colors hover:text-ink">{{ $vertical }}</a>
+                        @else
+                            {{ $vertical }}
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+
+        <div>
+            <h2 class="text-sm font-semibold text-ink">{{ __('footer.platform') }}</h2>
+            <ul class="mt-4 space-y-3 text-sm text-muted">
+                @foreach (['product' => 'nav.product', 'pricing' => 'nav.pricing', 'compliance' => 'nav.compliance', 'demo' => 'nav.book_demo'] as $route => $label)
+                    @if (Route::has($route))
+                        <li><a href="{{ route($route) }}" class="transition-colors hover:text-ink">{{ __($label) }}</a></li>
+                    @endif
                 @endforeach
             </ul>
         </div>

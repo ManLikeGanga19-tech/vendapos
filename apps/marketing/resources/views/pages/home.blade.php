@@ -121,6 +121,11 @@
                                 {{ $vertical['title'] }}
                             </h3>
                             <p class="mt-2 text-sm text-muted">{{ $vertical['body'] }}</p>
+                            @if (Route::has("solutions.{$key}"))
+                                <a href="{{ route("solutions.{$key}") }}" class="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-coral hover:text-coral-hover">
+                                    {{ __('home.verticals.more') }} <x-icon name="arrow-right" class="size-4" />
+                                </a>
+                            @endif
                         </div>
                     </li>
                 @endforeach
@@ -151,7 +156,7 @@
     <section class="border-y border-line bg-surface py-16 lg:py-24">
         <div class="container-page grid items-center gap-12 lg:grid-cols-2">
             <x-picture name="onboarding/training" :alt="__('home.steps.photo_alt')" icon="users"
-                       class="" sizes="(min-width: 1024px) 568px, 100vw" />
+                       sizes="(min-width: 1024px) 568px, 100vw" />
 
             <div>
                 <x-section-heading :eyebrow="__('home.steps.eyebrow')" :title="__('home.steps.title')" align="start" />

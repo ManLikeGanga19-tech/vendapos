@@ -3,6 +3,7 @@
 return [
     'tagline' => 'Mfumo wa mauzo, malipo na KRA eTIMS kwa biashara kote Kenya na Afrika Mashariki — umejengwa kuendelea kuuza hata mtandao ukikatika.',
     'solutions' => 'Suluhisho',
+    'platform' => 'Mfumo',
     'verticals' => [
         'restaurants' => 'Migahawa na mikahawa',
         'bars' => 'Baa na klabu',
