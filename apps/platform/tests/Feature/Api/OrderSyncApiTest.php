@@ -15,12 +15,9 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
-use Illuminate\Testing\TestResponse;
 use VendaPOS\Core\Data\OrderData;
-use VendaPOS\Core\Data\OrderLineData;
 use VendaPOS\Core\Enums\ItemType;
 use VendaPOS\Core\Enums\VatCategory;
-use VendaPOS\Core\Tax\OrderTotals;
 
 uses(DatabaseMigrations::class);
 
@@ -37,50 +34,6 @@ afterEach(function () {
     tenancy()->end();
     Tenant::all()->each->delete();
 });
-
-/**
- * A correct order payload whose totals are computed with the shared core maths.
- *
- * @param  list<array{0: Item, 1: int}>  $lines
- * @return array<string, mixed>
- */
-function saleOf(array $lines, int $sequence = 1, array $overrides = []): array
-{
-    $lineData = array_map(fn (array $line) => [
-        'item_id' => $line[0]->id,
-        'name' => $line[0]->name,
-        'quantity' => $line[1],
-        'unit_price_cents' => $line[0]->price_cents,
-        'vat_category' => $line[0]->vat_category->value,
-        'line_total_cents' => $line[0]->price_cents * $line[1],
-    ], $lines);
-
-    $totals = OrderTotals::fromLines(array_map(fn (array $l) => OrderLineData::from($l), $lineData));
-
-    return array_merge([
-        'uuid' => (string) Str::uuid(),
-        'sequence_number' => $sequence,
-        'placed_at' => '2026-10-21T19:15:00+03:00',
-        'status' => 'completed',
-        'lines' => $lineData,
-        'payment_type' => 'cash',
-        'subtotal_cents' => $totals->subtotal->cents,
-        'vat_cents' => $totals->vat->cents,
-        'total_cents' => $totals->total->cents,
-    ], $overrides);
-}
-
-/** POST a batch as the test's enrolled device. */
-function sync(array $orders): TestResponse
-{
-    $enrolment = test()->enrolment;
-    app('auth')->forgetGuards();
-
-    return test()->withHeaders([
-        'Authorization' => 'Bearer '.$enrolment->plainTextToken,
-        'X-Device-ID' => $enrolment->device->id,
-    ])->postJson('/api/v1/orders/sync', ['orders' => $orders]);
-}
 
 it('records an order, its lines and its outbox event in the device’s tenant', function () {
     $sale = saleOf([[$this->nyama, 1], [$this->water, 2]]);

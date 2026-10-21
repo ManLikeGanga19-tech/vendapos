@@ -31,6 +31,9 @@ return [
         'tenant' => (int) env('VENDAPOS_RATE_LIMIT_TENANT', 5000),
     ],
 
+    // Business days are counted here; storage stays UTC (CLAUDE.md §4).
+    'business_timezone' => 'Africa/Nairobi',
+
     // Largest accepted API body, in KB (architecture §5).
     'api_body_limit_kb' => (int) env('VENDAPOS_API_BODY_LIMIT_KB', 64),
 

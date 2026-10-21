@@ -10,6 +10,7 @@ use App\Domain\Orders\Data\SyncResult;
 use App\Domain\Orders\Events\OrderRecorded;
 use App\Domain\Orders\Events\OrderVoided;
 use App\Domain\Orders\Models\Order;
+use App\Domain\Orders\Models\OrderLine;
 use App\Infrastructure\Outbox\DomainEvent;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
@@ -94,27 +95,12 @@ final class RecordOrder
             ];
         }
 
-        $order->lines()->createMany($lines);
+        $order->setRelation('lines', $order->lines()->createMany($lines));
 
         $event = DomainEvent::record(
             type: 'order.recorded',
             tenantId: $context->tenantId,
-            payload: [
-                'order_id' => $order->id,
-                'sequence_number' => $order->sequence_number,
-                'status' => $order->status->value,
-                'placed_at' => $order->placed_at->toIso8601String(),
-                'payment_type' => $order->payment_type->value,
-                'subtotal_cents' => $order->subtotal_cents,
-                'vat_cents' => $order->vat_cents,
-                'total_cents' => $order->total_cents,
-                'lines' => array_map(fn (array $line) => [
-                    'item_id' => $line['item_id'],
-                    'quantity' => $line['quantity'],
-                    'line_total_cents' => $line['line_total_cents'],
-                    'vat_cents' => $line['vat_cents'],
-                ], $lines),
-            ],
+            payload: $this->snapshot($order),
             aggregateId: $order->id,
             branchId: $context->branchId,
             deviceId: $context->deviceId,
@@ -144,7 +130,7 @@ final class RecordOrder
         $event = DomainEvent::record(
             type: 'order.voided',
             tenantId: $context->tenantId,
-            payload: ['order_id' => $order->id, 'total_cents' => $order->total_cents],
+            payload: $this->snapshot($order),
             aggregateId: $order->id,
             branchId: $context->branchId,
             deviceId: $context->deviceId,
@@ -153,5 +139,31 @@ final class RecordOrder
         OrderVoided::dispatch($event->event_id, $context->tenantId, $order->id);
 
         return SyncResult::updated($order->id);
+    }
+
+    /**
+     * The outbox payload for every order event: a full snapshot, so each
+     * listener can act on its own event without reading the Orders tables.
+     *
+     * @return array<string, mixed>
+     */
+    private function snapshot(Order $order): array
+    {
+        return [
+            'order_id' => $order->id,
+            'sequence_number' => $order->sequence_number,
+            'status' => $order->status->value,
+            'placed_at' => $order->placed_at->toIso8601String(),
+            'payment_type' => $order->payment_type->value,
+            'subtotal_cents' => $order->subtotal_cents,
+            'vat_cents' => $order->vat_cents,
+            'total_cents' => $order->total_cents,
+            'lines' => $order->lines->map(fn (OrderLine $line) => [
+                'item_id' => $line->item_id,
+                'quantity' => $line->quantity,
+                'line_total_cents' => $line->line_total_cents,
+                'vat_cents' => $line->vat_cents,
+            ])->values()->all(),
+        ];
     }
 }
