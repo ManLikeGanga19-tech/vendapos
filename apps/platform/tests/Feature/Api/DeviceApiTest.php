@@ -3,14 +3,10 @@
 declare(strict_types=1);
 
 use App\Domain\Tenancy\Actions\EnrolDevice;
-use App\Domain\Tenancy\Data\DeviceEnrolment;
-use App\Domain\Tenancy\Models\Branch;
 use App\Domain\Tenancy\Models\Device;
 use App\Domain\Tenancy\Models\Tenant;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Illuminate\Testing\TestResponse;
 use VendaPOS\Core\Enums\BusinessType;
 
 uses(DatabaseMigrations::class);
@@ -19,33 +15,6 @@ afterEach(function () {
     tenancy()->end();
     Tenant::all()->each->delete(); // drops each tenant's schema
 });
-
-/** @return array{0: Tenant, 1: Branch} */
-function tenantWithBranch(BusinessType $type = BusinessType::Restaurant): array
-{
-    $tenant = Tenant::create(['id' => 't'.Str::lower(Str::random(10))]);
-
-    $branch = $tenant->run(fn () => Branch::create(['name' => 'Nyali '.$tenant->id, 'business_type' => $type]));
-
-    return [$tenant, $branch];
-}
-
-function enrolFor(Tenant $tenant, Branch $branch): DeviceEnrolment
-{
-    return app(EnrolDevice::class)->handle($tenant, $branch->id, 'Till 1');
-}
-
-function deviceRequest(string $method, string $uri, string $token, ?string $deviceId, array $headers = []): TestResponse
-{
-    app('auth')->forgetGuards(); // each request authenticates from scratch, as in production
-
-    $headers = ['Authorization' => "Bearer {$token}", ...$headers];
-    if ($deviceId !== null) {
-        $headers['X-Device-ID'] = $deviceId;
-    }
-
-    return test()->json($method, $uri, [], $headers);
-}
 
 it('lets an enrolled device read its own branch from its tenant’s schema', function () {
     [$tenant, $branch] = tenantWithBranch(BusinessType::Bar);

@@ -16,6 +16,8 @@ use Tests\TestCase;
 pest()->extend(TestCase::class)
     ->in('Feature', 'Arch');
 
+require_once __DIR__.'/Feature/Api/helpers.php';
+
 /*
 |--------------------------------------------------------------------------
 | Expectations
