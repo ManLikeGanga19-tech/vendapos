@@ -1,3 +1,5 @@
 <?php
 
-uses(VendaPOS\Core\Tests\TestCase::class)->in('Data');
+use VendaPOS\Core\Tests\TestCase;
+
+uses(TestCase::class)->in('Data', 'Rules');
