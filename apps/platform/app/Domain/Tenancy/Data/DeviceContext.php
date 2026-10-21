@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Orders\Data;
+namespace App\Domain\Tenancy\Data;
 
 /**
  * Where a sale came from, taken from the authenticated device (never from
- * the request body) and handed to the Orders module by the HTTP layer.
+ * the request body) and handed to the domain modules by the HTTP layer.
  */
 final readonly class DeviceContext
 {

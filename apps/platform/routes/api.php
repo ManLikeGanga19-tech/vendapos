@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Http\Api\V1\Controllers\RefreshDeviceToken;
+use App\Http\Api\V1\Controllers\RequestPayment;
 use App\Http\Api\V1\Controllers\ShowCatalogue;
 use App\Http\Api\V1\Controllers\ShowDevice;
+use App\Http\Api\V1\Controllers\ShowPayment;
 use App\Http\Api\V1\Controllers\SyncOrders;
 use Illuminate\Support\Facades\Route;
 
@@ -22,4 +24,11 @@ Route::prefix('v1')
         Route::post('orders/sync', SyncOrders::class)
             ->middleware(['ability:orders:sync', 'body.limit'])
             ->name('api.v1.orders.sync');
+        Route::post('payments', RequestPayment::class)
+            ->middleware(['ability:payments:initiate', 'body.limit'])
+            ->name('api.v1.payments.store');
+        Route::get('payments/{uuid}', ShowPayment::class)
+            ->middleware('ability:payments:initiate')
+            ->whereUuid('uuid')
+            ->name('api.v1.payments.show');
     });

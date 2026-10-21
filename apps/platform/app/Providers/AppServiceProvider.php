@@ -7,6 +7,8 @@ use App\Domain\Inventory\Jobs\DecrementStock;
 use App\Domain\Inventory\Jobs\RestoreStock;
 use App\Domain\Orders\Events\OrderRecorded;
 use App\Domain\Orders\Events\OrderVoided;
+use App\Domain\Payments\Events\PaymentRequested;
+use App\Domain\Payments\Jobs\InitiatePayment;
 use App\Domain\Tenancy\Models\Device;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -51,6 +53,8 @@ class AppServiceProvider extends ServiceProvider
             RestoreStock::dispatch($event->tenantId, $event->eventId);
             UpdateSalesSummaries::dispatch($event->tenantId, $event->eventId);
         });
+
+        Event::listen(PaymentRequested::class, fn (PaymentRequested $event) => InitiatePayment::dispatch($event->tenantId, $event->eventId));
     }
 
     private function deviceOf(Request $request): ?Device

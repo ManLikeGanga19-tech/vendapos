@@ -10,7 +10,7 @@ use App\Domain\Inventory\Jobs\RestoreStock;
 use App\Domain\Inventory\Models\StockLevel;
 use App\Domain\Inventory\Models\StockMovement;
 use App\Domain\Orders\Actions\RecordOrder;
-use App\Domain\Orders\Data\DeviceContext;
+use App\Domain\Tenancy\Data\DeviceContext;
 use App\Domain\Tenancy\Models\Tenant;
 use App\Infrastructure\Outbox\DomainEvent;
 use Illuminate\Database\QueryException;

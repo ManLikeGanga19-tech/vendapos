@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Domain\Orders\Actions;
 
 use App\Domain\Catalogue\Actions\FindUnknownItems;
-use App\Domain\Orders\Data\DeviceContext;
 use App\Domain\Orders\Data\SyncResult;
 use App\Domain\Orders\Events\OrderRecorded;
 use App\Domain\Orders\Events\OrderVoided;
 use App\Domain\Orders\Models\Order;
 use App\Domain\Orders\Models\OrderLine;
+use App\Domain\Tenancy\Data\DeviceContext;
 use App\Infrastructure\Outbox\DomainEvent;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;

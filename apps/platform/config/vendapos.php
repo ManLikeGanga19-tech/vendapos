@@ -31,6 +31,27 @@ return [
         'tenant' => (int) env('VENDAPOS_RATE_LIMIT_TENANT', 5000),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Mobile money
+    |--------------------------------------------------------------------------
+    |
+    | Each provider maps to a gateway class. With `fake` on, every provider
+    | uses FakeGateway (tests, demos, local work without sandbox keys).
+    | Callbacks reach {callback_base_url}/webhooks/payments/{provider}/{token}.
+    |
+    */
+
+    'payments' => [
+        'fake' => (bool) env('VENDAPOS_PAYMENTS_FAKE', false),
+        // What FakeGateway's status query reports: pending, succeeded or failed.
+        'fake_outcome' => env('VENDAPOS_PAYMENTS_FAKE_OUTCOME', 'pending'),
+        'callback_base_url' => env('VENDAPOS_PAYMENTS_CALLBACK_URL', env('APP_URL')),
+        'gateways' => [
+            // 'mpesa_ke' => DarajaGateway::class (slice E2), 'airtel_ke' => AirtelGateway::class (E3)
+        ],
+    ],
+
     // Business days are counted here; storage stays UTC (CLAUDE.md §4).
     'business_timezone' => 'Africa/Nairobi',
 

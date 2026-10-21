@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Api\V1\Controllers;
 
 use App\Domain\Orders\Actions\RecordOrder;
-use App\Domain\Orders\Data\DeviceContext;
 use App\Domain\Orders\Data\SyncResult;
+use App\Domain\Tenancy\Data\DeviceContext;
 use App\Domain\Tenancy\Models\Device;
 use App\Http\Api\V1\Requests\SyncOrdersRequest;
 use Illuminate\Http\JsonResponse;
