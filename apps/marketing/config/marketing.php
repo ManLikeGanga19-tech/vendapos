@@ -36,6 +36,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Demo request leads
+    |--------------------------------------------------------------------------
+    |
+    | Where new-lead alerts are emailed, and how long leads are kept before
+    | deletion (stated in the privacy notice under the form; TBC until legal
+    | signs off on the period).
+    |
+    */
+
+    'leads' => [
+        'inbox' => env('MARKETING_LEADS_INBOX', 'sales@example.co.ke'),
+        'retention_months' => 12,
+        'retention_confirmed' => false,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Plans
     |--------------------------------------------------------------------------
     |

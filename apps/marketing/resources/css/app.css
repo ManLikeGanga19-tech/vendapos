@@ -82,6 +82,18 @@
     }
 }
 
+@layer components {
+    /* 16px text stops mobile browsers zooming in on focus; 48px tall for thumbs. */
+    .field-control {
+        @apply block min-h-12 w-full rounded-control border border-line bg-surface px-3 py-2.5 text-base text-ink placeholder:text-subtle;
+        @apply focus:border-coral focus:outline-none focus:ring-3 focus:ring-coral/15;
+    }
+
+    .field-control[aria-invalid='true'] {
+        @apply border-danger;
+    }
+}
+
 @utility tabular {
     font-variant-numeric: tabular-nums;
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DemoRequestController;
 use App\Http\Controllers\RedirectToPreferredLocale;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -34,4 +35,11 @@ Route::prefix('{locale}')
             ->group(function () {
                 Route::view('/', 'pages.home')->name('home');
             });
+
+        // Form pages keep the session for CSRF protection and validation errors.
+        Route::controller(DemoRequestController::class)->group(function () {
+            Route::get('demo', 'create')->name('demo');
+            Route::post('demo', 'store')->middleware('throttle:demo-requests')->name('demo.store');
+            Route::get('demo/thanks', 'thanks')->name('demo.thanks');
+        });
     });

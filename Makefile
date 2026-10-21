@@ -61,6 +61,12 @@ marketing-build:
 marketing-serve:
 	docker compose exec app php apps/marketing/artisan serve --host=0.0.0.0 --port=8001
 
+marketing-queue:
+	docker compose exec app php apps/marketing/artisan queue:work --tries=3
+
+marketing-migrate:
+	docker compose exec app bash -c "cd apps/marketing && touch database/database.sqlite && php artisan migrate"
+
 marketing-test:
 	docker compose exec app bash -c "cd apps/marketing && vendor/bin/pest"
 
