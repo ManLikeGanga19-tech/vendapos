@@ -16,7 +16,8 @@
         "laravel/sanctum": "^4.3",
         "laravel/tinker": "^3.0",
         "spatie/laravel-permission": "^8.3",
-        "stancl/tenancy": "^3.10.1"
+        "stancl/tenancy": "^3.10.1",
+        "vendapos/core": "@dev"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -95,5 +96,13 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": [{
+        "name": "core",
+        "type": "path",
+        "url": "../../packages/core",
+        "options": {
+            "symlink": true
+        }
+    }]
 }

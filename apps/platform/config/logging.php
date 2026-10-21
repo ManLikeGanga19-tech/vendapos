@@ -73,6 +73,15 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Rejected device tokens and other security events (architecture §10, L5).
+        'security' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/security.log'),
+            'level' => 'info',
+            'max_files' => 90,
+            'replace_placeholders' => true,
+        ],
+
         'monthly' => [
             'driver' => 'monthly',
             'path' => storage_path('logs/laravel.log'),
