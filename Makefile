@@ -56,7 +56,7 @@ marketing-install:
 	docker compose exec app bash -c "cd apps/marketing && composer install && npm ci"
 
 marketing-build:
-	docker compose exec app bash -c "cd apps/marketing && npm run build"
+	docker compose exec app bash -c "cd apps/marketing && npm run build && php artisan marketing:images"
 
 marketing-serve:
 	docker compose exec app php apps/marketing/artisan serve --host=0.0.0.0 --port=8001
