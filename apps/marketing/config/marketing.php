@@ -9,14 +9,14 @@ return [
     |
     | Every public page is served under a locale prefix (/en, /sw). The first
     | entry is the fallback when a visitor's browser asks for neither.
-    | Labels are shown in their own language; flags (public/flags) mark the
-    | two launch markets: English for Kenya, Kiswahili for Tanzania.
+    | Labels are shown in their own language next to a flag from public/flags
+    | (both use Kenya's, as requested by DanamoTech).
     |
     */
 
     'locales' => [
         'en' => ['label' => 'English', 'flag' => 'ke', 'og' => 'en_KE'],
-        'sw' => ['label' => 'Kiswahili', 'flag' => 'tz', 'og' => 'sw_TZ'],
+        'sw' => ['label' => 'Kiswahili', 'flag' => 'ke', 'og' => 'sw_KE'],
     ],
 
     /*

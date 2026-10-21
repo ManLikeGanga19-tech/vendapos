@@ -1,6 +1,7 @@
-Drop official partner artwork here (SVG preferred):
+Partner marks used by `<x-brand-mark>` (SVG preferred, PNG accepted):
 
-- mpesa.svg — from Safaricom (Lipa na M-Pesa merchant brand kit)
-- etims.svg — from KRA, only once VendaPOS is a certified eTIMS integrator
+- kra.png — KRA lion mark, supplied by DanamoTech (source: resources/brand/kra-source.jpg)
+- mpesa.png — M-Pesa mark, supplied by DanamoTech (source: resources/brand/mpesa-source.png)
 
-Badges switch from the fallback icon to the logo as soon as the file exists.
+These are trimmed, 96px-tall copies with the white background made transparent.
+Use of both marks is at DanamoTech's discretion under the owners' brand terms.

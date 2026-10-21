@@ -21,11 +21,9 @@
 
                 <h2 class="mt-10 font-semibold">{{ __('demo.intro.benefits_title') }}</h2>
                 <ul class="mt-4 space-y-4">
-                    @foreach (['offline' => 'wifi-off', 'mpesa' => 'smartphone', 'etims' => 'receipt-text', 'branches' => 'network'] as $key => $icon)
+                    @foreach (['offline' => ['cloud-off', null], 'mpesa' => ['smartphone', 'mpesa'], 'etims' => ['receipt-text', 'kra'], 'branches' => ['network', null]] as $key => [$icon, $brand])
                         <li class="flex gap-3">
-                            <span class="flex size-9 shrink-0 items-center justify-center rounded-control bg-coral/10 text-coral">
-                                <x-icon :name="$icon" />
-                            </span>
+                            <x-feature-icon :icon="$icon" :brand="$brand" />
                             <span class="text-muted">{{ __("demo.intro.benefits.{$key}") }}</span>
                         </li>
                     @endforeach

@@ -19,6 +19,7 @@
         'offline' => 'wifi-off', 'mpesa' => 'smartphone', 'etims' => 'receipt-text',
         'branches' => 'network', 'stock' => 'warehouse', 'staff' => 'id-card',
     ];
+    $partnerMarks = ['mpesa' => 'mpesa', 'etims' => 'kra'];
     $trustIcons = ['isolation' => 'database', 'durable' => 'shield-check', 'idempotent' => 'refresh-cw', 'cards' => 'credit-card'];
 @endphp
 
@@ -30,7 +31,7 @@
             <div>
                 <ul class="flex flex-wrap gap-2">
                     <li><x-badge variant="success"><x-icon name="cloud-off" class="size-3.5" />{{ __('home.hero.chips.offline') }}</x-badge></li>
-                    <li><x-badge variant="coral"><x-brand-mark name="etims" icon="receipt-text" />{{ __('home.hero.chips.etims') }}</x-badge></li>
+                    <li><x-badge variant="coral"><x-brand-mark name="kra" icon="receipt-text" />{{ __('home.hero.chips.etims') }}</x-badge></li>
                     <li><x-badge variant="mpesa"><x-brand-mark name="mpesa" icon="smartphone" />{{ __('home.hero.chips.mpesa') }}</x-badge></li>
                 </ul>
 
@@ -87,7 +88,7 @@
 
                     <div class="mt-4 space-y-2" aria-hidden="true">
                         <div class="flex min-h-12 items-center justify-center gap-2 rounded-card bg-mpesa font-semibold text-canvas">
-                            <x-icon name="smartphone" />
+                            <x-brand-mark name="mpesa" icon="smartphone" size="sm" class="size-6" />
                             {{ __('home.till.pay_mpesa', ['amount' => $total->format()]) }}
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-sm text-muted">
@@ -136,9 +137,7 @@
                 @foreach (__('home.pillars.items') as $key => $pillar)
                     <li>
                         <x-card class="h-full">
-                            <span class="flex size-11 items-center justify-center rounded-control bg-coral/10 text-coral">
-                                <x-icon :name="$pillarIcons[$key]" class="size-6" />
-                            </span>
+                            <x-feature-icon :icon="$pillarIcons[$key]" :brand="$partnerMarks[$key] ?? null" size="lg" />
                             <h3 class="mt-5 text-xl font-semibold">{{ $pillar['title'] }}</h3>
                             <p class="mt-3 text-muted">{{ $pillar['body'] }}</p>
                         </x-card>

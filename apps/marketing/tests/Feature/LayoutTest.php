@@ -9,14 +9,14 @@ it('renders the shared layout with SEO alternates', function () {
         ->assertSee('<link rel="canonical" href="'.url('/sw').'">', false)
         ->assertSee('<link rel="alternate" hreflang="en" href="'.url('/en').'">', false)
         ->assertSee('<link rel="alternate" hreflang="x-default" href="'.url('/').'">', false)
-        ->assertSee('<meta property="og:locale" content="sw_TZ">', false);
+        ->assertSee('<meta property="og:locale" content="sw_KE">', false);
 });
 
 it('offers a flag dropdown linking to the same page in each language', function () {
     $this->get('/en')
         ->assertSee('aria-label="Language: English"', false)
         ->assertSee(asset('flags/ke.svg'), false)
-        ->assertSee(asset('flags/tz.svg'), false)
+        ->assertDontSee('flags/tz.svg', false)
         ->assertSeeInOrder(['href="'.url('/sw').'"', 'Kiswahili'], false)
         ->assertDontSee('type="radio"', false);
 });

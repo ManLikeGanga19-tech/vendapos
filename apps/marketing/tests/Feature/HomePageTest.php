@@ -62,3 +62,10 @@ it('drops the placeholder marker once figures are confirmed', function () {
 it('prices the enterprise plan as custom', function () {
     $this->get('/sw')->assertSee('Bei maalum');
 });
+
+it('shows the official M-Pesa and KRA marks on the hero and feature cards', function () {
+    $html = $this->get('/en')->getContent();
+
+    expect(substr_count($html, asset('brand/mpesa.png')))->toBeGreaterThanOrEqual(3)
+        ->and(substr_count($html, asset('brand/kra.png')))->toBeGreaterThanOrEqual(2);
+});
