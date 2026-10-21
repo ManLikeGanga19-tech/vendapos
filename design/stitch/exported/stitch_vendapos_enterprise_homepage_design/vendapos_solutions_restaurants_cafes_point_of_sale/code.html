@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "outline": "#a98a80", "on-tertiary-fixed-variant": "#48445a", "on-primary-fixed": "#390c00", "surface-tint": "#ffb59c", "inverse-on-surface": "#332d43", "on-secondary-container": "#00320f", "background": "#151024", "surface-bright": "#3c364c", "primary": "#ffb59c", "secondary": "#5cdf78", "surface-container": "#221c31", "primary-fixed": "#ffdbcf", "surface": "#151024", "on-tertiary-container": "#2a273b", "on-tertiary-fixed": "#1c192c", "error-container": "#93000a", "error": "#ffb4ab", "surface-variant": "#373147", "on-surface-variant": "#e2bfb4", "on-surface": "#e8defb", "tertiary-container": "#938da6", "primary-fixed-dim": "#ffb59c", "tertiary-fixed-dim": "#c9c3dd", "on-tertiary": "#312e42", "surface-container-low": "#1d182d", "on-secondary-fixed-variant": "#00531f", "surface-dim": "#151024", "on-primary-fixed-variant": "#822700", "inverse-surface": "#e8defb", "secondary-fixed": "#7afd91", "on-primary": "#5c1900", "on-primary-container": "#511500", "on-error": "#690005", "surface-container-lowest": "#100b1f", "secondary-container": "#0ea747", "outline-variant": "#594139", "secondary-fixed-dim": "#5cdf78", "tertiary-fixed": "#e6dffa", "inverse-primary": "#ab3600", "on-secondary": "#003913", "surface-container-high": "#2c273c", "on-secondary-fixed": "#002108", "on-background": "#e8defb", "primary-container": "#f4622a", "on-error-container": "#ffdad6", "surface-container-highest": "#373147", "tertiary": "#c9c3dd" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "margin": "2rem", "space-md": "1rem", "margin-mobile": "1rem", "gutter": "1.5rem", "space-xs": "0.5rem", "space-xl": "2rem", "gutter-mobile": "1rem", "space-lg": "1.5rem", "space-sm": "0.75rem" }, "fontFamily": { "body-lg-medium": [ "Inter" ], "body-lg": [ "Inter" ], "display-lg": [ "Inter" ], "display-lg-mobile": [ "Inter" ], "body-md-medium": [ "Inter" ], "headline-lg-mobile": [ "Inter" ], "label-md": [ "Inter" ], "headline-lg": [ "Inter" ], "headline-md": [ "Inter" ], "label-sm": [ "Inter" ], "body-md": [ "Inter" ], "headline-sm": [ "Inter" ] }, "fontSize": { "body-lg-medium": [ "18px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "500" } ], "body-lg": [ "18px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400" } ], "display-lg": [ "64px", { "lineHeight": "72px", "letterSpacing": "-0.025em", "fontWeight": "700" } ], "display-lg-mobile": [ "36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "body-md-medium": [ "16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "500" } ], "headline-lg-mobile": [ "28px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "700" } ], "label-md": [ "14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" } ], "headline-lg": [ "40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "headline-md": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "label-sm": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" } ], "body-md": [ "16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" } ], "headline-sm": [ "20px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-surface-container-lowest text-on-surface font-body-md text-body-md antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen"><header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-surface-variant/40"><div class="h-20 max-w-[1200px] mx-auto px-margin-mobile lg:px-margin flex items-center justify-between"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-xs" data-path="product" href="#"><img alt="VendaPOS Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XEytxPPtEqFweBOw2okAKawiwfgJXKpc5lEOEDjnF21_OeHfcxa7R8vjxIOmMOedjeNAcmJKCXXTW779Rmb280ULKzD56Js_6nSIeC8REqxJ0f5JFplJ-P1g3IIxMSuYf6_Llh6y1LLBmEP7RTd91gX0Z0tLKJvD2t-Tv-FMpK5gpIu_RQuHHrCUSijnj7LlynPCEG2jGZwfm3R5g3aTloNX-tpYKD91Yvi2ZrNKRYxG-_xbLKV4e90i8"/><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight font-bold">Venda<span class="text-primary-container">POS</span></span></a><nav class="hidden lg:flex items-center gap-space-lg ml-space-md" data-active-classes="text-on-surface font-body-md-medium border-b-2 border-primary-container"><a class="flex items-center gap-1 font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="product" href="#">Product</a><div class="relative group"><a class="flex items-center gap-1 font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="solutions" href="#">Solutions<span class="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-on-surface transition-transform duration-200 group-hover:rotate-180">expand_more</span></a></div><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="pricing" href="#">Pricing</a><a class="flex items-center gap-1.5 font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="compliance" href="#">Compliance<span class="px-1.5 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/30 font-label-sm text-label-sm uppercase tracking-wider">KRA eTIMS</span></a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="resources" href="#">Resources</a></nav></div><div class="flex items-center gap-space-md"><a class="hidden sm:inline-flex font-body-md-medium text-body-md-medium text-on-surface-variant hover:text-on-surface transition-colors px-space-xs py-space-xs" data-path="login" href="#">Log in</a><a class="inline-flex items-center justify-center bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary font-body-md-medium text-body-md-medium px-space-md py-2.5 rounded-lg transition-all shadow-[0_0_24px_rgba(244,98,42,0.25)] hover:shadow-[0_0_30px_rgba(244,98,42,0.4)] active:scale-95" data-path="book-a-demo" href="#">Book a demo</a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 ml-space-xs"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-surface-container-lowest"><div class="flex flex-col w-full">
+<!-- Top Industry Switcher / Breadcrumb Sub-Nav -->
+<section class="w-full bg-surface-container-low/70 border-b border-surface-variant/40 backdrop-blur-md sticky top-20 z-40">
+<div class="max-w-[1200px] mx-auto px-margin-mobile lg:px-margin py-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-center gap-2 font-label-md text-label-md text-on-surface-variant">
+<a class="hover:text-on-surface transition-colors" data-path="solutions" href="#">Solutions</a>
+<span class="text-surface-variant">/</span>
+<span class="text-on-surface font-body-md-medium flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary-container">restaurant</span>
+          Restaurants &amp; Cafes
+        </span>
+</div>
+<!-- Horizontal Industry Template Pills Switcher -->
+<div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none text-nowrap">
+<a class="px-3 py-1.5 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm shadow-[0_0_16px_rgba(244,98,42,0.3)] font-semibold flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[14px]">restaurant</span>
+          Restaurants &amp; Cafes
+        </a>
+<a class="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[14px]">local_bar</span>
+          Bars &amp; Nightclubs
+        </a>
+<a class="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[14px]">content_cut</span>
+          Salons &amp; Spas
+        </a>
+<a class="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[14px]">storefront</span>
+          Retail &amp; Supermarkets
+        </a>
+<a class="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[14px]">hardware</span>
+          Hardware Stores
+        </a>
+<a class="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[14px]">local_pharmacy</span>
+          Pharmacies
+        </a>
+<a class="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[14px]">liquor</span>
+          Liquor Stores
+        </a>
+</div>
+</div>
+</section>
+<!-- Hero Section -->
+<section class="relative w-full overflow-hidden pt-12 pb-20 lg:pt-16 lg:pb-28">
+<div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[720px] h-[360px] bg-primary-container/10 rounded-full blur-[140px] pointer-events-none"></div>
+<div class="max-w-[1200px] mx-auto px-margin-mobile lg:px-margin relative z-10">
+<!-- Top Title Group -->
+<div class="max-w-3xl mb-12">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-container/15 text-primary border border-primary-container/30 font-label-sm text-label-sm uppercase tracking-wider mb-5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+          SOLUTIONS FOR RESTAURANTS, CAFES &amp; BISTROS
+        </div>
+<h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface tracking-tight mb-6">
+          Turn tables faster, eliminate order mix-ups, and settle checks in seconds.
+        </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed mb-8">
+          From bustling terraces in Westlands to busy multi-station dining rooms across Nairobi: offline-first table management, real-time kitchen displays, and instant M-Pesa pay-at-table.
+        </p>
+<div class="flex flex-wrap items-center gap-4">
+<a class="inline-flex items-center justify-center gap-2 bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary font-body-md-medium text-body-md-medium px-6 py-3.5 rounded-xl transition-all shadow-[0_0_24px_rgba(244,98,42,0.35)] active:scale-95" data-path="book-a-demo" href="#">
+<span>Book restaurant demo</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</a>
+<a class="inline-flex items-center justify-center gap-2 bg-surface-container hover:bg-surface-container-high border border-surface-variant/70 text-on-surface font-body-md-medium text-body-md-medium px-6 py-3.5 rounded-xl transition-all" href="#hardware">
+<span class="material-symbols-outlined text-[20px] text-primary">kitchen</span>
+<span>Explore restaurant hardware bundle</span>
+</a>
+</div>
+<!-- Trust Badges -->
+<div class="mt-8 pt-6 border-t border-surface-variant/30 flex flex-wrap items-center gap-y-3 gap-x-6 text-on-surface-variant font-label-md text-label-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="text-on-surface font-semibold">Powering 450+ dining rooms</span> across East Africa
+          </div>
+<span class="hidden sm:inline opacity-30">•</span>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container border border-surface-variant/60 text-secondary">
+<span class="material-symbols-outlined text-[16px]">speed</span>
+<span>14 min avg table turn reduction</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container border border-surface-variant/60 text-primary">
+<span class="material-symbols-outlined text-[16px]">wifi_off</span>
+<span>99.98% offline uptime</span>
+</div>
+</div>
+</div>
+<!-- Realistic Product Composite Shot -->
+<div class="relative w-full rounded-2xl bg-surface-container p-3 sm:p-5 border border-surface-variant/60 shadow-2xl overflow-hidden">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+<!-- Left: Table Floor Plan & Active Ticket View (7 cols) -->
+<div class="lg:col-span-7 flex flex-col bg-surface-container-lowest rounded-xl border border-surface-variant/50 p-4">
+<div class="flex items-center justify-between pb-3 border-b border-surface-variant/40 mb-3">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Floor Plan: Terrace &amp; Hall</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-label-sm text-label-sm text-on-surface-variant">8/12 Occupied</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2 py-1 rounded bg-secondary/15 text-secondary font-label-sm text-label-sm border border-secondary/30">Synced Local DB</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">more_vert</span>
+</div>
+</div>
+<!-- Floor Map Grid -->
+<div class="grid grid-cols-3 gap-2.5 mb-4">
+<div class="p-3 rounded-lg bg-primary-container/15 border border-primary-container/40 flex flex-col justify-between h-24">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-primary font-bold">T14</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary-container text-on-primary">MAINS FIRED</span>
+</div>
+<div class="text-on-surface font-label-md text-label-md font-semibold">KES 8,400</div>
+<div class="text-on-surface-variant text-[11px] truncate">Server: Brenda • 4 Guests</div>
+</div>
+<div class="p-3 rounded-lg bg-surface-container border border-secondary/40 flex flex-col justify-between h-24">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">T06</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-secondary/20 text-secondary">READY BILL</span>
+</div>
+<div class="text-on-surface font-label-md text-label-md font-semibold">KES 4,150</div>
+<div class="text-on-surface-variant text-[11px] truncate">Server: Kelvin • 2 Guests</div>
+</div>
+<div class="p-3 rounded-lg bg-surface-container/60 border border-surface-variant/30 flex flex-col justify-between h-24 opacity-65">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface-variant font-bold">T02</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-surface-variant text-on-surface-variant">VACANT</span>
+</div>
+<div class="text-on-surface-variant font-label-md text-label-md">Ready</div>
+<div class="text-on-surface-variant text-[11px]">Seats 6</div>
+</div>
+</div>
+<!-- Active Order Slip Preview on Table 14 -->
+<div class="bg-surface-container rounded-lg p-3 border border-surface-variant/40">
+<div class="flex items-center justify-between mb-2 pb-2 border-b border-surface-variant/40">
+<span class="font-body-md-medium text-body-md-medium text-on-surface">Active Ticket #108 — Table 14 (Terrace)</span>
+<span class="text-primary font-label-sm text-label-sm font-semibold">KRA eTIMS Validated</span>
+</div>
+<div class="space-y-2 font-label-md text-label-md">
+<div class="flex items-start justify-between">
+<div>
+<div class="text-on-surface font-medium">1x Goat Ribs (Nyama Choma)</div>
+<div class="text-primary text-[11px]">→ Medium Well, Ugali, Extra Sukuma Wiki</div>
+</div>
+<div class="text-on-surface font-semibold">KES 1,900</div>
+</div>
+<div class="flex items-start justify-between">
+<div>
+<div class="text-on-surface font-medium">2x Tusker Lager (500ml Cold)</div>
+<div class="text-on-surface-variant text-[11px]">→ Station: Bar Dispense</div>
+</div>
+<div class="text-on-surface font-semibold">KES 700</div>
+</div>
+<div class="flex items-start justify-between">
+<div>
+<div class="text-on-surface font-medium">1x Mukimo Plate &amp; Beef Gravy</div>
+<div class="text-primary text-[11px]">→ Allergen: No Dairy</div>
+</div>
+<div class="text-on-surface font-semibold">KES 850</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Kitchen Display System (KDS) Live Rail Preview (5 cols) -->
+<div class="lg:col-span-5 flex flex-col bg-surface-container-lowest rounded-xl border border-surface-variant/50 p-4">
+<div class="flex items-center justify-between pb-3 border-b border-surface-variant/40 mb-3">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Kitchen KDS: Station Grill #01</span>
+</div>
+<span class="text-on-surface-variant font-label-sm text-label-sm">Shift: Dinner Rush</span>
+</div>
+<!-- KDS Active Ticket Card -->
+<div class="bg-surface-container rounded-lg p-3.5 border-l-4 border-l-primary-container border-y border-r border-surface-variant/40 flex-1 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Ticket #204</span>
+<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-error/15 text-error border border-error/30 font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">timer</span>
+<span>03:12 Countdown</span>
+</div>
+</div>
+<div class="text-on-surface-variant text-label-sm font-label-sm mb-3">Table 14 • Course 2: Mains Fired • Server Brenda</div>
+<div class="space-y-1.5 font-label-md text-label-md">
+<div class="flex items-center justify-between text-on-surface bg-surface-container-high/60 px-2 py-1 rounded">
+<span>1x Mbuzi Choma (Kilo)</span>
+<span class="text-primary-container font-semibold">GRILL HOT</span>
+</div>
+<div class="flex items-center justify-between text-on-surface bg-surface-container-high/60 px-2 py-1 rounded">
+<span>1x Kuku Choma Quarter</span>
+<span class="text-primary-container font-semibold">CHARCOAL</span>
+</div>
+<div class="flex items-center justify-between text-on-surface bg-surface-container-high/60 px-2 py-1 rounded">
+<span>2x Extra Chapati</span>
+<span class="text-secondary font-semibold">READY</span>
+</div>
+</div>
+</div>
+<!-- Action Bar for Kitchen Line -->
+<div class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-surface-variant/30">
+<button class="py-2 bg-surface-variant text-on-surface hover:bg-surface-bright rounded text-center font-label-sm text-label-sm font-semibold transition-colors">HOLD</button>
+<button class="py-2 bg-surface-variant text-on-surface hover:bg-surface-bright rounded text-center font-label-sm text-label-sm font-semibold transition-colors">RECALL</button>
+<button class="py-2 bg-secondary text-on-secondary rounded text-center font-label-sm text-label-sm font-bold shadow-[0_0_12px_rgba(92,223,120,0.3)] hover:opacity-90 transition-opacity">BUMP TICKET</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Pay-at-Table STK Prompt Mockup Badge -->
+<div class="mt-4 lg:mt-0 lg:absolute lg:bottom-7 lg:right-7 bg-surface-container-high/95 backdrop-blur-xl border border-secondary/40 rounded-xl p-3.5 shadow-2xl flex items-center gap-3.5 max-w-sm">
+<div class="w-10 h-10 rounded-full bg-secondary/20 border border-secondary/40 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-[22px]">contactless</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-label-sm text-label-sm text-secondary font-bold">M-PESA PAY-AT-TABLE</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+</div>
+<div class="text-on-surface font-body-md-medium text-body-md-medium truncate">STK Prompt: KES 8,400</div>
+<div class="text-on-surface-variant text-[11px] truncate">Auto-settles Table 14 &amp; signs KRA QR receipt</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Built for Your Floor: 3 Pain-Point -> Solution Pairs -->
+<section class="w-full py-16 bg-surface-container-lowest border-y border-surface-variant/30">
+<div class="max-w-[1200px] mx-auto px-margin-mobile lg:px-margin">
+<div class="max-w-2xl mb-12">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">BUILT FOR THE RUSH</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface tracking-tight mt-2">
+          Tackle the 3 bottlenecks slowing down your dining room.
+        </h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Pain Point 1 -->
+<div class="bg-surface-container rounded-xl p-6 border border-surface-variant/50 flex flex-col justify-between hover:border-surface-variant transition-colors">
+<div>
+<div class="px-2.5 py-1 rounded bg-error-container/20 border border-error/30 text-error inline-block font-label-sm text-label-sm font-semibold mb-4">
+              PAIN POINT 01
+            </div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">
+              Slow Bill Settlement &amp; M-Pesa Reconciliation
+            </h3>
+<div class="p-3 bg-surface-container-lowest/80 rounded-lg text-on-surface-variant font-body-md text-body-md mb-4 border border-surface-variant/30">
+<span class="text-error font-semibold">The Struggle:</span> Waiters running back and forth with manual M-Pesa till confirmation screenshots, causing table bottlenecks on busy Friday nights.
+            </div>
+<p class="text-on-surface font-body-md text-body-md leading-relaxed mb-6">
+<span class="text-secondary font-semibold">VendaPOS Solution:</span> Direct Pay-at-Table STK Push. Server triggers prompt directly from the mobile tablet. Guest enters PIN on their phone, and receipt auto-prints at the terminal in 2.1 seconds.
+            </p>
+</div>
+<div class="pt-4 border-t border-surface-variant/30 flex items-center justify-between">
+<span class="text-on-surface-variant font-label-sm text-label-sm">Settlement Speed</span>
+<span class="font-headline-sm text-headline-sm text-secondary font-bold">-65% wait time</span>
+</div>
+</div>
+<!-- Pain Point 2 -->
+<div class="bg-surface-container rounded-xl p-6 border border-surface-variant/50 flex flex-col justify-between hover:border-surface-variant transition-colors">
+<div>
+<div class="px-2.5 py-1 rounded bg-error-container/20 border border-error/30 text-error inline-block font-label-sm text-label-sm font-semibold mb-4">
+              PAIN POINT 02
+            </div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">
+              Kitchen Chaos &amp; Handwritten Ticket Errors
+            </h3>
+<div class="p-3 bg-surface-container-lowest/80 rounded-lg text-on-surface-variant font-body-md text-body-md mb-4 border border-surface-variant/30">
+<span class="text-error font-semibold">The Struggle:</span> Lost carbon-copy chits, illegible waiter handwriting, cold food delays, and mismatched dietary modifiers between waitstaff and grill line.
+            </div>
+<p class="text-on-surface font-body-md text-body-md leading-relaxed mb-6">
+<span class="text-secondary font-semibold">VendaPOS Solution:</span> Smart Multi-Station KDS. Automatic course sequencing (Starters → Mains → Desserts). Orders route instantly to Bar, Grill, and Hot Line monitors with live countdown timers.
+            </p>
+</div>
+<div class="pt-4 border-t border-surface-variant/30 flex items-center justify-between">
+<span class="text-on-surface-variant font-label-sm text-label-sm">Expedite Efficiency</span>
+<span class="font-headline-sm text-headline-sm text-secondary font-bold">Zero lost chits</span>
+</div>
+</div>
+<!-- Pain Point 3 -->
+<div class="bg-surface-container rounded-xl p-6 border border-surface-variant/50 flex flex-col justify-between hover:border-surface-variant transition-colors">
+<div>
+<div class="px-2.5 py-1 rounded bg-error-container/20 border border-error/30 text-error inline-block font-label-sm text-label-sm font-semibold mb-4">
+              PAIN POINT 03
+            </div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">
+              Yield Leakage &amp; Raw Ingredient Waste
+            </h3>
+<div class="p-3 bg-surface-container-lowest/80 rounded-lg text-on-surface-variant font-body-md text-body-md mb-4 border border-surface-variant/30">
+<span class="text-error font-semibold">The Struggle:</span> High meat and beverage shrinkage, untracked sauce portions, and inventory surprises discovered only during manual end-of-month stocktakes.
+            </div>
+<p class="text-on-surface font-body-md text-body-md leading-relaxed mb-6">
+<span class="text-secondary font-semibold">VendaPOS Solution:</span> Real-Time Recipe Depletion &amp; Yield Tracking. Every dish rung up automatically deducts grams of beef, cooking oil, and bottled beverage units. Live alerts fire before prime cuts run out.
+            </p>
+</div>
+<div class="pt-4 border-t border-surface-variant/30 flex items-center justify-between">
+<span class="text-on-surface-variant font-label-sm text-label-sm">Food Cost Recovery</span>
+<span class="font-headline-sm text-headline-sm text-secondary font-bold">Save 4.2% margin</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Complete Restaurant Arsenal: 7 Bento Grid Capabilities -->
+<section class="w-full py-20">
+<div class="max-w-[1200px] mx-auto px-margin-mobile lg:px-margin">
+<div class="text-center max-w-3xl mx-auto mb-14">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">COMPLETE RESTAURANT ARSENAL</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface tracking-tight mt-2 mb-4">
+          Everything needed from greeting to settlement.
+        </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+          Purpose-built modules that integrate dining rooms, bars, cash registers, and back-of-house culinary lines into one synchronized engine.
+        </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
+<!-- 1. Interactive Table & Floor Plans (8 cols) -->
+<div class="lg:col-span-8 bg-surface-container rounded-xl p-6 border border-surface-variant/50 relative overflow-hidden flex flex-col justify-between">
+<div class="relative z-10 max-w-lg mb-6">
+<div class="w-10 h-10 rounded-lg bg-primary-container/20 border border-primary-container/40 flex items-center justify-center text-primary-container mb-4">
+<span class="material-symbols-outlined text-[24px]">table_bar</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">1. Interactive Table &amp; Floor Plans</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              Design multi-zone visual layouts matching your physical floor: Terrace, Garden, Main Dining, and VIP Lounge. Color-coded status updates communicate occupied, ordered, billed, and cleaning states across all servers in real time.
+            </p>
+</div>
+<!-- Visual snippet -->
+<div class="grid grid-cols-4 gap-2 pt-4 border-t border-surface-variant/30">
+<div class="bg-surface-container-lowest p-2 rounded text-center">
+<div class="text-[11px] text-on-surface-variant">Zone 1</div>
+<div class="text-on-surface font-bold text-label-sm">Terrace (12)</div>
+</div>
+<div class="bg-surface-container-lowest p-2 rounded text-center">
+<div class="text-[11px] text-on-surface-variant">Zone 2</div>
+<div class="text-on-surface font-bold text-label-sm">Main Hall (24)</div>
+</div>
+<div class="bg-surface-container-lowest p-2 rounded text-center">
+<div class="text-[11px] text-on-surface-variant">Zone 3</div>
+<div class="text-on-surface font-bold text-label-sm">Veranda (8)</div>
+</div>
+<div class="bg-surface-container-lowest p-2 rounded text-center">
+<div class="text-[11px] text-on-surface-variant">Zone 4</div>
+<div class="text-on-surface font-bold text-label-sm">VIP Club (4)</div>
+</div>
+</div>
+</div>
+<!-- 2. Course Pacing & Fire Control (4 cols) -->
+<div class="lg:col-span-4 bg-surface-container rounded-xl p-6 border border-surface-variant/50 flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-lg bg-secondary/20 border border-secondary/40 flex items-center justify-center text-secondary mb-4">
+<span class="material-symbols-outlined text-[24px]">local_fire_department</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">2. Course Pacing &amp; Fire Control</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              Hold appetizers, delay main courses, or fire desserts with single-tap kitchen notifications. Keep courses in rhythm so guests never receive entrees before their soup is cleared.
+            </p>
+</div>
+<div class="mt-6 p-3 bg-surface-container-lowest rounded-lg border border-surface-variant/30 flex items-center justify-between">
+<span class="text-on-surface font-label-sm text-label-sm">Mains Stage</span>
+<span class="px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-label-sm text-label-sm font-bold">FIRE COURSE</span>
+</div>
+</div>
+<!-- 3. Modifiers & Custom Combos (4 cols) -->
+<div class="lg:col-span-4 bg-surface-container rounded-xl p-6 border border-surface-variant/50 flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-lg bg-primary-container/20 border border-primary-container/40 flex items-center justify-center text-primary-container mb-4">
+<span class="material-symbols-outlined text-[24px]">tune</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">3. Item Modifiers &amp; Custom Combos</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              From meat temperature specifications (Rare to Well Done) to local staple sides (Ugali, Mukimo, Steamed Rice, or Chips), capture precise dining preferences and allergies effortlessly.
+            </p>
+</div>
+<div class="mt-4 flex flex-wrap gap-1.5 font-label-sm text-label-sm">
+<span class="px-2 py-1 rounded bg-surface-container-high text-on-surface">Med Well</span>
+<span class="px-2 py-1 rounded bg-surface-container-high text-on-surface">Sukuma Extra</span>
+<span class="px-2 py-1 rounded bg-surface-container-high text-on-surface">No Onions</span>
+</div>
+</div>
+<!-- 4. Kitchen Display System (KDS) (8 cols) -->
+<div class="lg:col-span-8 bg-surface-container rounded-xl p-6 border border-surface-variant/50 flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-lg bg-secondary/20 border border-secondary/40 flex items-center justify-center text-secondary mb-4">
+<span class="material-symbols-outlined text-[24px]">desktop_windows</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">4. Kitchen Display System (KDS)</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              Ruggedized kitchen monitors replace fragile chit printers. Digital tickets organize by line preparation time, change colors as wait times rise, and buzz waiters via terminal notifications when platters are ready on the pass.
+            </p>
+</div>
+<div class="mt-4 grid grid-cols-3 gap-2 text-center font-label-sm text-label-sm">
+<div class="p-2 rounded bg-surface-container-lowest border border-surface-variant/40 text-on-surface">Station 1: Hot Kitchen</div>
+<div class="p-2 rounded bg-surface-container-lowest border border-surface-variant/40 text-on-surface">Station 2: Charcoal Grill</div>
+<div class="p-2 rounded bg-surface-container-lowest border border-surface-variant/40 text-on-surface">Station 3: Cocktail Bar</div>
+</div>
+</div>
+<!-- 5. Flexible Split Billing (4 cols) -->
+<div class="lg:col-span-4 bg-surface-container rounded-xl p-6 border border-surface-variant/50">
+<div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-on-surface mb-4">
+<span class="material-symbols-outlined text-[24px]">call_split</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">5. Flexible Split Billing</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Handle complex group settlements without math errors. Split bills evenly across guests, split line-by-line, or move bar drinks to a separate guest ticket in seconds.
+          </p>
+</div>
+<!-- 6. Server Tips & Shift Balancing (4 cols) -->
+<div class="lg:col-span-4 bg-surface-container rounded-xl p-6 border border-surface-variant/50">
+<div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-on-surface mb-4">
+<span class="material-symbols-outlined text-[24px]">payments</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">6. Server Tips &amp; Shift Balancing</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Automated server tip pooling, individual gratuity tracking, and blind shift drop balancing make end-of-night reconciliations foolproof and auditable.
+          </p>
+</div>
+<!-- 7. Instant Pay-at-Table (4 cols) -->
+<div class="lg:col-span-4 bg-surface-container rounded-xl p-6 border border-surface-variant/50">
+<div class="w-10 h-10 rounded-lg bg-secondary/20 border border-secondary/40 flex items-center justify-center text-secondary mb-4">
+<span class="material-symbols-outlined text-[24px]">qr_code_2</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">7. Instant Pay-at-Table &amp; KRA eTIMS</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Accept Safaricom M-Pesa STK prompts, Airtel Money, and Visa/Mastercard taps right at the table. Instant cryptographic KRA eTIMS QR receipts print automatically.
+          </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Visual Workflow Pipeline Diagram: How Orders Move -->
+<section class="w-full py-20 bg-surface-container-low border-y border-surface-variant/30 relative">
+<div class="max-w-[1200px] mx-auto px-margin-mobile lg:px-margin">
+<div class="text-center max-w-2xl mx-auto mb-14">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">HOW ORDERS MOVE</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface tracking-tight mt-2 mb-3">
+          Seamless flow from first order to KRA fiscal receipt.
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+          Built for zero latency, zero paper clutter, and 100% tax compliance on every transaction.
+        </p>
+</div>
+<!-- 4-Step Process Pipeline -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+<!-- Step 1 -->
+<div class="bg-surface-container rounded-xl p-5 border border-surface-variant/50 relative flex flex-col justify-between">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container font-headline-sm text-headline-sm flex items-center justify-center font-bold">
+                1
+              </div>
+<span class="px-2 py-0.5 rounded bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">Floor Tablet</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold mb-2">Table Order Taken</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              Waitstaff punch orders at the dining table with table numbers, guest count, and customized meat cooking levels.
+            </p>
+</div>
+<div class="p-2.5 rounded bg-surface-container-lowest font-label-sm text-label-sm text-primary flex items-center gap-1.5 border border-primary-container/20">
+<span class="material-symbols-outlined text-[16px]">touch_app</span>
+<span>Instant local capture</span>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="bg-surface-container rounded-xl p-5 border border-surface-variant/50 relative flex flex-col justify-between">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<div class="w-10 h-10 rounded-full bg-surface-variant text-on-surface font-headline-sm text-headline-sm flex items-center justify-center font-bold">
+                2
+              </div>
+<span class="px-2 py-0.5 rounded bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">Routing Mesh</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold mb-2">Station Dispatch</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              Drinks instantly route to the service bar printer, while food tickets pop on the kitchen line KDS screens with prep timers.
+            </p>
+</div>
+<div class="p-2.5 rounded bg-surface-container-lowest font-label-sm text-label-sm text-secondary flex items-center gap-1.5 border border-secondary/20">
+<span class="material-symbols-outlined text-[16px]">fork_spoon</span>
+<span>Split print &amp; KDS ping</span>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="bg-surface-container rounded-xl p-5 border border-surface-variant/50 relative flex flex-col justify-between">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<div class="w-10 h-10 rounded-full bg-secondary text-on-secondary font-headline-sm text-headline-sm flex items-center justify-center font-bold">
+                3
+              </div>
+<span class="px-2 py-0.5 rounded bg-secondary/15 text-secondary font-label-sm text-label-sm font-semibold">M-Pesa Core</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold mb-2">Pay-at-Table Push</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              Server selects M-Pesa tender; Safaricom STK prompt triggers immediately on the customer's phone with accurate bill total.
+            </p>
+</div>
+<div class="p-2.5 rounded bg-surface-container-lowest font-label-sm text-label-sm text-secondary flex items-center gap-1.5 border border-secondary/20">
+<span class="material-symbols-outlined text-[16px]">phonelink_ring</span>
+<span>2.1s STK prompt delivery</span>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="bg-surface-container rounded-xl p-5 border border-surface-variant/50 relative flex flex-col justify-between">
+<div class="mb-4">
+<div class="flex items-center justify-between mb-4">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container font-headline-sm text-headline-sm flex items-center justify-center font-bold">
+                4
+              </div>
+<span class="px-2 py-0.5 rounded bg-secondary/15 text-secondary font-label-sm text-label-sm font-semibold">eTIMS FDN</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold mb-2">Instant Fiscal Receipt</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              System signs KRA QR receipt, table updates to vacant on floor map, and ingredient stocks decrement across your ledger.
+            </p>
+</div>
+<div class="p-2.5 rounded bg-surface-container-lowest font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1.5 border border-surface-variant/40">
+<span class="material-symbols-outlined text-[16px]">receipt_long</span>
+<span>Cryptographic compliance</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Hardware Bundle Card: Restaurant Pro Kit -->
+<section class="w-full py-20" id="hardware">
+<div class="max-w-[1200px] mx-auto px-margin-mobile lg:px-margin">
+<div class="bg-gradient-to-br from-surface-container via-surface-container to-surface-container-high rounded-2xl border border-surface-variant/60 p-8 lg:p-12 shadow-2xl relative overflow-hidden">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+<div class="lg:col-span-7">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/15 text-secondary border border-secondary/30 font-label-sm text-label-sm uppercase tracking-wider mb-4">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+              Turnkey Restaurant Kit • Plug &amp; Play
+            </div>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface tracking-tight mb-4">
+              Engineered for spills, grease, drops, and 14-hour weekend shifts.
+            </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-6">
+              Industrial-grade POS terminals, kitchen display monitors with high-decibel buzzers, and customer-facing bill displays designed specifically for Kenyan food &amp; beverage realities.
+            </p>
+<!-- Bundle Spec List -->
+<ul class="space-y-3 font-body-md text-body-md text-on-surface mb-8">
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+<span><strong>15.6" Capacitive Touch Countertop Terminal</strong> (IP54 spill &amp; dust resistant)</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+<span><strong>10.1" Integrated Customer Bill Display</strong> for itemized pricing clarity</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+<span><strong>80mm High-Speed Thermal Receipt Printer</strong> with auto-cutter &amp; eTIMS QR driver</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+<span><strong>Heavy-Duty 5-Bill / 8-Coin Steel Cash Drawer</strong> with RJ11 auto-kick</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+<span><strong>21.5" Stainless KDS Kitchen Screen</strong> with thermal heat shielding</span>
+</li>
+</ul>
+<!-- Pricing Pill & Action -->
+<div class="p-4 rounded-xl bg-surface-container-lowest border border-surface-variant/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-bold">KES 149,000 <span class="font-body-md text-body-md text-on-surface-variant font-normal">one-time</span></div>
+<div class="text-on-surface-variant text-label-sm font-label-sm">Or KES 14,500/mo hardware lease • Free setup in Nairobi, Mombasa &amp; Kisumu</div>
+</div>
+<div class="flex items-center gap-2">
+<a class="px-5 py-2.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary font-body-md-medium text-body-md-medium transition-colors text-center text-nowrap" data-path="contact" href="#">
+                  Order Hardware Kit
+                </a>
+</div>
+</div>
+</div>
+<!-- Hardware Visual Mockup / Badge Area -->
+<div class="lg:col-span-5 flex flex-col items-center justify-center">
+<div class="w-full bg-surface-container-lowest border border-surface-variant/40 rounded-xl p-6 flex flex-col items-center text-center shadow-lg">
+<span class="material-symbols-outlined text-primary-container text-[64px] mb-3">point_of_sale</span>
+<div class="font-headline-sm text-headline-sm text-on-surface font-bold mb-1">VendaPOS Pro Bundle</div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-4">Complete Front-of-House &amp; Kitchen Line Hardware</p>
+<div class="w-full space-y-2 text-left font-label-md text-label-md border-t border-surface-variant/30 pt-3">
+<div class="flex justify-between text-on-surface-variant">
+<span>Warranty:</span>
+<span class="text-on-surface font-medium">3-Year On-Site Swap</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Battery Backup:</span>
+<span class="text-on-surface font-medium">4 Hours Power Surge UPS</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Network:</span>
+<span class="text-on-surface font-medium">Dual 4G SIM + Gigabit LAN</span>
+</div>
+</div>
+<a class="mt-4 text-primary hover:text-primary-fixed text-label-md font-label-md font-semibold inline-flex items-center gap-1" href="#">
+<span>Download full hardware spec sheet</span>
+<span class="material-symbols-outlined text-[16px]">download</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Operator Stories: Restaurant Case Study Feature -->
+<section class="w-full py-20 bg-surface-container-lowest border-y border-surface-variant/30">
+<div class="max-w-[1200px] mx-auto px-margin-mobile lg:px-margin">
+<div class="max-w-2xl mb-12">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">OPERATOR STORIES</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface tracking-tight mt-2">
+          Proven across high-volume dining rooms.
+        </h2>
+</div>
+<div class="bg-surface-container rounded-2xl border border-surface-variant/50 p-6 lg:p-10">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+<div class="lg:col-span-8">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold mb-4">
+              CASE STUDY: PRIME HOSPITALITY GROUP
+            </div>
+<h3 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface font-bold tracking-tight mb-4">
+              How Urban Bistro &amp; Grill cut table turn times by 16 minutes across 4 busy outlets in Nairobi.
+            </h3>
+<!-- Metric Highlights -->
+<div class="grid grid-cols-3 gap-3 my-6 pt-2 pb-4 border-y border-surface-variant/30">
+<div>
+<div class="font-display-lg text-[32px] lg:text-[40px] text-secondary font-bold leading-tight">+22%</div>
+<div class="text-on-surface-variant font-label-sm text-label-sm">Table Turnover Rate</div>
+</div>
+<div>
+<div class="font-display-lg text-[32px] lg:text-[40px] text-primary font-bold leading-tight">KES 420K</div>
+<div class="text-on-surface-variant font-label-sm text-label-sm">Monthly Food Waste Saved</div>
+</div>
+<div>
+<div class="font-display-lg text-[32px] lg:text-[40px] text-on-surface font-bold leading-tight">100%</div>
+<div class="text-on-surface-variant font-label-sm text-label-sm">KRA eTIMS Automatic Match</div>
+</div>
+</div>
+<blockquote class="text-on-surface font-body-lg text-body-lg italic mb-4">
+              "Before VendaPOS, Friday night table settlements were a nightmare of lost paper bills, delayed M-Pesa screenshot confirmations, and cold orders on the pass. Today, our waitstaff settle tables in under 30 seconds without leaving the floor, and our kitchen runs in total sync."
+            </blockquote>
+<div class="text-on-surface-variant font-label-md text-label-md">
+<strong class="text-on-surface">David Gitonga</strong> — Operations Director, Urban Bistro &amp; Grill (Westlands, Kilimani, Village Market)
+            </div>
+</div>
+<!-- Side Action / Quote Card -->
+<div class="lg:col-span-4 bg-surface-container-lowest border border-surface-variant/40 rounded-xl p-6 flex flex-col justify-between h-full">
+<div>
+<span class="material-symbols-outlined text-primary-container text-[36px] mb-2">format_quote</span>
+<div class="font-headline-sm text-headline-sm text-on-surface font-semibold mb-2">Ready to see these results on your floor?</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">
+                We'll walk your dining area, audit current check settlement speeds, and configure a tailored trial for your team.
+              </p>
+</div>
+<a class="inline-flex items-center gap-2 text-primary hover:text-primary-fixed font-body-md-medium text-body-md-medium" data-path="customers" href="#">
+<span>Read complete operator case study</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- FAQ Accordion (6 Restaurant-Specific Questions) -->
+<section class="w-full py-20">
+<div class="max-w-[900px] mx-auto px-margin-mobile lg:px-margin">
+<div class="text-center mb-12">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">FREQUENTLY ASKED QUESTIONS</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface tracking-tight mt-2 mb-3">
+          Everything you need to know about restaurant deployment.
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+          Clear answers regarding offline operations, M-Pesa integration, and Kenyan tax compliance.
+        </p>
+</div>
+<!-- FAQ List with vanilla toggle interactions -->
+<div class="space-y-4" id="restaurant-faqs">
+<!-- Q1 -->
+<div class="faq-item bg-surface-container rounded-xl border border-surface-variant/40 overflow-hidden">
+<button class="faq-trigger w-full px-6 py-4 text-left flex items-center justify-between gap-4 font-headline-sm text-headline-sm text-on-surface hover:text-primary transition-colors" type="button">
+<span>Can VendaPOS keep taking orders and printing kitchen chits if our internet goes down?</span>
+<span class="material-symbols-outlined text-primary transition-transform duration-200">expand_more</span>
+</button>
+<div class="faq-content px-6 pb-5 pt-1 text-on-surface-variant font-body-md text-body-md leading-relaxed">
+            Yes, 100%. VendaPOS is built offline-first using embedded local database engines on every terminal. If Safaricom fiber or mobile networks cut out, table ordering, kitchen KDS routing, receipt printing, and cash register kicks continue without interruption. When connectivity restores, transactions automatically synchronize upstream to the central cloud.
+          </div>
+</div>
+<!-- Q2 -->
+<div class="faq-item bg-surface-container rounded-xl border border-surface-variant/40 overflow-hidden">
+<button class="faq-trigger w-full px-6 py-4 text-left flex items-center justify-between gap-4 font-headline-sm text-headline-sm text-on-surface hover:text-primary transition-colors" type="button">
+<span>How does M-Pesa pay-at-table work for split checks?</span>
+<span class="material-symbols-outlined text-primary transition-transform duration-200">expand_more</span>
+</button>
+<div class="faq-content px-6 pb-5 pt-1 text-on-surface-variant font-body-md text-body-md leading-relaxed hidden">
+            When a table splits a bill, the waiter selects the individual guest items or specifies custom amount splits on the handheld screen. VendaPOS immediately sends separate Safaricom STK prompt requests to each guest's respective phone number. Each payment verifies independently in real time, and the register will only close the table once the full balance is covered.
+          </div>
+</div>
+<!-- Q3 -->
+<div class="faq-item bg-surface-container rounded-xl border border-surface-variant/40 overflow-hidden">
+<button class="faq-trigger w-full px-6 py-4 text-left flex items-center justify-between gap-4 font-headline-sm text-headline-sm text-on-surface hover:text-primary transition-colors" type="button">
+<span>Can we route different items to different preparation areas (e.g. drinks to bar, food to grill)?</span>
+<span class="material-symbols-outlined text-primary transition-transform duration-200">expand_more</span>
+</button>
+<div class="faq-content px-6 pb-5 pt-1 text-on-surface-variant font-body-md text-body-md leading-relaxed hidden">
+            Yes. Every category and menu item has customized routing rules. A single order containing cocktails, cold appetizers, and charcoal choma will instantly split: drink chits print at the bar dispense station, appetizers show on the pantry KDS, and grilled meats display on the kitchen pass with course tags.
+          </div>
+</div>
+<!-- Q4 -->
+<div class="faq-item bg-surface-container rounded-xl border border-surface-variant/40 overflow-hidden">
+<button class="faq-trigger w-full px-6 py-4 text-left flex items-center justify-between gap-4 font-headline-sm text-headline-sm text-on-surface hover:text-primary transition-colors" type="button">
+<span>Is VendaPOS certified with the Kenya Revenue Authority (KRA) for eTIMS receipts?</span>
+<span class="material-symbols-outlined text-primary transition-transform duration-200">expand_more</span>
+</button>
+<div class="faq-content px-6 pb-5 pt-1 text-on-surface-variant font-body-md text-body-md leading-relaxed hidden">
+            Yes. VendaPOS natively embeds the KRA eTIMS Type-C fiscal transmission engine. Every thermal checkout receipt prints with a valid cryptographic QR code, Fiscal Day Number (FDN), and Invoice Number transmitted automatically to KRA systems. You avoid secondary fiscal boxes or manual portal typing.
+          </div>
+</div>
+<!-- Q5 -->
+<div class="faq-item bg-surface-container rounded-xl border border-surface-variant/40 overflow-hidden">
+<button class="faq-trigger w-full px-6 py-4 text-left flex items-center justify-between gap-4 font-headline-sm text-headline-sm text-on-surface hover:text-primary transition-colors" type="button">
+<span>How does recipe inventory tracking work for complex recipes and meat cuts?</span>
+<span class="material-symbols-outlined text-primary transition-transform duration-200">expand_more</span>
+</button>
+<div class="faq-content px-6 pb-5 pt-1 text-on-surface-variant font-body-md text-body-md leading-relaxed hidden">
+            You can link sub-recipes and raw ingredients to every menu offering. For example, ringing up 1x Kuku Choma Quarter automatically deducts 250g raw chicken, 15ml marinade oil, and charcoal allocations from your inventory ledger. When butchery yields are entered, the system calculates waste variance and food cost percentages automatically.
+          </div>
+</div>
+<!-- Q6 -->
+<div class="faq-item bg-surface-container rounded-xl border border-surface-variant/40 overflow-hidden">
+<button class="faq-trigger w-full px-6 py-4 text-left flex items-center justify-between gap-4 font-headline-sm text-headline-sm text-on-surface hover:text-primary transition-colors" type="button">
+<span>How long does installation, staff training, and menu setup take?</span>
+<span class="material-symbols-outlined text-primary transition-transform duration-200">expand_more</span>
+</button>
+<div class="faq-content px-6 pb-5 pt-1 text-on-surface-variant font-body-md text-body-md leading-relaxed hidden">
+            Our Nairobi deployment squad typically finishes installation within 48 to 72 hours. We configure your floor plan, import your full menu with modifier matrices, configure your M-Pesa Till/Paybill, and conduct on-site shift simulations with both waitstaff and kitchen brigade before your next busy service.
+          </div>
+</div>
+</div>
+</div>
+</section>
+<!-- Final High-Impact Conversion Band -->
+<section class="w-full py-16 bg-surface-container-lowest border-t border-surface-variant/40">
+<div class="max-w-[1200px] mx-auto px-margin-mobile lg:px-margin">
+<div class="relative bg-gradient-to-r from-surface-container via-surface-container-high to-surface-container rounded-2xl border border-primary-container/30 p-8 lg:p-14 text-center overflow-hidden shadow-[0_0_50px_rgba(244,98,42,0.15)]">
+<div class="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary-container/20 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="relative z-10 max-w-2xl mx-auto">
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-container/20 text-primary border border-primary-container/40 font-label-sm text-label-sm uppercase tracking-wider mb-4">
+<span class="material-symbols-outlined text-[16px]">restaurant_menu</span>
+            Ready for your next dinner rush
+          </div>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface tracking-tight mb-4">
+            Ready to run a faster, more profitable dining room?
+          </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8">
+            Schedule a 20-minute live demonstration on your own dining floor or visit our Nairobi experience showroom in Westlands.
+          </p>
+<div class="flex flex-wrap items-center justify-center gap-4 mb-8">
+<a class="inline-flex items-center justify-center gap-2 bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary font-body-md-medium text-body-md-medium px-8 py-3.5 rounded-xl transition-all shadow-[0_0_30px_rgba(244,98,42,0.35)] active:scale-95" data-path="book-a-demo" href="#">
+<span>Book a restaurant demo</span>
+<span class="material-symbols-outlined text-[20px]">calendar_today</span>
+</a>
+<a class="inline-flex items-center justify-center gap-2 bg-surface-container hover:bg-surface-bright border border-surface-variant text-on-surface font-body-md-medium text-body-md-medium px-8 py-3.5 rounded-xl transition-colors" data-path="contact" href="#">
+<span class="material-symbols-outlined text-[20px] text-secondary">support_agent</span>
+<span>Speak with a hospitality specialist</span>
+</a>
+</div>
+<div class="flex flex-wrap items-center justify-center gap-6 text-on-surface-variant font-label-md text-label-md pt-4 border-t border-surface-variant/30">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-primary">call</span>
+<span>Call: <strong class="text-on-surface">+254 (0) 700 000 000</strong></span>
+</div>
+<span class="hidden sm:inline opacity-30">•</span>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-primary">mail</span>
+<span>Email: <strong class="text-on-surface">restaurants@vendapos.co.ke</strong></span>
+</div>
+<span class="hidden sm:inline opacity-30">•</span>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-secondary">location_on</span>
+<span>Showroom: Westlands, Nairobi</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive Accordion Handler Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const faqTriggers = document.querySelectorAll('.faq-trigger');
+      faqTriggers.forEach(trigger => {
+        trigger.addEventListener('click', () => {
+          const content = trigger.nextElementSibling;
+          const icon = trigger.querySelector('.material-symbols-outlined');
+          const isHidden = content.classList.contains('hidden');
+
+          // Close all contents first
+          document.querySelectorAll('.faq-content').forEach(c => c.classList.add('hidden'));
+          document.querySelectorAll('.faq-trigger .material-symbols-outlined').forEach(i => i.classList.remove('rotate-180'));
+
+          if (isHidden) {
+            content.classList.remove('hidden');
+            icon.classList.add('rotate-180');
+          }
+        });
+      });
+    });
+  </script>
+</div></main><footer class="w-full bg-surface-container-low border-t border-surface-variant/40 mt-space-xl"><div class="max-w-[1200px] mx-auto px-margin-mobile lg:px-margin pt-space-xl pb-space-lg"><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-space-lg mb-space-xl"><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Product</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">Touch Terminal</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">Kitchen Display</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">Multi-Branch Cloud</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">Offline Engine</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">M-Pesa Integration</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="compliance" href="#">KRA eTIMS Engine</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Solutions</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Restaurants &amp; Cafes</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Bars &amp; Nightclubs</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Salons &amp; Barbershops</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Supermarkets &amp; Retail</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Hardware Stores</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Pharmacies</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Liquor Stores</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Company</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="company" href="#">About VendaPOS</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="customers" href="#">Customers</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="careers" href="#">Careers</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="press" href="#">Press</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="partner-program" href="#">Partner Program</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="contact" href="#">Contact</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Resources</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="resources" href="#">Help Center</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="developer-api" href="#">API &amp; Webhooks</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="hardware-guide" href="#">Hardware Guide</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="compliance" href="#">eTIMS Compliance Hub</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="migration-guide" href="#">POS Migration Guide</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Legal &amp; Trust</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="privacy-policy" href="#">Privacy Policy</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="terms-of-service" href="#">Terms of Service</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="security-architecture" href="#">Security Architecture</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="data-processing" href="#">Data Processing Agreement</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="system-status" href="#">System Status</a></li></ul></div></div><div class="border-t border-surface-variant/40 pt-space-lg flex flex-col lg:flex-row items-center justify-between gap-space-md"><div class="flex flex-wrap items-center gap-space-md"><div class="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md"><span class="material-symbols-outlined text-[16px]">language</span><button class="hover:text-on-surface transition-colors text-on-surface font-semibold">English (KE)</button><span class="opacity-40">|</span><button class="hover:text-on-surface transition-colors">Kiswahili</button></div><div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container border border-surface-variant font-label-sm text-label-sm text-on-surface-variant"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Billing in KES &amp; USD</div></div><div class="flex items-center gap-space-md"><a class="w-9 h-9 rounded-full bg-surface-container border border-surface-variant/60 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="https://x.com" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[18px]">alternate_email</span></a><a class="w-9 h-9 rounded-full bg-surface-container border border-surface-variant/60 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="https://linkedin.com" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[18px]">business_center</span></a><a class="w-9 h-9 rounded-full bg-surface-container border border-surface-variant/60 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="https://github.com" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[18px]">code</span></a></div><div class="text-on-surface-variant font-label-md text-label-md text-center lg:text-right">© 2025 Venda Technologies Ltd. All rights reserved. Fast. Local. Built for Africa.</div></div></div></footer></body></html>

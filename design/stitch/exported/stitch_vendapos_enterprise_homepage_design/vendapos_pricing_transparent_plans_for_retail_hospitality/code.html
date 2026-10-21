@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "outline": "#a98a80", "on-tertiary-fixed-variant": "#48445a", "on-primary-fixed": "#390c00", "surface-tint": "#ffb59c", "inverse-on-surface": "#332d43", "on-secondary-container": "#00320f", "background": "#151024", "surface-bright": "#3c364c", "primary": "#ffb59c", "secondary": "#5cdf78", "surface-container": "#221c31", "primary-fixed": "#ffdbcf", "surface": "#151024", "on-tertiary-container": "#2a273b", "on-tertiary-fixed": "#1c192c", "error-container": "#93000a", "error": "#ffb4ab", "surface-variant": "#373147", "on-surface-variant": "#e2bfb4", "on-surface": "#e8defb", "tertiary-container": "#938da6", "primary-fixed-dim": "#ffb59c", "tertiary-fixed-dim": "#c9c3dd", "on-tertiary": "#312e42", "surface-container-low": "#1d182d", "on-secondary-fixed-variant": "#00531f", "surface-dim": "#151024", "on-primary-fixed-variant": "#822700", "inverse-surface": "#e8defb", "secondary-fixed": "#7afd91", "on-primary": "#5c1900", "on-primary-container": "#511500", "on-error": "#690005", "surface-container-lowest": "#100b1f", "secondary-container": "#0ea747", "outline-variant": "#594139", "secondary-fixed-dim": "#5cdf78", "tertiary-fixed": "#e6dffa", "inverse-primary": "#ab3600", "on-secondary": "#003913", "surface-container-high": "#2c273c", "on-secondary-fixed": "#002108", "on-background": "#e8defb", "primary-container": "#f4622a", "on-error-container": "#ffdad6", "surface-container-highest": "#373147", "tertiary": "#c9c3dd" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "margin": "2rem", "space-md": "1rem", "margin-mobile": "1rem", "gutter": "1.5rem", "space-xs": "0.5rem", "space-xl": "2rem", "gutter-mobile": "1rem", "space-lg": "1.5rem", "space-sm": "0.75rem" }, "fontFamily": { "body-lg-medium": [ "Inter" ], "body-lg": [ "Inter" ], "display-lg": [ "Inter" ], "display-lg-mobile": [ "Inter" ], "body-md-medium": [ "Inter" ], "headline-lg-mobile": [ "Inter" ], "label-md": [ "Inter" ], "headline-lg": [ "Inter" ], "headline-md": [ "Inter" ], "label-sm": [ "Inter" ], "body-md": [ "Inter" ], "headline-sm": [ "Inter" ] }, "fontSize": { "body-lg-medium": [ "18px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "500" } ], "body-lg": [ "18px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400" } ], "display-lg": [ "64px", { "lineHeight": "72px", "letterSpacing": "-0.025em", "fontWeight": "700" } ], "display-lg-mobile": [ "36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "body-md-medium": [ "16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "500" } ], "headline-lg-mobile": [ "28px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "700" } ], "label-md": [ "14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" } ], "headline-lg": [ "40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "headline-md": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "label-sm": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" } ], "body-md": [ "16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" } ], "headline-sm": [ "20px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-surface-container-lowest text-on-surface font-body-md text-body-md antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen"><header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-surface-variant/40"><div class="h-20 max-w-[1200px] mx-auto px-margin-mobile lg:px-margin flex items-center justify-between"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-xs" data-path="product" href="#"><img alt="VendaPOS Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XEytxPPtEqFweBOw2okAKawiwfgJXKpc5lEOEDjnF21_OeHfcxa7R8vjxIOmMOedjeNAcmJKCXXTW779Rmb280ULKzD56Js_6nSIeC8REqxJ0f5JFplJ-P1g3IIxMSuYf6_Llh6y1LLBmEP7RTd91gX0Z0tLKJvD2t-Tv-FMpK5gpIu_RQuHHrCUSijnj7LlynPCEG2jGZwfm3R5g3aTloNX-tpYKD91Yvi2ZrNKRYxG-_xbLKV4e90i8"/><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight font-bold">Venda<span class="text-primary-container">POS</span></span></a><nav class="hidden lg:flex items-center gap-space-lg ml-space-md" data-active-classes="text-on-surface font-body-md-medium border-b-2 border-primary-container"><a class="flex items-center gap-1 font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="product" href="#">Product</a><div class="relative group"><a class="flex items-center gap-1 font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="solutions" href="#">Solutions<span class="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-on-surface transition-transform duration-200 group-hover:rotate-180">expand_more</span></a></div><a aria-current="page" class="transition-colors py-space-xs text-on-surface font-body-md-medium border-b-2 border-primary-container" data-path="pricing" href="#">Pricing</a><a class="flex items-center gap-1.5 font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="compliance" href="#">Compliance<span class="px-1.5 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/30 font-label-sm text-label-sm uppercase tracking-wider">KRA eTIMS</span></a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="resources" href="#">Resources</a></nav></div><div class="flex items-center gap-space-md"><a class="hidden sm:inline-flex font-body-md-medium text-body-md-medium text-on-surface-variant hover:text-on-surface transition-colors px-space-xs py-space-xs" data-path="login" href="#">Log in</a><a class="inline-flex items-center justify-center bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary font-body-md-medium text-body-md-medium px-space-md py-2.5 rounded-lg transition-all shadow-[0_0_24px_rgba(244,98,42,0.25)] hover:shadow-[0_0_30px_rgba(244,98,42,0.4)] active:scale-95" data-path="book-a-demo" href="#">Book a demo</a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 ml-space-xs"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-surface-container-lowest"><div class="flex flex-col w-full">
+<!-- Top Decorative Ambient Glow -->
+<div class="relative w-full max-w-[1200px] mx-auto px-margin-mobile lg:px-margin pt-12 pb-6">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[320px] bg-primary-container/10 rounded-full blur-[140px] pointer-events-none"></div>
+<!-- 1. Hero Section -->
+<div class="relative flex flex-col items-center text-center max-w-3xl mx-auto space-y-6">
+<div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container border border-surface-variant/60 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary">Predictable, transparent investment</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface tracking-tight font-bold">
+        Simple, transparent pricing for every stage of retail and dining.
+      </h1>
+<p class="font-body-lg text-body-md md:text-body-lg text-on-surface-variant max-w-2xl leading-relaxed">
+        Zero hidden transaction surcharges. Keep 100% of your sales revenue. Transparent monthly software per branch with full offline resilience and KRA eTIMS built-in.
+      </p>
+<!-- Billing Cadence Switcher -->
+<div class="pt-4 flex items-center justify-center">
+<div class="p-1 rounded-xl bg-surface-container-low border border-surface-variant/70 flex items-center gap-1 shadow-inner">
+<button class="px-5 py-2.5 rounded-lg font-label-md text-label-md text-on-surface bg-surface-container font-semibold transition-all" id="cadence-monthly" type="button">
+            Monthly
+          </button>
+<button class="relative px-5 py-2.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-2" id="cadence-annual" type="button">
+<span>Annual</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary border border-secondary/30 font-label-sm text-label-sm tracking-wide">
+              Save 20% · 2 mos free
+            </span>
+</button>
+</div>
+</div>
+</div>
+<!-- 2. Plan Cards Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-12 items-stretch">
+<!-- Card 1: Starter -->
+<div class="relative rounded-xl bg-surface-container border border-surface-variant/80 p-8 flex flex-col justify-between hover:border-surface-variant transition-colors shadow-lg">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Starter</span>
+<span class="material-symbols-outlined text-on-surface-variant">storefront</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant min-h-[48px]">
+            Single shop, boutique, or quick-service counter getting started
+          </p>
+<div class="mt-6 mb-8 pb-6 border-b border-surface-variant/50">
+<div class="flex items-baseline gap-1">
+<span class="text-on-surface font-headline-lg text-headline-lg font-bold price-value" data-annual="2,799" data-monthly="3,499">3,499</span>
+<span class="font-label-md text-label-md text-on-surface-variant">KES / month</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant/80 mt-1.5 price-subtext" data-annual="Billed annually at 33,588 KES per branch" data-monthly="Billed monthly or 33,588 KES annually">
+              Billed monthly or 33,588 KES annually
+            </p>
+</div>
+<div class="space-y-3.5 mb-8">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">1 POS terminal license included</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Up to 1,000 monthly transactions</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Full offline SQLite database sync</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">M-Pesa STK push &amp; cash audit trail</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Automated KRA eTIMS fiscalization</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Standard email &amp; portal support</span>
+</div>
+</div>
+</div>
+<a class="w-full py-3 px-4 rounded-lg bg-surface-container-high hover:bg-surface-variant text-on-surface border border-surface-variant font-body-md-medium text-body-md-medium text-center transition-all" href="#">
+          Start 14-day free trial
+        </a>
+</div>
+<!-- Card 2: Business (Featured) -->
+<div class="relative rounded-xl bg-surface-container-high border-2 border-primary-container p-8 flex flex-col justify-between shadow-[0_0_35px_rgba(244,98,42,0.18)] transform lg:-translate-y-2">
+<div class="absolute -top-3.5 left-1/2 -translate-x-1/2">
+<span class="px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm uppercase tracking-wider font-bold shadow-md">
+            Most popular
+          </span>
+</div>
+<div>
+<div class="flex items-center justify-between mb-4 mt-2">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Business</span>
+<span class="material-symbols-outlined text-primary-container">local_dining</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant min-h-[48px]">
+            High-volume restaurants, multi-till supermarkets, bars &amp; busy retail chains
+          </p>
+<div class="mt-6 mb-8 pb-6 border-b border-surface-variant/50">
+<div class="flex items-baseline gap-1">
+<span class="text-on-surface font-headline-lg text-headline-lg font-bold price-value" data-annual="6,399" data-monthly="7,999">7,999</span>
+<span class="font-label-md text-label-md text-on-surface-variant">KES / month</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant/80 mt-1.5 price-subtext" data-annual="Billed annually at 76,788 KES per branch" data-monthly="Billed monthly or 76,788 KES annually">
+              Billed monthly or 76,788 KES annually
+            </p>
+</div>
+<div class="space-y-3.5 mb-8">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-container text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Up to 5 POS terminal licenses included</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-container text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Unlimited transactions &amp; SKU catalog</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-container text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Kitchen Display System (KDS) &amp; bar routing</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-container text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Batch, serial &amp; expiry inventory tracking</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-container text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Recipe depletion &amp; butchery yield tracking</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-container text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Manager PIN overrides &amp; cashier audit</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary-container text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">24/7 priority WhatsApp &amp; phone onboarding</span>
+</div>
+</div>
+</div>
+<a class="w-full py-3 px-4 rounded-lg bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary font-body-md-medium text-body-md-medium text-center transition-all shadow-[0_0_24px_rgba(244,98,42,0.3)]" href="#">
+          Start 14-day free trial
+        </a>
+</div>
+<!-- Card 3: Enterprise -->
+<div class="relative rounded-xl bg-surface-container border border-surface-variant/80 p-8 flex flex-col justify-between hover:border-surface-variant transition-colors shadow-lg">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Enterprise</span>
+<span class="material-symbols-outlined text-on-surface-variant">hub</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant min-h-[48px]">
+            Large supermarket chains, multi-region franchises &amp; 10+ branch groups
+          </p>
+<div class="mt-6 mb-8 pb-6 border-b border-surface-variant/50">
+<div class="flex items-baseline gap-1">
+<span class="text-on-surface font-headline-lg text-headline-lg font-bold">Custom</span>
+<span class="font-label-md text-label-md text-on-surface-variant">/ tailored SLA</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant/80 mt-1.5">
+              Volume discounts for 10+ branches across East Africa
+            </p>
+</div>
+<div class="space-y-3.5 mb-8">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Unlimited POS terminals per branch</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Multi-brand consolidated HQ command center</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Custom ERP integrations (SAP, Oracle, Odoo)</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Dedicated TAM with 99.99% uptime SLA</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">On-site engineer hardware replacement (4 hrs)</span>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Local cloud data residency &amp; infinite audit logs</span>
+</div>
+</div>
+</div>
+<a class="w-full py-3 px-4 rounded-lg bg-surface-container-high hover:bg-surface-variant text-on-surface border border-surface-variant font-body-md-medium text-body-md-medium text-center transition-all" href="#">
+          Talk to enterprise sales
+        </a>
+</div>
+</div>
+<!-- 3. Modular Add-ons Row -->
+<div class="pt-24 pb-12">
+<div class="max-w-2xl mb-8">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary">Scalable Infrastructure</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface font-bold mt-1">
+          Modular hardware &amp; software add-ons
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">
+          Expand your setup as your dining floor or retail aisles grow. Add to any active tier with seamless billing.
+        </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+<!-- Addon 1 -->
+<div class="p-6 rounded-xl bg-surface-container border border-surface-variant/70 hover:border-surface-variant transition-colors flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary-container mb-4">
+<span class="material-symbols-outlined">point_of_sale</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Extra POS Terminal</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 leading-relaxed">
+              Full offline SQLite instance, cashier PIN lock, and dual cash drawer trigger.
+            </p>
+</div>
+<div class="mt-6 pt-4 border-t border-surface-variant/40">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">1,200</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant"> KES / mo / till</span>
+</div>
+</div>
+<!-- Addon 2 -->
+<div class="p-6 rounded-xl bg-surface-container border border-surface-variant/70 hover:border-surface-variant transition-colors flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary-container mb-4">
+<span class="material-symbols-outlined">soup_kitchen</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Kitchen Display (KDS)</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 leading-relaxed">
+              Real-time color-coded station dispatch, bump bar integration, and prep pace timing.
+            </p>
+</div>
+<div class="mt-6 pt-4 border-t border-surface-variant/40">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">1,800</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant"> KES / mo / screen</span>
+</div>
+</div>
+<!-- Addon 3 -->
+<div class="p-6 rounded-xl bg-surface-container border border-surface-variant/70 hover:border-surface-variant transition-colors flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary mb-4">
+<span class="material-symbols-outlined">chat</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Branded SMS &amp; WhatsApp</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 leading-relaxed">
+              Instant fiscalized eTIMS e-receipts and order ready pings directly to customer mobiles.
+            </p>
+</div>
+<div class="mt-6 pt-4 border-t border-surface-variant/40">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">2,500</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant"> KES / 5k bundle</span>
+</div>
+</div>
+<!-- Addon 4 -->
+<div class="p-6 rounded-xl bg-surface-container border border-surface-variant/70 hover:border-surface-variant transition-colors flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary-container mb-4">
+<span class="material-symbols-outlined">home_repair_service</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Field Engineer SLA</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 leading-relaxed">
+              Guaranteed 4-hour hot-swap replacement for hardware in Nairobi, Mombasa &amp; Kisumu.
+            </p>
+</div>
+<div class="mt-6 pt-4 border-t border-surface-variant/40">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">4,500</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant"> KES / mo / site</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 4. Detailed Feature Comparison Table -->
+<div class="pt-20 pb-16">
+<div class="text-center max-w-2xl mx-auto mb-12">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary">In-Depth Matrix</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface font-bold mt-1">
+          Compare plan capabilities
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">
+          Every layer of the VendaPOS engine engineered for uptime, speed, and fiscal compliance.
+        </p>
+</div>
+<div class="overflow-x-auto rounded-xl border border-surface-variant/70 bg-surface-container-low shadow-xl">
+<table class="w-full min-w-[760px] border-collapse text-left">
+<!-- Sticky Header -->
+<thead class="sticky top-20 z-30 bg-surface-container-low/95 backdrop-blur-md border-b border-surface-variant">
+<tr>
+<th class="p-4 lg:p-6 w-2/5 font-headline-sm text-headline-sm text-on-surface">Platform Features</th>
+<th class="p-4 lg:p-6 w-1/5 text-center">
+<span class="font-headline-sm text-headline-sm text-on-surface block font-bold">Starter</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Small counters</span>
+</th>
+<th class="p-4 lg:p-6 w-1/5 text-center bg-surface-container-high/50">
+<div class="inline-flex items-center gap-1 text-primary-container mb-0.5">
+<span class="material-symbols-outlined text-[14px]">star</span>
+<span class="font-label-sm text-label-sm uppercase font-bold">Popular</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface block font-bold">Business</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Multi-till hubs</span>
+</th>
+<th class="p-4 lg:p-6 w-1/5 text-center">
+<span class="font-headline-sm text-headline-sm text-on-surface block font-bold">Enterprise</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">10+ Branches</span>
+</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-variant/40 font-body-md text-body-md">
+<!-- Group 1: Selling & Floor Operations -->
+<tr class="bg-surface-container">
+<td class="p-3.5 px-6 font-label-md text-label-md uppercase tracking-wider text-primary font-bold" colspan="4">
+                1. Selling &amp; Floor Operations
+              </td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Offline-first core transactions</td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Included terminal licenses per branch</td>
+<td class="p-4 text-center text-on-surface-variant">1 Till</td>
+<td class="p-4 text-center text-on-surface font-semibold bg-surface-container-high/30">Up to 5 Tills</td>
+<td class="p-4 text-center text-primary-container font-semibold">Unlimited</td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Table &amp; interactive floor mapping</td>
+<td class="p-4 text-center text-on-surface-variant/40"><span class="material-symbols-outlined text-[18px]">remove</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Course firing &amp; pacing controls</td>
+<td class="p-4 text-center text-on-surface-variant/40"><span class="material-symbols-outlined text-[18px]">remove</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Item modifiers &amp; combo matrix</td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Barcode scanning &amp; weight scale RS232</td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<!-- Group 2: Payments & Settlement -->
+<tr class="bg-surface-container">
+<td class="p-3.5 px-6 font-label-md text-label-md uppercase tracking-wider text-primary font-bold" colspan="4">
+                2. Payments &amp; Settlement
+              </td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Safaricom M-Pesa direct STK Push</td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Airtel Money &amp; Card (Pesapal, DPO, Stanbic)</td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Split bill tender (Multi-payer cash/M-Pesa)</td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface font-semibold text-primary">Zero per-transaction software fee</td>
+<td class="p-4 text-center text-secondary font-bold">0% Cut</td>
+<td class="p-4 text-center text-secondary font-bold bg-surface-container-high/30">0% Cut</td>
+<td class="p-4 text-center text-secondary font-bold">0% Cut</td>
+</tr>
+<!-- Group 3: Compliance & Statutory -->
+<tr class="bg-surface-container">
+<td class="p-3.5 px-6 font-label-md text-label-md uppercase tracking-wider text-primary font-bold" colspan="4">
+                3. Compliance &amp; Statutory (KRA eTIMS)
+              </td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Automated KRA eTIMS signing (FDN &amp; QR)</td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Offline fiscal queuing with auto-resync</td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Shift drawer reconciliation &amp; cashier audit</td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<!-- Group 4: Inventory & Purchasing -->
+<tr class="bg-surface-container">
+<td class="p-3.5 px-6 font-label-md text-label-md uppercase tracking-wider text-primary font-bold" colspan="4">
+                4. Inventory &amp; Purchasing
+              </td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Real-time stock deduction on sale</td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Batch numbers, barcodes &amp; expiry alerts</td>
+<td class="p-4 text-center text-on-surface-variant/40"><span class="material-symbols-outlined text-[18px]">remove</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Recipe yield depletion &amp; butchery wastage</td>
+<td class="p-4 text-center text-on-surface-variant/40"><span class="material-symbols-outlined text-[18px]">remove</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Inter-branch dispatch &amp; transfer approvals</td>
+<td class="p-4 text-center text-on-surface-variant/40"><span class="material-symbols-outlined text-[18px]">remove</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<!-- Group 5: Reporting & Integrations -->
+<tr class="bg-surface-container">
+<td class="p-3.5 px-6 font-label-md text-label-md uppercase tracking-wider text-primary font-bold" colspan="4">
+                5. Reporting &amp; Custom Architecture
+              </td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Automated nightly Z-reports &amp; CSV export</td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Multi-branch consolidated P&amp;L rollups</td>
+<td class="p-4 text-center text-on-surface-variant/40"><span class="material-symbols-outlined text-[18px]">remove</span></td>
+<td class="p-4 text-center text-secondary bg-surface-container-high/30"><span class="material-symbols-outlined text-[20px]">check</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Direct ERP pipelines (SAP, Oracle, Odoo)</td>
+<td class="p-4 text-center text-on-surface-variant/40"><span class="material-symbols-outlined text-[18px]">remove</span></td>
+<td class="p-4 text-center text-on-surface-variant/40 bg-surface-container-high/30"><span class="material-symbols-outlined text-[18px]">remove</span></td>
+<td class="p-4 text-center text-secondary"><span class="material-symbols-outlined text-[20px]">check</span></td>
+</tr>
+<!-- Group 6: Support & Service Level Agreement -->
+<tr class="bg-surface-container">
+<td class="p-3.5 px-6 font-label-md text-label-md uppercase tracking-wider text-primary font-bold" colspan="4">
+                6. Support &amp; Deployment SLA
+              </td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">Channel availability</td>
+<td class="p-4 text-center text-on-surface-variant">Email &amp; Web</td>
+<td class="p-4 text-center text-on-surface font-semibold bg-surface-container-high/30">24/7 WhatsApp &amp; Phone</td>
+<td class="p-4 text-center text-primary-container font-semibold">Dedicated TAM + Hotline</td>
+</tr>
+<tr class="hover:bg-surface-container/40 transition-colors">
+<td class="p-4 px-6 text-on-surface">On-site rapid replacement SLA</td>
+<td class="p-4 text-center text-on-surface-variant/40">Add-on</td>
+<td class="p-4 text-center text-on-surface-variant/40 bg-surface-container-high/30">Add-on</td>
+<td class="p-4 text-center text-secondary font-semibold">Included (4-hr SLA)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- 5. FAQ Accordion Section -->
+<div class="pt-12 pb-20 max-w-3xl mx-auto">
+<div class="text-center mb-12">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary">Clarity First</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface font-bold mt-1">
+          Frequently asked questions
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">
+          Clear answers about merchant settlement, branch scaling, and local compliance.
+        </p>
+</div>
+<div class="space-y-4" id="faq-accordion">
+<!-- FAQ 1 -->
+<div class="rounded-xl bg-surface-container border border-surface-variant/60 overflow-hidden transition-all">
+<button class="faq-toggle w-full p-6 text-left flex items-center justify-between gap-4" type="button">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">
+              Does VendaPOS take a percentage cut of my sales or M-Pesa volume?
+            </span>
+<span class="material-symbols-outlined text-primary-container shrink-0 transition-transform duration-200">expand_more</span>
+</button>
+<div class="faq-content px-6 pb-6 text-on-surface-variant font-body-md text-body-md leading-relaxed hidden">
+            No, absolutely not. Unlike legacy US and European POS vendors that levy a 1.5% to 3% platform surcharge on every card or mobile transaction, VendaPOS charges only a transparent, flat software fee. 100% of your sales settle directly into your Safaricom Paybill, Till number, or merchant bank account.
+          </div>
+</div>
+<!-- FAQ 2 -->
+<div class="rounded-xl bg-surface-container border border-surface-variant/60 overflow-hidden transition-all">
+<button class="faq-toggle w-full p-6 text-left flex items-center justify-between gap-4" type="button">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">
+              How does the per-branch pricing work if we have 5 branches?
+            </span>
+<span class="material-symbols-outlined text-primary-container shrink-0 transition-transform duration-200">expand_more</span>
+</button>
+<div class="faq-content px-6 pb-6 text-on-surface-variant font-body-md text-body-md leading-relaxed hidden">
+            Each branch operates its own isolated offline SQLite engine with cloud synchronization. For 5 branches on the Business tier, you are billed 5 × 7,999 KES per month (or annual equivalent), giving each location up to 5 tills (25 registers total) plus consolidated HQ analytics.
+          </div>
+</div>
+<!-- FAQ 3 -->
+<div class="rounded-xl bg-surface-container border border-surface-variant/60 overflow-hidden transition-all">
+<button class="faq-toggle w-full p-6 text-left flex items-center justify-between gap-4" type="button">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">
+              What happens if our internet drops during peak service?
+            </span>
+<span class="material-symbols-outlined text-primary-container shrink-0 transition-transform duration-200">expand_more</span>
+</button>
+<div class="faq-content px-6 pb-6 text-on-surface-variant font-body-md text-body-md leading-relaxed hidden">
+            Nothing stops. VendaPOS is built offline-first. Your kitchen printers keep firing, bar orders process, barcodes scan instantly, and cash/offline payments clear without interruption. When Wi-Fi or 4G restores, all transactions and KRA eTIMS signatures queue and synchronize transparently.
+          </div>
+</div>
+<!-- FAQ 4 -->
+<div class="rounded-xl bg-surface-container border border-surface-variant/60 overflow-hidden transition-all">
+<button class="faq-toggle w-full p-6 text-left flex items-center justify-between gap-4" type="button">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">
+              Is KRA eTIMS compliance included in the base plan or an extra module?
+            </span>
+<span class="material-symbols-outlined text-primary-container shrink-0 transition-transform duration-200">expand_more</span>
+</button>
+<div class="faq-content px-6 pb-6 text-on-surface-variant font-body-md text-body-md leading-relaxed hidden">
+            Every VendaPOS tier includes full, native KRA eTIMS fiscalization out of the box at no extra charge. We integrate directly with the KRA Virtual Sales Control Unit (VSCU) protocol, generating genuine Fiscal Day Numbers (FDN) and scannable QR verification codes instantly on customer receipts.
+          </div>
+</div>
+<!-- FAQ 5 -->
+<div class="rounded-xl bg-surface-container border border-surface-variant/60 overflow-hidden transition-all">
+<button class="faq-toggle w-full p-6 text-left flex items-center justify-between gap-4" type="button">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">
+              Can we bring our own touchscreens, tablets, or thermal receipt printers?
+            </span>
+<span class="material-symbols-outlined text-primary-container shrink-0 transition-transform duration-200">expand_more</span>
+</button>
+<div class="faq-content px-6 pb-6 text-on-surface-variant font-body-md text-body-md leading-relaxed hidden">
+            Yes. VendaPOS supports standard Android touch terminals (Sunmi, Telpo, iMin), iPads, Windows tablets, and Linux terminals. We support virtually all ESC/POS network and USB thermal printers (Epson, Bixolon, Xprinter) as well as serial deli scales.
+          </div>
+</div>
+<!-- FAQ 6 -->
+<div class="rounded-xl bg-surface-container border border-surface-variant/60 overflow-hidden transition-all">
+<button class="faq-toggle w-full p-6 text-left flex items-center justify-between gap-4" type="button">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">
+              How long does onboarding and menu or inventory setup take?
+            </span>
+<span class="material-symbols-outlined text-primary-container shrink-0 transition-transform duration-200">expand_more</span>
+</button>
+<div class="faq-content px-6 pb-6 text-on-surface-variant font-body-md text-body-md leading-relaxed hidden">
+            For standard retail or quick-service counters, our CSV bulk importer gets your entire inventory live in under 30 minutes. For complex restaurants with recipes, floor plans, and modifier trees, our Nairobi deployment team handles end-to-end setup and staff training within 48 hours.
+          </div>
+</div>
+</div>
+</div>
+<!-- 6. Enterprise Contact Band -->
+<div class="pb-16">
+<div class="relative rounded-2xl bg-gradient-to-br from-surface-container-high via-surface-container to-surface-container-lowest border border-primary-container/40 p-8 lg:p-12 overflow-hidden shadow-2xl">
+<div class="absolute -right-20 -bottom-20 w-80 h-80 bg-primary-container/15 rounded-full blur-3xl pointer-events-none"></div>
+<div class="relative flex flex-col lg:flex-row items-center justify-between gap-8 z-10">
+<div class="max-w-xl text-center lg:text-left">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container border border-surface-variant/60 mb-4">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">East Africa Enterprise Desk</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface font-bold">
+              Managing 10+ branches or need a custom multi-country rollout?
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-3 leading-relaxed">
+              Speak with our East African enterprise engineering team for tailored hardware staging, custom ERP connectors, and volume licensing across Kenya, Uganda, Tanzania, and Rwanda.
+            </p>
+</div>
+<div class="flex flex-col sm:flex-row items-center gap-4 shrink-0 w-full sm:w-auto">
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary font-body-md-medium text-body-md-medium px-6 py-3.5 rounded-lg transition-all shadow-[0_0_24px_rgba(244,98,42,0.3)]" href="#">
+<span>Book enterprise consultation</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-surface-container hover:bg-surface-variant text-on-surface border border-surface-variant px-5 py-3.5 rounded-lg font-body-md-medium text-body-md-medium transition-all" href="tel:+254700000000">
+<span class="material-symbols-outlined text-[18px] text-secondary">phone_in_talk</span>
+<span>+254 (0) 700 000 000</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Micro-interactions Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Cadence Switcher Logic
+      const btnMonthly = document.getElementById('cadence-monthly');
+      const btnAnnual = document.getElementById('cadence-annual');
+      const priceValues = document.querySelectorAll('.price-value');
+      const priceSubtexts = document.querySelectorAll('.price-subtext');
+
+      function setCadence(isAnnual) {
+        if (isAnnual) {
+          btnAnnual.classList.add('bg-surface-container', 'text-on-surface', 'font-semibold');
+          btnAnnual.classList.remove('text-on-surface-variant');
+          btnMonthly.classList.remove('bg-surface-container', 'text-on-surface', 'font-semibold');
+          btnMonthly.classList.add('text-on-surface-variant');
+
+          priceValues.forEach(el => {
+            el.textContent = el.getAttribute('data-annual');
+          });
+          priceSubtexts.forEach(el => {
+            el.textContent = el.getAttribute('data-annual');
+          });
+        } else {
+          btnMonthly.classList.add('bg-surface-container', 'text-on-surface', 'font-semibold');
+          btnMonthly.classList.remove('text-on-surface-variant');
+          btnAnnual.classList.remove('bg-surface-container', 'text-on-surface', 'font-semibold');
+          btnAnnual.classList.add('text-on-surface-variant');
+
+          priceValues.forEach(el => {
+            el.textContent = el.getAttribute('data-monthly');
+          });
+          priceSubtexts.forEach(el => {
+            el.textContent = el.getAttribute('data-monthly');
+          });
+        }
+      }
+
+      if (btnMonthly && btnAnnual) {
+        btnMonthly.addEventListener('click', () => setCadence(false));
+        btnAnnual.addEventListener('click', () => setCadence(true));
+      }
+
+      // 2. FAQ Accordion Interaction
+      const toggles = document.querySelectorAll('.faq-toggle');
+      toggles.forEach(toggle => {
+        toggle.addEventListener('click', () => {
+          const content = toggle.nextElementSibling;
+          const icon = toggle.querySelector('.material-symbols-outlined');
+          const isClosed = content.classList.contains('hidden');
+
+          // Close all open FAQs
+          document.querySelectorAll('.faq-content').forEach(c => c.classList.add('hidden'));
+          document.querySelectorAll('.faq-toggle .material-symbols-outlined').forEach(i => i.classList.remove('rotate-180'));
+
+          if (isClosed) {
+            content.classList.remove('hidden');
+            if (icon) icon.classList.add('rotate-180');
+          }
+        });
+      });
+    });
+  </script>
+</div></main><footer class="w-full bg-surface-container-low border-t border-surface-variant/40 mt-space-xl"><div class="max-w-[1200px] mx-auto px-margin-mobile lg:px-margin pt-space-xl pb-space-lg"><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-space-lg mb-space-xl"><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Product</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">Touch Terminal</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">Kitchen Display</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">Multi-Branch Cloud</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">Offline Engine</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">M-Pesa Integration</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="compliance" href="#">KRA eTIMS Engine</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Solutions</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Restaurants &amp; Cafes</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Bars &amp; Nightclubs</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Salons &amp; Barbershops</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Supermarkets &amp; Retail</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Hardware Stores</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Pharmacies</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Liquor Stores</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Company</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="company" href="#">About VendaPOS</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="customers" href="#">Customers</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="careers" href="#">Careers</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="press" href="#">Press</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="partner-program" href="#">Partner Program</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="contact" href="#">Contact</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Resources</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="resources" href="#">Help Center</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="developer-api" href="#">API &amp; Webhooks</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="hardware-guide" href="#">Hardware Guide</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="compliance" href="#">eTIMS Compliance Hub</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="migration-guide" href="#">POS Migration Guide</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Legal &amp; Trust</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="privacy-policy" href="#">Privacy Policy</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="terms-of-service" href="#">Terms of Service</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="security-architecture" href="#">Security Architecture</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="data-processing" href="#">Data Processing Agreement</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="system-status" href="#">System Status</a></li></ul></div></div><div class="border-t border-surface-variant/40 pt-space-lg flex flex-col lg:flex-row items-center justify-between gap-space-md"><div class="flex flex-wrap items-center gap-space-md"><div class="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md"><span class="material-symbols-outlined text-[16px]">language</span><button class="hover:text-on-surface transition-colors text-on-surface font-semibold">English (KE)</button><span class="opacity-40">|</span><button class="hover:text-on-surface transition-colors">Kiswahili</button></div><div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container border border-surface-variant font-label-sm text-label-sm text-on-surface-variant"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Billing in KES &amp; USD</div></div><div class="flex items-center gap-space-md"><a class="w-9 h-9 rounded-full bg-surface-container border border-surface-variant/60 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="https://x.com" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[18px]">alternate_email</span></a><a class="w-9 h-9 rounded-full bg-surface-container border border-surface-variant/60 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="https://linkedin.com" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[18px]">business_center</span></a><a class="w-9 h-9 rounded-full bg-surface-container border border-surface-variant/60 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="https://github.com" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[18px]">code</span></a></div><div class="text-on-surface-variant font-label-md text-label-md text-center lg:text-right">© 2025 Venda Technologies Ltd. All rights reserved. Fast. Local. Built for Africa.</div></div></div></footer></body></html>

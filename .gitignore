@@ -48,3 +48,6 @@ yarn-error.log*
 .phpunit.result.cache
 .php-cs-fixer.cache
 phpstan-baseline.neon.bak
+
+# === Design tool archives (extracted copies are committed) ===
+design/**/*.zip
