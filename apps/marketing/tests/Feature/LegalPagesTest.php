@@ -27,15 +27,17 @@ it('marks the documents as drafts until legal review is complete', function () {
     $this->get('/en/terms')->assertDontSee('Draft: this document is being reviewed');
 });
 
-it('names DanamoTech and marks unknown company facts as TBC', function () {
+it('shows the registered company details and marks the rest as TBC', function () {
     $this->get('/en/privacy')
-        ->assertSeeInOrder(['Company', 'DanamoTech Ltd', 'Based in', 'Mombasa, Kenya'])
-        ->assertSeeInOrder(['Registration number', 'TBC'])
-        ->assertSeeInOrder(['ODPC registration', 'TBC']);
+        ->assertSeeInOrder(['Company', 'Danamo Tech Limited', 'Based in', 'Mombasa, Kenya'])
+        ->assertSeeInOrder(['Registration number', 'PVT-J61587ER', 'KRA PIN', 'P052477504F', 'Postal address', 'TBC'])
+        ->assertSeeInOrder(['ODPC registration', 'TBC', 'Data hosting region', 'TBC', 'Privacy contact', 'TBC']);
 
-    config(['marketing.company.registration_number' => 'PVT-ABC123']);
+    $this->get('/sw/terms')->assertSeeInOrder(['Namba ya usajili', 'PVT-J61587ER', 'PIN ya KRA', 'P052477504F']);
 
-    $this->get('/en/privacy')->assertSee('PVT-ABC123');
+    config(['marketing.company.odpc_registration' => 'ODPC-TEST-1']);
+
+    $this->get('/en/privacy')->assertSee('ODPC-TEST-1');
 });
 
 it('states the demo lead retention period from config', function () {

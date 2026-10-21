@@ -11,6 +11,7 @@ return [
             'name' => 'Company',
             'location' => 'Based in',
             'registration_number' => 'Registration number',
+            'kra_pin' => 'KRA PIN',
             'postal_address' => 'Postal address',
             'odpc_registration' => 'ODPC registration',
             'hosting_region' => 'Data hosting region',
@@ -23,7 +24,7 @@ return [
     'privacy' => [
         'meta' => [
             'title' => 'Privacy policy',
-            'description' => 'How DanamoTech Ltd collects, uses and protects personal data on the VendaPOS website and platform, under the Kenya Data Protection Act, 2019.',
+            'description' => 'How Danamo Tech Limited collects, uses and protects personal data on the VendaPOS website and platform, under the Kenya Data Protection Act, 2019.',
         ],
         'title' => 'Privacy policy',
         'lead' => 'How we collect, use and protect personal data, and the rights you have under the Kenya Data Protection Act, 2019.',
@@ -31,7 +32,7 @@ return [
             'who' => [
                 'title' => 'Who we are',
                 'body' => [
-                    'VendaPOS is a point-of-sale platform built and run by DanamoTech Ltd of Mombasa, Kenya (“DanamoTech”, “we”, “us”). This policy explains how we handle personal data when you visit this website, request a demo or use VendaPOS.',
+                    'VendaPOS is a point-of-sale platform built and run by Danamo Tech Limited of Mombasa, Kenya (“Danamo Tech”, “we”, “us”). This policy explains how we handle personal data when you visit this website, request a demo or use VendaPOS.',
                     'We are the data controller for personal data collected through this website and for the account details of businesses that use VendaPOS. When a business uses VendaPOS to record its own sales and customers, that business is the data controller and we process the data on its behalf as a data processor.',
                 ],
             ],
@@ -130,7 +131,7 @@ return [
     'terms' => [
         'meta' => [
             'title' => 'Terms of service',
-            'description' => 'The terms that apply to the VendaPOS website and platform, provided by DanamoTech Ltd of Mombasa, Kenya.',
+            'description' => 'The terms that apply to the VendaPOS website and platform, provided by Danamo Tech Limited of Mombasa, Kenya.',
         ],
         'title' => 'Terms of service',
         'lead' => 'The terms that apply when you use this website or VendaPOS.',
@@ -138,7 +139,7 @@ return [
             'about' => [
                 'title' => 'About these terms',
                 'body' => [
-                    'These terms apply to your use of this website and of VendaPOS, provided by DanamoTech Ltd of Mombasa, Kenya. By using the website or the service you agree to them. If you use VendaPOS on behalf of a business, you confirm that you may accept these terms for it.',
+                    'These terms apply to your use of this website and of VendaPOS, provided by Danamo Tech Limited of Mombasa, Kenya. By using the website or the service you agree to them. If you use VendaPOS on behalf of a business, you confirm that you may accept these terms for it.',
                 ],
             ],
             'service' => [
@@ -197,7 +198,7 @@ return [
             'ip' => [
                 'title' => 'Intellectual property',
                 'body' => [
-                    'VendaPOS, its software and its brand belong to DanamoTech Ltd. Your subscription gives you the right to use the service, not ownership of it. M-Pesa, KRA and other names and marks belong to their owners.',
+                    'VendaPOS, its software and its brand belong to Danamo Tech Limited. Your subscription gives you the right to use the service, not ownership of it. M-Pesa, KRA and other names and marks belong to their owners.',
                 ],
             ],
             'liability' => [

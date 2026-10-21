@@ -11,6 +11,7 @@ return [
             'name' => 'Kampuni',
             'location' => 'Mahali',
             'registration_number' => 'Namba ya usajili',
+            'kra_pin' => 'PIN ya KRA',
             'postal_address' => 'Anwani ya posta',
             'odpc_registration' => 'Usajili wa ODPC',
             'hosting_region' => 'Eneo la kuhifadhi data',
@@ -23,7 +24,7 @@ return [
     'privacy' => [
         'meta' => [
             'title' => 'Sera ya faragha',
-            'description' => 'Jinsi DanamoTech Ltd inavyokusanya, kutumia na kulinda data binafsi kwenye tovuti na mfumo wa VendaPOS, kwa mujibu wa Sheria ya Ulinzi wa Data ya Kenya, 2019.',
+            'description' => 'Jinsi Danamo Tech Limited inavyokusanya, kutumia na kulinda data binafsi kwenye tovuti na mfumo wa VendaPOS, kwa mujibu wa Sheria ya Ulinzi wa Data ya Kenya, 2019.',
         ],
         'title' => 'Sera ya faragha',
         'lead' => 'Jinsi tunavyokusanya, kutumia na kulinda data binafsi, na haki ulizonazo chini ya Sheria ya Ulinzi wa Data ya Kenya, 2019.',
@@ -31,7 +32,7 @@ return [
             'who' => [
                 'title' => 'Sisi ni nani',
                 'body' => [
-                    'VendaPOS ni mfumo wa mauzo uliotengenezwa na unaoendeshwa na DanamoTech Ltd ya Mombasa, Kenya (“DanamoTech”, “sisi”). Sera hii inaeleza jinsi tunavyoshughulikia data binafsi unapotembelea tovuti hii, unapoomba onyesho au unapotumia VendaPOS.',
+                    'VendaPOS ni mfumo wa mauzo uliotengenezwa na unaoendeshwa na Danamo Tech Limited ya Mombasa, Kenya (“Danamo Tech”, “sisi”). Sera hii inaeleza jinsi tunavyoshughulikia data binafsi unapotembelea tovuti hii, unapoomba onyesho au unapotumia VendaPOS.',
                     'Sisi ndio mdhibiti wa data binafsi inayokusanywa kupitia tovuti hii na ya taarifa za akaunti za biashara zinazotumia VendaPOS. Biashara inapotumia VendaPOS kurekodi mauzo na wateja wake, biashara hiyo ndiyo mdhibiti wa data hiyo, nasi tunaichakata kwa niaba yake kama mchakataji wa data.',
                 ],
             ],
@@ -130,7 +131,7 @@ return [
     'terms' => [
         'meta' => [
             'title' => 'Masharti ya huduma',
-            'description' => 'Masharti yanayotumika kwa tovuti na mfumo wa VendaPOS, unaotolewa na DanamoTech Ltd ya Mombasa, Kenya.',
+            'description' => 'Masharti yanayotumika kwa tovuti na mfumo wa VendaPOS, unaotolewa na Danamo Tech Limited ya Mombasa, Kenya.',
         ],
         'title' => 'Masharti ya huduma',
         'lead' => 'Masharti yanayotumika unapotumia tovuti hii au VendaPOS.',
@@ -138,7 +139,7 @@ return [
             'about' => [
                 'title' => 'Kuhusu masharti haya',
                 'body' => [
-                    'Masharti haya yanatumika kwa matumizi yako ya tovuti hii na ya VendaPOS, inayotolewa na DanamoTech Ltd ya Mombasa, Kenya. Kwa kutumia tovuti au huduma unakubali masharti haya. Iwapo unatumia VendaPOS kwa niaba ya biashara, unathibitisha kuwa una mamlaka ya kukubali masharti haya kwa niaba yake.',
+                    'Masharti haya yanatumika kwa matumizi yako ya tovuti hii na ya VendaPOS, inayotolewa na Danamo Tech Limited ya Mombasa, Kenya. Kwa kutumia tovuti au huduma unakubali masharti haya. Iwapo unatumia VendaPOS kwa niaba ya biashara, unathibitisha kuwa una mamlaka ya kukubali masharti haya kwa niaba yake.',
                 ],
             ],
             'service' => [
@@ -197,7 +198,7 @@ return [
             'ip' => [
                 'title' => 'Haki miliki',
                 'body' => [
-                    'VendaPOS, programu yake na chapa yake ni mali ya DanamoTech Ltd. Usajili wako unakupa haki ya kutumia huduma, si umiliki wake. M-Pesa, KRA na majina na alama nyingine ni mali ya wamiliki wake.',
+                    'VendaPOS, programu yake na chapa yake ni mali ya Danamo Tech Limited. Usajili wako unakupa haki ya kutumia huduma, si umiliki wake. M-Pesa, KRA na majina na alama nyingine ni mali ya wamiliki wake.',
                 ],
             ],
             'liability' => [

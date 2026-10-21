@@ -53,14 +53,14 @@ it('ships no external JavaScript, only a tiny inline enhancement', function () {
         ->and(strlen($scripts[1][0]))->toBeLessThan(1024);
 });
 
-it('credits DanamoTech Ltd of Mombasa in the footer', function (string $locale, string $credit) {
+it('credits Danamo Tech Limited of Mombasa in the footer', function (string $locale, string $credit) {
     $this->get("/{$locale}")
-        ->assertSee('DanamoTech Ltd.')
+        ->assertSee('Danamo Tech Limited.')
         ->assertSee($credit)
         ->assertSee('Mombasa, Kenya');
 })->with([
-    ['en', 'VendaPOS is built by DanamoTech Ltd, Mombasa, Kenya.'],
-    ['sw', 'VendaPOS imetengenezwa na DanamoTech Ltd, Mombasa, Kenya.'],
+    ['en', 'VendaPOS is built by Danamo Tech Limited, Mombasa, Kenya.'],
+    ['sw', 'VendaPOS imetengenezwa na Danamo Tech Limited, Mombasa, Kenya.'],
 ]);
 
 it('marks unconfirmed contact details as placeholders', function () {

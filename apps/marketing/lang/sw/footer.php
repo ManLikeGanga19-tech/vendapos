@@ -17,6 +17,6 @@ return [
     'contact' => 'Wasiliana nasi',
     'location' => 'Mombasa, Kenya',
     'rights' => 'Haki zote zimehifadhiwa.',
-    'built_by' => 'VendaPOS imetengenezwa na DanamoTech Ltd, Mombasa, Kenya.',
+    'built_by' => 'VendaPOS imetengenezwa na Danamo Tech Limited, Mombasa, Kenya.',
     'billing' => 'Imetengenezwa Kenya kwa ajili ya Afrika Mashariki.',
 ];

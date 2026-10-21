@@ -44,6 +44,6 @@ it('explains how M-Pesa confirmations are verified', function () {
         ->assertSee(asset('brand/mpesa.png'), false);
 });
 
-it('names DanamoTech Ltd as accountable for platform data', function () {
-    $this->get('/sw/compliance')->assertSee('DanamoTech Ltd ya Mombasa, Kenya');
+it('names Danamo Tech Limited as accountable for platform data', function () {
+    $this->get('/sw/compliance')->assertSee('Danamo Tech Limited ya Mombasa, Kenya');
 });

@@ -89,7 +89,7 @@ return [
             ],
             'controller' => [
                 'title' => 'Who is responsible',
-                'body' => 'VendaPOS is built and run by DanamoTech Ltd of Mombasa, Kenya, which is accountable for how platform data is handled.',
+                'body' => 'VendaPOS is built and run by Danamo Tech Limited of Mombasa, Kenya, which is accountable for how platform data is handled.',
             ],
         ],
     ],

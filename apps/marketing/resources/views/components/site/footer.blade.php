@@ -55,7 +55,7 @@
 
     <div class="border-t border-line">
         <div class="container-page flex flex-col gap-2 py-6 text-xs text-subtle sm:flex-row sm:justify-between">
-            <p>&copy; {{ now('Africa/Nairobi')->year }} DanamoTech Ltd. {{ __('footer.rights') }} {{ __('footer.built_by') }}</p>
+            <p>&copy; {{ now('Africa/Nairobi')->year }} Danamo Tech Limited. {{ __('footer.rights') }} {{ __('footer.built_by') }}</p>
             <ul class="flex flex-wrap gap-x-5 gap-y-2">
                 <li><a href="{{ route('privacy') }}" class="transition-colors hover:text-ink">{{ __('legal.common.privacy') }}</a></li>
                 <li><a href="{{ route('terms') }}" class="transition-colors hover:text-ink">{{ __('legal.common.terms') }}</a></li>

@@ -10,7 +10,7 @@ return [
     | Every public page is served under a locale prefix (/en, /sw). The first
     | entry is the fallback when a visitor's browser asks for neither.
     | Labels are shown in their own language next to a flag from public/flags
-    | (both use Kenya's, as requested by DanamoTech).
+    | (both use Kenya's, as requested by Danamo Tech).
     |
     */
 
@@ -42,14 +42,15 @@ return [
     |
     | Facts shown on the privacy policy and terms. Unknown values stay null
     | and render with a "TBC" marker. Both documents show a "draft" notice
-    | until `reviewed` is true (after DanamoTech's legal advisers sign off).
+    | until `reviewed` is true (after Danamo Tech's legal advisers sign off).
     |
     */
 
     'company' => [
-        'name' => 'DanamoTech Ltd',
+        'name' => 'Danamo Tech Limited',
         'location' => 'Mombasa, Kenya',
-        'registration_number' => env('COMPANY_REGISTRATION_NUMBER'),
+        'registration_number' => env('COMPANY_REGISTRATION_NUMBER', 'PVT-J61587ER'),
+        'kra_pin' => env('COMPANY_KRA_PIN', 'P052477504F'),
         'postal_address' => env('COMPANY_POSTAL_ADDRESS'),
         'odpc_registration' => env('COMPANY_ODPC_REGISTRATION'),
         'hosting_region' => env('COMPANY_HOSTING_REGION'),

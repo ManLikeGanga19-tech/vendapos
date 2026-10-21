@@ -17,6 +17,6 @@ return [
     'contact' => 'Contact',
     'location' => 'Mombasa, Kenya',
     'rights' => 'All rights reserved.',
-    'built_by' => 'VendaPOS is built by DanamoTech Ltd, Mombasa, Kenya.',
+    'built_by' => 'VendaPOS is built by Danamo Tech Limited, Mombasa, Kenya.',
     'billing' => 'Built in Kenya for East Africa.',
 ];

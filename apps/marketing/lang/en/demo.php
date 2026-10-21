@@ -79,7 +79,7 @@ return [
 
     'privacy' => [
         'title' => 'How we use your details',
-        'controller' => 'Your details are held by DanamoTech Ltd of Mombasa, Kenya, which builds and runs VendaPOS.',
+        'controller' => 'Your details are held by Danamo Tech Limited of Mombasa, Kenya, which builds and runs VendaPOS.',
         'use' => 'We use these details only to arrange and follow up on your demo. We never sell or share them.',
         'retention' => 'We keep them for :months months, then delete them.',
         'rights' => 'To see, correct or delete your details, email :email.',

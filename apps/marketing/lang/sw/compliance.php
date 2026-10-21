@@ -89,7 +89,7 @@ return [
             ],
             'controller' => [
                 'title' => 'Anayewajibika',
-                'body' => 'VendaPOS imetengenezwa na inaendeshwa na DanamoTech Ltd ya Mombasa, Kenya, inayowajibika kwa jinsi data ya mfumo inavyoshughulikiwa.',
+                'body' => 'VendaPOS imetengenezwa na inaendeshwa na Danamo Tech Limited ya Mombasa, Kenya, inayowajibika kwa jinsi data ya mfumo inavyoshughulikiwa.',
             ],
         ],
     ],

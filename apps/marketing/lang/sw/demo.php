@@ -79,7 +79,7 @@ return [
 
     'privacy' => [
         'title' => 'Jinsi tunavyotumia taarifa zako',
-        'controller' => 'Taarifa zako zinahifadhiwa na DanamoTech Ltd ya Mombasa, Kenya, inayotengeneza na kuendesha VendaPOS.',
+        'controller' => 'Taarifa zako zinahifadhiwa na Danamo Tech Limited ya Mombasa, Kenya, inayotengeneza na kuendesha VendaPOS.',
         'use' => 'Tunatumia taarifa hizi tu kupanga na kufuatilia onyesho lako. Hatuziuzi wala kuzishiriki na mtu yeyote.',
         'retention' => 'Tunazihifadhi kwa miezi :months, kisha tunazifuta.',
         'rights' => 'Ili kuona, kurekebisha au kufuta taarifa zako, tuma barua pepe kwa :email.',
