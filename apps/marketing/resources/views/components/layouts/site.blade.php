@@ -33,8 +33,24 @@
 
     @fonts
     @vite('resources/css/app.css')
+
+    {{--
+        Outdated-browser notice. Plain CSS outside Tailwind's layers so it still renders
+        where Tailwind 4 doesn't; any browser supporting color-mix() (Chrome 111+,
+        Safari 16.2+, Firefox 113+) hides it. Unknown @supports tests count as false.
+    --}}
+    <style>
+        .browser-notice { display: block; margin: 0; padding: 12px 16px; background: #f59e0b; color: #0f0a1e; font: 600 15px/1.4 system-ui, sans-serif; text-align: center; }
+        .browser-notice a { color: #0f0a1e; text-decoration: underline; }
+        @supports (color: color-mix(in srgb, red, blue)) { .browser-notice { display: none; } }
+    </style>
 </head>
 <body class="min-h-dvh">
+    <p class="browser-notice" role="alert">
+        {{ __('common.outdated_browser.message') }}
+        <a href="https://play.google.com/store/apps/details?id=com.android.chrome" rel="noopener">{{ __('common.outdated_browser.action') }}</a>
+    </p>
+
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-control focus:bg-coral focus:px-4 focus:py-2 focus:text-canvas">
         {{ __('common.skip_to_content') }}
     </a>

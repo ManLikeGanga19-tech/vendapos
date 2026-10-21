@@ -23,6 +23,16 @@ it('serves public pages without a session so they can be cached', function () {
         ->and($response->headers->get('ETag'))->not->toBeNull();
 });
 
+it('asks visitors on outdated browsers to update, in their language', function (string $locale, string $message) {
+    $this->get("/{$locale}")
+        ->assertSee('<p class="browser-notice" role="alert">', false)
+        ->assertSee('@supports (color: color-mix(in srgb, red, blue))', false)
+        ->assertSee($message);
+})->with([
+    ['en', 'Your browser is out of date'],
+    ['sw', 'Kivinjari chako kimepitwa na wakati'],
+]);
+
 it('ships no JavaScript bundle', function () {
     $this->get('/en')->assertDontSee('<script', false);
 });
