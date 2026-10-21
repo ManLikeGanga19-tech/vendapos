@@ -45,7 +45,7 @@
             </div>
 
             {{-- Till illustration: plain HTML so it stays sharp and weighs almost nothing. --}}
-            <figure role="img" aria-label="{{ __('home.till.label') }}" class="rounded-card border border-line bg-surface shadow-float">
+            <figure role="img" aria-label="{{ __('home.till.label') }}" class="border border-line bg-surface shadow-float">
                 <div class="flex items-center justify-between gap-3 border-b border-line px-4 py-3 text-xs text-muted">
                     <div>
                         <p class="font-semibold text-ink">{{ __('home.till.location') }}</p>
@@ -87,15 +87,15 @@
                     </dl>
 
                     <div class="mt-4 space-y-2" aria-hidden="true">
-                        <div class="flex min-h-12 items-center justify-center gap-2 rounded-card bg-mpesa font-semibold text-canvas">
+                        <div class="flex min-h-12 items-center justify-center gap-2 bg-mpesa font-semibold text-canvas">
                             <x-brand-mark name="mpesa" icon="smartphone" size="sm" class="size-6" />
                             {{ __('home.till.pay_mpesa', ['amount' => $total->format()]) }}
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-sm text-muted">
-                            <div class="flex min-h-11 items-center justify-center gap-2 rounded-card border border-line">
+                            <div class="flex min-h-11 items-center justify-center gap-2 border border-line">
                                 <x-icon name="credit-card" class="size-4" />{{ __('home.till.card') }}
                             </div>
-                            <div class="flex min-h-11 items-center justify-center gap-2 rounded-card border border-line">
+                            <div class="flex min-h-11 items-center justify-center gap-2 border border-line">
                                 <x-icon name="banknote" class="size-4" />{{ __('home.till.cash') }}
                             </div>
                         </div>
@@ -112,7 +112,7 @@
 
             <ul class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach (__('home.verticals.items') as $key => $vertical)
-                    <li class="overflow-hidden rounded-card border border-line bg-canvas">
+                    <li class="overflow-hidden border border-line bg-canvas">
                         <x-picture :name="'verticals/'.$key" :alt="$vertical['alt']" :icon="$verticalIcons[$key]"
                                    sizes="(min-width: 1024px) 280px, (min-width: 640px) 50vw, 100vw" />
                         <div class="p-5">
@@ -151,7 +151,7 @@
     <section class="border-y border-line bg-surface py-16 lg:py-24">
         <div class="container-page grid items-center gap-12 lg:grid-cols-2">
             <x-picture name="onboarding/training" :alt="__('home.steps.photo_alt')" icon="users"
-                       class="rounded-card" sizes="(min-width: 1024px) 568px, 100vw" />
+                       class="" sizes="(min-width: 1024px) 568px, 100vw" />
 
             <div>
                 <x-section-heading :eyebrow="__('home.steps.eyebrow')" :title="__('home.steps.title')" align="start" />
@@ -159,7 +159,7 @@
                 <ol class="mt-8 space-y-6">
                     @foreach (__('home.steps.items') as $step)
                         <li class="flex gap-4">
-                            <span class="tabular flex size-10 shrink-0 items-center justify-center rounded-full border border-coral/40 font-bold text-coral">
+                            <span class="tabular flex size-10 shrink-0 items-center justify-center border border-coral/40 font-bold text-coral">
                                 {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}
                             </span>
                             <div>
@@ -183,7 +183,7 @@
 
             <ul class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach (__('home.trust.items') as $key => $item)
-                    <li class="rounded-card border border-paper-line bg-white p-6">
+                    <li class="border border-paper-line bg-white p-6">
                         <x-icon :name="$trustIcons[$key]" class="size-7 text-paper-accent" />
                         <h3 class="mt-4 font-semibold">{{ $item['title'] }}</h3>
                         <p class="mt-2 text-sm text-paper-muted">{{ $item['body'] }}</p>

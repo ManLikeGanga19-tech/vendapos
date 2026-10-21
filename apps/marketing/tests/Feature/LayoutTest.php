@@ -67,12 +67,21 @@ it('marks unconfirmed contact details as placeholders', function () {
     $this->get('/sw')->assertSee('Haijathibitishwa');
 });
 
-it('keeps the design flat: no gradients in styles or views', function () {
-    $files = [resource_path('css/app.css'), ...File::allFiles(resource_path('views'))];
+it('keeps the design flat: no gradients or rounded corners in styles or views', function () {
+    $files = [resource_path('css/app.css'), public_path('favicon.svg'), ...File::allFiles(resource_path('views'))];
 
     foreach ($files as $file) {
-        expect((string) file_get_contents((string) $file))->not->toMatch('/gradient|bg-linear|bg-radial|bg-conic/i');
+        $source = (string) file_get_contents((string) $file);
+
+        expect($source)->not->toMatch('/gradient|bg-linear|bg-radial|bg-conic/i', "Gradient in {$file}")
+            ->and($source)->not->toMatch('/\brounded\b|rounded-|border-radius:\s*[^0\s]|\brx="/', "Rounded corner in {$file}");
     }
+});
+
+it('compiles no border-radius utilities at all', function () {
+    $css = (string) file_get_contents(public_path('build/'.json_decode((string) file_get_contents(public_path('build/manifest.json')), true)['resources/css/app.css']['file']));
+
+    expect($css)->not->toContain('.rounded');
 });
 
 it('uses supplied partner logos and falls back to icons until then', function () {

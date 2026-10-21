@@ -9,7 +9,7 @@
     <x-brand-mark :name="$brand" :icon="$icon" :size="$size" {{ $attributes }} />
 @else
     <span {{ $attributes->class([
-        'flex shrink-0 items-center justify-center rounded-control bg-coral/10 text-coral',
+        'flex shrink-0 items-center justify-center bg-coral/10 text-coral',
         'size-12' => $size === 'lg',
         'size-9' => $size === 'md',
     ]) }}>

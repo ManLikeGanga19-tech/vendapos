@@ -12,7 +12,7 @@
 
 <header class="sticky top-0 z-50 border-b border-line bg-canvas/95">
     <div class="container-page flex h-16 items-center justify-between gap-4 lg:h-20">
-        <a href="{{ route('home') }}" class="rounded-control" aria-label="{{ __('nav.home') }}">
+        <a href="{{ route('home') }}" class="" aria-label="{{ __('nav.home') }}">
             <x-site.logo />
         </a>
 
@@ -43,7 +43,7 @@
 
             {{-- <details> gives a working menu with zero JavaScript. --}}
             <details class="group lg:hidden" data-dismissible>
-                <summary class="btn size-11 cursor-pointer list-none rounded-control border border-line text-ink hover:border-line-strong hover:bg-white/5 [&::-webkit-details-marker]:hidden">
+                <summary class="btn size-11 cursor-pointer list-none border border-line text-ink hover:border-line-strong hover:bg-white/5 [&::-webkit-details-marker]:hidden">
                     <x-icon name="menu" class="size-5 group-open:hidden" />
                     <x-icon name="x" class="hidden size-5 group-open:block" />
                     <span class="sr-only">{{ __('nav.menu') }}</span>

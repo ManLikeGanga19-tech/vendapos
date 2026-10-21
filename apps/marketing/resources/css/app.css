@@ -46,8 +46,8 @@
     --text-headline-lg--line-height: 3rem;
     --text-headline-lg--letter-spacing: -0.02em;
 
-    --radius-card: 0.75rem;
-    --radius-control: 0.5rem;
+    /* Square corners everywhere: the radius scale is switched off (enforced by LayoutTest). */
+    --radius-*: initial;
 
     --shadow-float: 0 20px 40px -15px rgb(0 0 0 / 0.7), 0 0 0 1px #3b315e;
 }
@@ -88,7 +88,7 @@
      * Flat colours only across the site (enforced by LayoutTest).
      */
     .btn {
-        @apply inline-flex items-center justify-center gap-2 rounded-card font-semibold;
+        @apply inline-flex items-center justify-center gap-2 font-semibold;
         transition:
             background-color 150ms ease,
             border-color 150ms ease,
@@ -117,7 +117,7 @@
 
     /* 16px text stops mobile browsers zooming in on focus; 48px tall for thumbs. */
     .field-control {
-        @apply block min-h-12 w-full rounded-control border border-line bg-surface px-3 py-2.5 text-base text-ink placeholder:text-subtle;
+        @apply block min-h-12 w-full border border-line bg-surface px-3 py-2.5 text-base text-ink placeholder:text-subtle;
         @apply focus:border-coral focus:outline-none focus:ring-3 focus:ring-coral/15;
     }
 

@@ -45,7 +45,7 @@
                 </div>
             </div>
 
-            <figure role="img" aria-label="{{ __('product.dashboard.label') }}" class="rounded-card border border-line bg-surface shadow-float">
+            <figure role="img" aria-label="{{ __('product.dashboard.label') }}" class="border border-line bg-surface shadow-float">
                 <div class="flex items-center justify-between border-b border-line px-5 py-4">
                     <p class="font-semibold">{{ __('product.dashboard.title') }}</p>
                     <x-badge variant="success" dot>{{ __('product.dashboard.live') }}</x-badge>
@@ -61,8 +61,8 @@
                                     <span class="font-medium">{{ __("product.dashboard.branches.{$branch}") }}</span>
                                     <span class="tabular text-muted">{{ Money::fromCents($cents)->format() }}</span>
                                 </div>
-                                <div class="mt-2 h-2 rounded-full bg-line">
-                                    <div class="h-2 rounded-full bg-coral" style="width: {{ intdiv($cents * 100, $maxSales) }}%"></div>
+                                <div class="mt-2 h-2 bg-line">
+                                    <div class="h-2 bg-coral" style="width: {{ intdiv($cents * 100, $maxSales) }}%"></div>
                                 </div>
                                 <p class="mt-1.5 flex items-center gap-2 text-xs text-subtle">
                                     {{ __('product.dashboard.tills', ['count' => $tills]) }}
@@ -110,7 +110,7 @@
                            :class="$loop->first ? '' : 'border-t border-line'">
             @switch($key)
                 @case('payments')
-                    <figure role="img" aria-label="{{ __('product.stk.label') }}" class="rounded-card border border-line bg-surface p-6">
+                    <figure role="img" aria-label="{{ __('product.stk.label') }}" class="border border-line bg-surface p-6">
                         <div class="flex items-center gap-3">
                             <x-brand-mark name="mpesa" icon="smartphone" size="md" />
                             <p class="tabular font-semibold">{{ __('product.stk.amount', ['amount' => Money::fromCents(405_000)->format()]) }}</p>
@@ -119,7 +119,7 @@
                             @foreach (__('product.stk.steps') as $step => $text)
                                 <li class="flex items-center gap-3">
                                     <span @class([
-                                        'flex size-8 shrink-0 items-center justify-center rounded-full border',
+                                        'flex size-8 shrink-0 items-center justify-center border',
                                         'border-success/40 bg-success/10 text-success' => $step === 'confirmed',
                                         'border-line text-muted' => $step !== 'confirmed',
                                     ])>
@@ -133,7 +133,7 @@
                     @break
 
                 @case('etims')
-                    <figure role="img" aria-label="{{ __('product.receipt.label') }}" class="mx-auto max-w-sm rounded-card border border-paper-line bg-paper p-6 font-mono text-sm text-canvas">
+                    <figure role="img" aria-label="{{ __('product.receipt.label') }}" class="mx-auto max-w-sm border border-paper-line bg-paper p-6 font-mono text-sm text-canvas">
                         <p class="text-center font-bold">{{ __('product.receipt.business') }}</p>
                         <ul class="mt-4 space-y-1.5 border-y border-dashed border-paper-line py-3">
                             @foreach ($receiptItems as $item => $cents)
@@ -160,10 +160,10 @@
                     @break
 
                 @case('offline')
-                    <figure role="img" aria-label="{{ __('product.sync.label') }}" class="rounded-card border border-line bg-surface p-6">
+                    <figure role="img" aria-label="{{ __('product.sync.label') }}" class="border border-line bg-surface p-6">
                         <ol class="grid gap-3 sm:grid-cols-4">
                             @foreach (__('product.sync.steps') as $step => $item)
-                                <li class="relative flex items-center gap-3 rounded-control border border-line bg-canvas p-4 sm:flex-col sm:text-center">
+                                <li class="relative flex items-center gap-3 border border-line bg-canvas p-4 sm:flex-col sm:text-center">
                                     @if ($step === 'kra')
                                         <x-brand-mark name="kra" icon="receipt-text" size="md" />
                                     @else
@@ -184,11 +184,11 @@
                     @break
 
                 @case('kitchen')
-                    <figure role="img" aria-label="{{ __('product.kds.label') }}" class="rounded-card border border-line bg-surface p-5">
+                    <figure role="img" aria-label="{{ __('product.kds.label') }}" class="border border-line bg-surface p-5">
                         <p class="flex items-center gap-2 text-sm font-semibold"><x-icon name="chef-hat" class="size-4 text-coral" />{{ __('product.kds.station') }}</p>
                         <ul class="mt-4 grid gap-3 sm:grid-cols-3">
                             @foreach (__('product.kds.tickets') as $ticket => $item)
-                                <li class="flex flex-col rounded-control border border-line bg-canvas p-4">
+                                <li class="flex flex-col border border-line bg-canvas p-4">
                                     <div class="flex items-center justify-between gap-2">
                                         <p class="text-sm font-semibold">{{ $item['table'] }}</p>
                                         <span @class(['tabular text-xs font-semibold', 'text-danger' => $ticket === 'one', 'text-pending' => $ticket === 'two', 'text-success' => $ticket === 'three'])>
@@ -196,7 +196,7 @@
                                         </span>
                                     </div>
                                     <p class="mt-2 flex-1 text-xs text-muted">{{ $item['items'] }}</p>
-                                    <span class="mt-3 rounded-control border border-line py-1.5 text-center text-xs font-semibold text-ink">{{ __('product.kds.bump') }}</span>
+                                    <span class="mt-3 border border-line py-1.5 text-center text-xs font-semibold text-ink">{{ __('product.kds.bump') }}</span>
                                 </li>
                             @endforeach
                         </ul>
@@ -205,7 +205,7 @@
 
                 @default
                     <x-picture :name="['till' => 'verticals/bars', 'stock' => 'verticals/hardware', 'branches' => 'verticals/supermarkets', 'staff' => 'verticals/pharmacy'][$key]"
-                               :alt="$copy['photo_alt']" :icon="$section['icon']" class="rounded-card"
+                               :alt="$copy['photo_alt']" :icon="$section['icon']" class=""
                                sizes="(min-width: 1024px) 560px, 100vw" />
             @endswitch
         </x-feature-section>
@@ -217,7 +217,7 @@
             <x-section-heading :eyebrow="__('product.hardware.eyebrow')" :title="__('product.hardware.title')" :lead="__('product.hardware.lead')" />
             <ul class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach (__('product.hardware.items') as $key => $item)
-                    <li class="flex items-center gap-4 rounded-card border border-line bg-canvas p-5">
+                    <li class="flex items-center gap-4 border border-line bg-canvas p-5">
                         <x-feature-icon :icon="$hardwareIcons[$key]" />
                         <span>{{ $item }}</span>
                     </li>

@@ -21,14 +21,14 @@
                 <p class="mt-6 text-lg text-muted text-pretty">{{ __('pricing.hero.lead') }}</p>
             </div>
 
-            <fieldset class="mx-auto mt-10 flex w-fit items-center gap-1 rounded-full border border-line bg-surface p-1">
+            <fieldset class="mx-auto mt-10 flex w-fit items-center gap-1 border border-line bg-surface p-1">
                 <legend class="sr-only">{{ __('pricing.billing.label') }}</legend>
                 <input type="radio" name="billing" id="billing-monthly" class="peer/monthly sr-only" checked>
-                <label for="billing-monthly" class="cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold text-muted transition-colors hover:text-ink peer-checked/monthly:bg-elevated peer-checked/monthly:text-ink peer-focus-visible/monthly:outline-2 peer-focus-visible/monthly:outline-coral">
+                <label for="billing-monthly" class="cursor-pointer px-5 py-2.5 text-sm font-semibold text-muted transition-colors hover:text-ink peer-checked/monthly:bg-elevated peer-checked/monthly:text-ink peer-focus-visible/monthly:outline-2 peer-focus-visible/monthly:outline-coral">
                     {{ __('pricing.billing.monthly') }}
                 </label>
                 <input type="radio" name="billing" id="billing-annual" class="peer/annual sr-only">
-                <label for="billing-annual" class="flex cursor-pointer items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-muted transition-colors hover:text-ink peer-checked/annual:bg-elevated peer-checked/annual:text-ink peer-focus-visible/annual:outline-2 peer-focus-visible/annual:outline-coral">
+                <label for="billing-annual" class="flex cursor-pointer items-center gap-2 px-5 py-2.5 text-sm font-semibold text-muted transition-colors hover:text-ink peer-checked/annual:bg-elevated peer-checked/annual:text-ink peer-focus-visible/annual:outline-2 peer-focus-visible/annual:outline-coral">
                     {{ __('pricing.billing.annual') }}
                     <x-badge variant="success" class="py-0.5">{{ __('pricing.billing.saving') }}</x-badge>
                 </label>
@@ -68,7 +68,7 @@
             </div>
 
             {{-- Scrolls sideways on phones, with the feature names pinned. --}}
-            <div class="mt-8 overflow-x-auto rounded-card border border-line">
+            <div class="mt-8 overflow-x-auto border border-line">
                 <table class="w-full min-w-[640px] border-collapse text-left text-sm">
                     <thead>
                         <tr class="border-b border-line bg-surface">

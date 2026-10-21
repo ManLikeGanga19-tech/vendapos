@@ -30,15 +30,15 @@
                 </ul>
 
                 <x-picture name="verticals/shops" :alt="__('demo.intro.photo_alt')" icon="store"
-                           class="mt-10 hidden rounded-card lg:block" sizes="(min-width: 1024px) 520px, 0px" />
+                           class="mt-10 hidden lg:block" sizes="(min-width: 1024px) 520px, 0px" />
             </div>
 
-            <div class="rounded-card border border-line bg-canvas/60 p-5 sm:p-8">
+            <div class="border border-line bg-canvas/60 p-5 sm:p-8">
                 <h2 class="text-2xl font-bold">{{ __('demo.form.title') }}</h2>
                 <p class="mt-2 text-muted">{{ __('demo.form.lead') }}</p>
 
                 @if ($errors->any())
-                    <div class="mt-6 rounded-control border border-danger/40 bg-danger/10 p-4 text-sm" role="alert" tabindex="-1" id="form-errors">
+                    <div class="mt-6 border border-danger/40 bg-danger/10 p-4 text-sm" role="alert" tabindex="-1" id="form-errors">
                         <p class="font-semibold text-ink">{{ __('demo.form.errors_title') }}</p>
                         @if ($errors->hasAny(['form', 'form_token', 'request_id']))
                             <p class="mt-1 text-muted">{{ $errors->first('form') ?: $errors->first('form_token') ?: $errors->first('request_id') }}</p>

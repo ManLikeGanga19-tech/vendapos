@@ -7,7 +7,7 @@
 @if ($confirmed)
     {{ $slot }}
 @else
-    <span {{ $attributes->merge(['class' => 'inline-flex items-baseline gap-2 rounded-control border border-dashed border-pending/60 px-2']) }}>
+    <span {{ $attributes->merge(['class' => 'inline-flex items-baseline gap-2 border border-dashed border-pending/60 px-2']) }}>
         {{ $slot }}
         <span class="text-[10px] font-semibold uppercase tracking-widest text-pending">{{ __('common.to_be_confirmed') }}</span>
     </span>

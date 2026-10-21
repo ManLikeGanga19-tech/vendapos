@@ -11,9 +11,9 @@
         ->first(fn (string $path) => is_file(public_path($path)));
 
     [$chip, $mark] = match ($size) {
-        'lg' => ['size-12 rounded-control p-1.5', 'h-full'],
-        'md' => ['size-9 rounded-control p-1', 'h-full'],
-        default => ['size-5 rounded p-0.5', 'h-full'],
+        'lg' => ['size-12 p-1.5', 'h-full'],
+        'md' => ['size-9 p-1', 'h-full'],
+        default => ['size-5 p-0.5', 'h-full'],
     };
 @endphp
 

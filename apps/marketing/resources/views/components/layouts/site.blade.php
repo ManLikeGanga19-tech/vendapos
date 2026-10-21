@@ -51,7 +51,7 @@
         <a href="https://play.google.com/store/apps/details?id=com.android.chrome" rel="noopener">{{ __('common.outdated_browser.action') }}</a>
     </p>
 
-    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-control focus:bg-coral focus:px-4 focus:py-2 focus:text-canvas">
+    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:bg-coral focus:px-4 focus:py-2 focus:text-canvas">
         {{ __('common.skip_to_content') }}
     </a>
 
