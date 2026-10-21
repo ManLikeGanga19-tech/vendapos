@@ -30,6 +30,7 @@ return [
         'submit' => 'Omba onyesho',
         'consent' => 'Ninakubali VendaPOS ihifadhi taarifa hizi na iwasiliane nami kuhusu onyesho hili, kama ilivyoelezwa hapa chini.',
         'honeypot' => 'Acha sehemu hii wazi',
+        'plan_interest' => 'Unauliza kuhusu mpango wa :plan. Tutathibitisha mpango na bei inayofaa biashara yako wakati wa simu.',
     ],
 
     'hints' => [
@@ -49,6 +50,7 @@ return [
         'outlets' => 'Idadi ya matawi',
         'contact_window' => 'Wakati mzuri wa kupigiwa simu',
         'message' => 'Kuna jambo tunalopaswa kujua?',
+        'plan_interest' => 'Mpango unaoupenda',
         'consent' => 'Idhini',
     ],
 

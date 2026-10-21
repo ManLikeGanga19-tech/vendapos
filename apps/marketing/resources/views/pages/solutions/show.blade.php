@@ -5,6 +5,7 @@
     $config = config("marketing.solutions.{$vertical}");
     $copy = __("solutions.{$vertical}");
     $common = __('solutions.common');
+    $demoUrl = route('demo', ['type' => $config['business_type']]);
     $coreIcons = ['mpesa' => ['smartphone', 'mpesa'], 'etims' => ['receipt-text', 'kra'], 'offline' => ['cloud-off', null]];
 @endphp
 
@@ -28,7 +29,7 @@
                 <h1 class="text-display font-bold text-balance lg:text-display-lg">{{ $copy['hero']['title'] }}</h1>
                 <p class="mt-6 max-w-xl text-lg text-muted text-pretty">{{ $copy['hero']['lead'] }}</p>
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                    <x-button :href="route('demo')" size="lg" icon="arrow-right">{{ $copy['hero']['primary_cta'] }}</x-button>
+                    <x-button :href="$demoUrl" size="lg" icon="arrow-right">{{ $copy['hero']['primary_cta'] }}</x-button>
                     <x-button :href="route('pricing')" variant="secondary" size="lg">{{ $common['secondary_cta'] }}</x-button>
                 </div>
             </div>
@@ -135,7 +136,7 @@
         </div>
     </section>
 
-    <x-closing-cta :title="$copy['cta']['title']" :lead="$copy['cta']['lead']" :button="$copy['cta']['button']"
+    <x-closing-cta :title="$copy['cta']['title']" :lead="$copy['cta']['lead']" :button="$copy['cta']['button']" :demo-url="$demoUrl"
                    photo="cta/owner" :photo-alt="__('home.cta.photo_alt')" />
 
     <x-solutions-nav :current="$vertical" />

@@ -207,7 +207,7 @@
 
             <ul class="mt-12 grid gap-6 lg:grid-cols-3">
                 @foreach (config('marketing.plans') as $key => $plan)
-                    <x-plan-card :key="$key" :plan="$plan" :cta-url="$demoUrl" />
+                    <x-plan-card :key="$key" :plan="$plan" :cta-url="route('demo', ['plan' => $key])" />
                 @endforeach
             </ul>
 

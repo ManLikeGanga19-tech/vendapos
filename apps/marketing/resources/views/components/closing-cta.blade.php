@@ -5,6 +5,7 @@
     'photo',
     'photoAlt',
     'photoIcon' => 'trending-up',
+    'demoUrl' => null,
 ])
 
 {{-- Shared end-of-page call to action: book a demo or call sales, beside a photo. --}}
@@ -15,7 +16,7 @@
                 <h2 class="text-headline font-bold text-balance lg:text-headline-lg">{{ $title }}</h2>
                 <p class="mt-4 text-lg text-muted">{{ $lead }}</p>
                 <div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
-                    <x-button :href="route('demo')" size="lg" icon="arrow-right">{{ $button }}</x-button>
+                    <x-button :href="$demoUrl ?? route('demo')" size="lg" icon="arrow-right">{{ $button }}</x-button>
                     <p class="flex flex-wrap items-center gap-2 text-sm text-muted">
                         {{ __('common.call_sales') }}
                         <x-placeholder :confirmed="config('marketing.contact.confirmed')">{{ config('marketing.contact.phone') }}</x-placeholder>

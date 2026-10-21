@@ -23,6 +23,7 @@ use VendaPOS\Core\Enums\BusinessType;
  * @property OutletRange $outlets
  * @property ContactWindow|null $contact_window
  * @property string|null $message
+ * @property string|null $plan_interest key of config('marketing.plans'); interest only, not a commitment
  * @property string $locale
  * @property string $status
  * @property Carbon $consented_at
@@ -42,6 +43,7 @@ class DemoRequest extends Model implements HasLocalePreference
         'outlets',
         'contact_window',
         'message',
+        'plan_interest',
         'locale',
         'consented_at',
     ];

@@ -36,6 +36,7 @@ class StoreDemoRequest extends FormRequest
             'outlets' => ['required', Rule::in(array_column(OutletRange::cases(), 'value'))],
             'contact_window' => ['nullable', Rule::in(array_column(ContactWindow::cases(), 'value'))],
             'message' => ['nullable', 'string', 'max:2000'],
+            'plan_interest' => ['nullable', Rule::in(array_keys(config('marketing.plans')))],
             'consent' => ['accepted'],
         ];
     }
