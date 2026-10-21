@@ -1,5 +1,8 @@
 <?php
 
+use App\Support\ImageManifest;
+use Illuminate\Support\Facades\File;
+
 it('renders the home page in each language with no missing translations', function (string $locale, string $heading) {
     $this->get("/{$locale}")
         ->assertOk()
@@ -18,13 +21,22 @@ it('splits VAT out of the illustrative till total with integer cents', function 
         ->assertSee('Pay KES 4,050.00 with M-Pesa');
 });
 
-it('shows a photo slot with translated alt text for every vertical', function () {
+it('shows a photo with translated alt text for every vertical', function () {
+    File::put($manifest = storage_path('framework/testing/manifest-'.uniqid().'.json'), json_encode(
+        collect(__('home.verticals.items'))->mapWithKeys(fn ($v, string $key) => [
+            "verticals/{$key}" => ['width' => 1600, 'height' => 1200, 'widths' => [480, 1600], 'formats' => ['avif', 'webp']],
+        ]),
+    ));
+    app()->instance(ImageManifest::class, new ImageManifest($manifest));
+
     $response = $this->get('/sw')->assertOk();
 
     foreach (__('home.verticals.items', [], 'sw') as $key => $vertical) {
-        $response->assertSee('data-image-placeholder="verticals/'.$key.'"', false)
-            ->assertSee('aria-label="'.e($vertical['alt']).'"', false);
+        $response->assertSee(asset("images/verticals/{$key}-480.avif"), false)
+            ->assertSee('alt="'.e($vertical['alt']).'"', false);
     }
+
+    File::delete($manifest);
 });
 
 it('marks unconfirmed prices and figures as placeholders', function () {

@@ -47,42 +47,42 @@ return [
             'restaurants' => [
                 'title' => 'Restaurants & cafés',
                 'body' => 'Floor plans, courses, modifiers, split bills and kitchen display tickets.',
-                'alt' => 'A waiter taking an order at a busy Nairobi restaurant',
+                'alt' => 'A chef plating a dish in a Nairobi hotel kitchen',
             ],
             'bars' => [
                 'title' => 'Bars, clubs & lounges',
                 'body' => 'Open tabs, bottle service, happy-hour pricing and tight void controls.',
-                'alt' => 'A bartender serving drinks at a lounge counter',
+                'alt' => 'A bartender preparing drinks behind a well-stocked bar counter',
             ],
             'salons' => [
                 'title' => 'Salons, spas & kinyozi',
                 'body' => 'Bookings, timed services, commission per stylist and M-Pesa deposits.',
-                'alt' => 'A barber at work in a Kenyan kinyozi',
+                'alt' => 'A barber giving a client a haircut',
             ],
             'shops' => [
                 'title' => 'Shops & dukas',
                 'body' => 'Barcode scanning, quick keys and a customer credit book for deni.',
-                'alt' => 'A shopkeeper serving a customer at a neighbourhood duka',
+                'alt' => 'A shopkeeper at the counter of her shop in Dar es Salaam',
             ],
             'supermarkets' => [
                 'title' => 'Supermarkets & minimarts',
                 'body' => 'Multiple lanes, weighing-scale codes, promotions and shift cash-ups.',
-                'alt' => 'Shoppers at the checkout lanes of a supermarket',
+                'alt' => 'A shopping trolley in a supermarket aisle',
             ],
             'hardware' => [
                 'title' => 'Hardware stores',
                 'body' => 'Sell by piece, metre, kg or bag, turn quotes into invoices and track contractor accounts.',
-                'alt' => 'Bags of cement and building materials stacked in a hardware store',
+                'alt' => 'Shelves stacked high with stock in a hardware store',
             ],
             'pharmacy' => [
                 'title' => 'Chemists & pharmacies',
                 'body' => 'First-expiry-first-out batches, prescription records and pharmacist sign-off.',
-                'alt' => 'A pharmacist checking medicine on a chemist’s shelves',
+                'alt' => 'A pharmacist explaining a prescription to a customer',
             ],
             'liquor' => [
                 'title' => 'Liquor stores',
                 'body' => 'Age-check prompts, licensed selling hours and case pricing.',
-                'alt' => 'Shelves of drinks in a well-stocked liquor store',
+                'alt' => 'Shelves of bottled drinks in a liquor store',
             ],
         ],
     ],
@@ -121,7 +121,7 @@ return [
     'steps' => [
         'eyebrow' => 'Getting started',
         'title' => 'From sign-up to first sale, step by step.',
-        'photo_alt' => 'A VendaPOS team member training a cashier at the till',
+        'photo_alt' => 'A barista smiling as she prepares coffee at the counter',
         'items' => [
             'setup' => [
                 'title' => 'Set up branches and catalogue',
@@ -218,6 +218,6 @@ return [
         'lead' => 'Book a walkthrough tailored to your business, in English or Kiswahili.',
         'button' => 'Book a demo',
         'call' => 'Or call sales:',
-        'photo_alt' => 'A restaurant owner reviewing the day’s sales on a phone',
+        'photo_alt' => 'A trader checking her phone at her fruit stall',
     ],
 ];

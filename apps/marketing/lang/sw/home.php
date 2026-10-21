@@ -47,42 +47,42 @@ return [
             'restaurants' => [
                 'title' => 'Migahawa na mikahawa',
                 'body' => 'Ramani ya meza, mlo kwa awamu, marekebisho ya oda, kugawanya bili na tiketi za skrini ya jikoni.',
-                'alt' => 'Mhudumu akichukua oda katika mgahawa wenye shughuli nyingi jijini Nairobi',
+                'alt' => 'Mpishi akiandaa mlo katika jiko la hoteli jijini Nairobi',
             ],
             'bars' => [
                 'title' => 'Baa, klabu na lounge',
                 'body' => 'Akaunti wazi za wateja, huduma ya chupa, bei za happy hour na udhibiti mkali wa kufuta oda.',
-                'alt' => 'Mhudumu wa baa akiwahudumia wateja vinywaji kaunta',
+                'alt' => 'Mhudumu wa baa akiandaa vinywaji nyuma ya kaunta ya baa iliyojaa bidhaa',
             ],
             'salons' => [
                 'title' => 'Saluni, spa na vinyozi',
                 'body' => 'Miadi, huduma zilizopangiwa muda, kamisheni kwa kila msusi na amana kupitia M-Pesa.',
-                'alt' => 'Kinyozi akimnyoa mteja katika kinyozi cha Kenya',
+                'alt' => 'Kinyozi akimnyoa mteja',
             ],
             'shops' => [
                 'title' => 'Maduka na vibanda',
                 'body' => 'Kuskani barcode, vitufe vya haraka na daftari la madeni ya wateja.',
-                'alt' => 'Mwenye duka akimhudumia mteja katika duka la mtaani',
+                'alt' => 'Mwenye duka kwenye kaunta ya duka lake jijini Dar es Salaam',
             ],
             'supermarkets' => [
                 'title' => 'Supamaketi na minimaketi',
                 'body' => 'Njia nyingi za malipo, misimbo ya mizani, ofa na ufungaji wa hesabu za zamu.',
-                'alt' => 'Wanunuzi kwenye njia za malipo za supamaketi',
+                'alt' => 'Toroli la ununuzi katika njia ya supamaketi',
             ],
             'hardware' => [
                 'title' => 'Maduka ya vifaa vya ujenzi',
                 'body' => 'Uza kwa kipande, mita, kilo au mfuko, geuza nukuu ya bei kuwa ankara na fuatilia akaunti za wakandarasi.',
-                'alt' => 'Mifuko ya saruji na vifaa vya ujenzi vilivyopangwa dukani',
+                'alt' => 'Rafu zilizojaa bidhaa katika duka la vifaa vya ujenzi',
             ],
             'pharmacy' => [
                 'title' => 'Kemisti na maduka ya dawa',
                 'body' => 'Bechi zinazoisha muda kwanza hutoka kwanza, kumbukumbu za maagizo ya daktari na idhini ya mfamasia.',
-                'alt' => 'Mfamasia akikagua dawa kwenye rafu za kemisti',
+                'alt' => 'Mfamasia akimweleza mteja kuhusu dawa aliyoandikiwa',
             ],
             'liquor' => [
                 'title' => 'Maduka ya vileo',
                 'body' => 'Ukumbusho wa kuhakiki umri, saa za kuuza kwa mujibu wa leseni na bei za kreti.',
-                'alt' => 'Rafu za vinywaji katika duka la vileo lililojaa bidhaa',
+                'alt' => 'Rafu za vinywaji vya chupa katika duka la vileo',
             ],
         ],
     ],
@@ -121,7 +121,7 @@ return [
     'steps' => [
         'eyebrow' => 'Kuanza',
         'title' => 'Kuanzia kujisajili hadi mauzo ya kwanza, hatua kwa hatua.',
-        'photo_alt' => 'Mfanyakazi wa VendaPOS akimfundisha keshia kwenye kaunta',
+        'photo_alt' => 'Mhudumu akitabasamu akiandaa kahawa kaunta',
         'items' => [
             'setup' => [
                 'title' => 'Andaa matawi na orodha ya bidhaa',
@@ -218,6 +218,6 @@ return [
         'lead' => 'Panga onyesho lililoandaliwa kwa ajili ya biashara yako, kwa Kiingereza au Kiswahili.',
         'button' => 'Omba onyesho',
         'call' => 'Au piga simu kwa timu ya mauzo:',
-        'photo_alt' => 'Mmiliki wa mgahawa akikagua mauzo ya siku kwenye simu',
+        'photo_alt' => 'Mfanyabiashara akiangalia simu yake kwenye kibanda chake cha matunda',
     ],
 ];
