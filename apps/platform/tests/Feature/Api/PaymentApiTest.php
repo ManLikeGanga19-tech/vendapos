@@ -14,8 +14,6 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Str;
-use Illuminate\Testing\TestResponse;
 use VendaPOS\Core\Enums\PaymentStatus;
 
 uses(DatabaseMigrations::class);
@@ -32,6 +30,11 @@ final class UnreachableGateway extends MobileMoneyGateway
     {
         throw new RuntimeException('Connection timed out');
     }
+
+    public function parseCallback(array $body): ?array
+    {
+        return null;
+    }
 }
 
 /** Refuses every push, like a provider rejecting a bad shortcode. */
@@ -46,6 +49,11 @@ final class RejectingGateway extends MobileMoneyGateway
     {
         return GatewayResult::pending();
     }
+
+    public function parseCallback(array $body): ?array
+    {
+        return null;
+    }
 }
 
 beforeEach(function () {
@@ -59,34 +67,6 @@ afterEach(function () {
     tenancy()->end();
     Tenant::all()->each->delete();
 });
-
-/** @return array<string, mixed> */
-function paymentOf(array $overrides = []): array
-{
-    return array_merge([
-        'uuid' => (string) Str::uuid(),
-        'order_uuid' => (string) Str::uuid(),
-        'provider' => 'mpesa_ke',
-        'phone' => '0712 345 678',
-        'amount_cents' => 185_000,
-    ], $overrides);
-}
-
-/** POST a payment request as the test's enrolled device. */
-function requestPayment(array $payment): TestResponse
-{
-    app('auth')->forgetGuards();
-
-    return test()->withHeaders([
-        'Authorization' => 'Bearer '.test()->enrolment->plainTextToken,
-        'X-Device-ID' => test()->enrolment->device->id,
-    ])->postJson('/api/v1/payments', $payment);
-}
-
-function paymentIn(Tenant $tenant, string $uuid): Payment
-{
-    return $tenant->run(fn () => Payment::query()->findOrFail($uuid));
-}
 
 it('records a pending payment, its callback route and its outbox event, then queues the push', function () {
     Queue::fake();

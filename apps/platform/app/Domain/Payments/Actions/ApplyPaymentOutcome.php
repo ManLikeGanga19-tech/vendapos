@@ -25,6 +25,16 @@ final class ApplyPaymentOutcome
         return DB::transaction(function () use ($paymentId, $result) {
             $payment = Payment::query()->whereKey($paymentId)->lockForUpdate()->firstOrFail();
 
+            // A status query confirms without a receipt number; a later callback may still supply it.
+            if ($payment->status === PaymentStatus::Succeeded
+                && $payment->provider_reference === null
+                && $result->status === PaymentStatus::Succeeded
+                && $result->reference !== null) {
+                $payment->update(['provider_reference' => $result->reference]);
+
+                return $payment;
+            }
+
             if ($payment->status->isFinal() || $result->status === PaymentStatus::Pending) {
                 return $payment;
             }

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Domain\Payments\Gateways\DarajaGateway;
+
 return [
 
     /*
@@ -48,8 +50,25 @@ return [
         'fake_outcome' => env('VENDAPOS_PAYMENTS_FAKE_OUTCOME', 'pending'),
         'callback_base_url' => env('VENDAPOS_PAYMENTS_CALLBACK_URL', env('APP_URL')),
         'gateways' => [
-            // 'mpesa_ke' => DarajaGateway::class (slice E2), 'airtel_ke' => AirtelGateway::class (E3)
+            'mpesa_ke' => DarajaGateway::class,
+            // 'airtel_ke' => AirtelGateway::class (slice E3)
         ],
+
+        // Callbacks are accepted only from the provider's published addresses (CLAUDE.md §4).
+        // Turn off only for local tunnels; requires TrustProxies to be right behind a load balancer.
+        'enforce_callback_ips' => (bool) env('VENDAPOS_PAYMENTS_ENFORCE_CALLBACK_IPS', true),
+        'callback_ips' => [
+            // Safaricom's published Daraja callback addresses. Re-check against the Daraja portal before go-live.
+            'mpesa_ke' => [
+                '196.201.214.200', '196.201.214.206', '196.201.213.114', '196.201.214.207',
+                '196.201.214.208', '196.201.213.44', '196.201.212.127', '196.201.212.138',
+                '196.201.212.129', '196.201.212.136', '196.201.212.74', '196.201.212.69',
+            ],
+            'airtel_ke' => [],
+        ],
+
+        // Callbacks per minute per source IP.
+        'callback_rate_limit' => (int) env('VENDAPOS_PAYMENTS_CALLBACK_RATE_LIMIT', 600),
     ],
 
     // Business days are counted here; storage stays UTC (CLAUDE.md §4).

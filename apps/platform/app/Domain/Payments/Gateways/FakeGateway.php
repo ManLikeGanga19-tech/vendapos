@@ -24,4 +24,21 @@ final class FakeGateway extends MobileMoneyGateway
             default => GatewayResult::pending(),
         };
     }
+
+    /** Body: {"request_id": "...", "status": "succeeded|failed|cancelled|timed_out", "reference": "...", "amount_cents": 100} */
+    public function parseCallback(array $body): ?array
+    {
+        $status = PaymentStatus::tryFrom((string) ($body['status'] ?? ''));
+
+        if (! is_string($body['request_id'] ?? null) || $status === null) {
+            return null;
+        }
+
+        return [
+            'requestId' => $body['request_id'],
+            'result' => $status === PaymentStatus::Succeeded
+                ? GatewayResult::succeeded((string) ($body['reference'] ?? ''), isset($body['amount_cents']) ? (int) $body['amount_cents'] : null)
+                : GatewayResult::unsuccessful($status, 'fake_'.$status->value, 'Reported by the fake gateway.'),
+        ];
+    }
 }

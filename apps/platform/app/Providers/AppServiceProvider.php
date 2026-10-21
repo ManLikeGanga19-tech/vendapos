@@ -40,6 +40,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('device', fn (Request $request) => Limit::perMinute((int) config('vendapos.rate_limits.device'))
             ->by('device:'.$this->deviceOf($request)?->id));
 
+        RateLimiter::for('payment-callbacks', fn (Request $request) => Limit::perMinute((int) config('vendapos.payments.callback_rate_limit'))
+            ->by('callback:'.$request->ip()));
+
         RateLimiter::for('tenant', fn (Request $request) => Limit::perMinute((int) config('vendapos.rate_limits.tenant'))
             ->by('tenant:'.$this->deviceOf($request)?->tenant_id));
 

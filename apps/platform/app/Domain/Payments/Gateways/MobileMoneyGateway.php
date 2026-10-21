@@ -18,4 +18,14 @@ abstract class MobileMoneyGateway
 
     /** Asks the provider for the payment's current state (late or missing callbacks). */
     abstract public function query(Payment $payment): GatewayResult;
+
+    /**
+     * Reads a callback body into the provider's request ID and its result,
+     * or null when the body is not a callback this gateway understands.
+     * The caller checks the request ID against the payment before trusting it.
+     *
+     * @param  array<mixed>  $body
+     * @return array{requestId: string, result: GatewayResult}|null
+     */
+    abstract public function parseCallback(array $body): ?array;
 }

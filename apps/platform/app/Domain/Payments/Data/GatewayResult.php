@@ -34,7 +34,8 @@ final readonly class GatewayResult
         return new self(PaymentStatus::Pending);
     }
 
-    public static function succeeded(string $reference, ?int $amountCents = null): self
+    /** $reference is null when the provider confirms without one (e.g. a Daraja status query). */
+    public static function succeeded(?string $reference, ?int $amountCents = null): self
     {
         return new self(PaymentStatus::Succeeded, reference: $reference, amountCents: $amountCents);
     }

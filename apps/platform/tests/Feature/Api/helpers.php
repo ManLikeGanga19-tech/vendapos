@@ -5,6 +5,7 @@ declare(strict_types=1);
 /* Shared helpers for API feature tests: real tenants with real schemas, enrolled devices, device-authenticated requests. */
 
 use App\Domain\Catalogue\Models\Item;
+use App\Domain\Payments\Models\Payment;
 use App\Domain\Tenancy\Actions\EnrolDevice;
 use App\Domain\Tenancy\Data\DeviceEnrolment;
 use App\Domain\Tenancy\Models\Branch;
@@ -84,4 +85,32 @@ function sync(array $orders): TestResponse
         'Authorization' => 'Bearer '.$enrolment->plainTextToken,
         'X-Device-ID' => $enrolment->device->id,
     ])->postJson('/api/v1/orders/sync', ['orders' => $orders]);
+}
+
+/** @return array<string, mixed> */
+function paymentOf(array $overrides = []): array
+{
+    return array_merge([
+        'uuid' => (string) Str::uuid(),
+        'order_uuid' => (string) Str::uuid(),
+        'provider' => 'mpesa_ke',
+        'phone' => '0712 345 678',
+        'amount_cents' => 185_000,
+    ], $overrides);
+}
+
+/** POST a payment request as the test's enrolled device. */
+function requestPayment(array $payment): TestResponse
+{
+    app('auth')->forgetGuards();
+
+    return test()->withHeaders([
+        'Authorization' => 'Bearer '.test()->enrolment->plainTextToken,
+        'X-Device-ID' => test()->enrolment->device->id,
+    ])->postJson('/api/v1/payments', $payment);
+}
+
+function paymentIn(Tenant $tenant, string $uuid): Payment
+{
+    return $tenant->run(fn () => Payment::query()->findOrFail($uuid));
 }
