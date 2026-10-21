@@ -22,11 +22,11 @@
             <ul class="mt-4 space-y-3 text-sm text-muted">
                 <li class="flex items-center gap-2">
                     <x-icon name="mail" class="size-4" />
-                    <x-placeholder>{{ config('marketing.contact.email') }}</x-placeholder>
+                    <x-placeholder :confirmed="config('marketing.contact.confirmed')">{{ config('marketing.contact.email') }}</x-placeholder>
                 </li>
                 <li class="flex items-center gap-2">
                     <x-icon name="phone" class="size-4" />
-                    <x-placeholder>{{ config('marketing.contact.phone') }}</x-placeholder>
+                    <x-placeholder :confirmed="config('marketing.contact.confirmed')">{{ config('marketing.contact.phone') }}</x-placeholder>
                 </li>
                 <li class="flex items-center gap-2">
                     <x-icon name="map-pin" class="size-4" />

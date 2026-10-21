@@ -29,6 +29,9 @@
 
     --color-paper: #faf8f5;
     --color-paper-line: #e5dfd7;
+    /* Coral and muted text darkened for AA contrast on the paper surface. */
+    --color-paper-accent: #b33d0f;
+    --color-paper-muted: #4a4458;
 
     --text-display: 2.25rem;
     --text-display--line-height: 2.75rem;
