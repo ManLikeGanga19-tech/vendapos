@@ -6,11 +6,14 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            // CSS only: the marketing site ships no JavaScript so it stays fast on entry-level phones.
+            input: ['resources/css/app.css'],
             refresh: true,
             fonts: [
-                bunny('Instrument Sans', {
-                    weights: [400, 500, 600],
+                // Downloaded at build time and served from our own origin.
+                bunny('Inter', {
+                    weights: [400, 500, 600, 700],
+                    preload: [{ weight: 400 }, { weight: 700 }],
                 }),
             ],
         }),

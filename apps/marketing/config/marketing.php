@@ -18,4 +18,19 @@ return [
         'sw' => 'Kiswahili',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Public contact details
+    |--------------------------------------------------------------------------
+    |
+    | Placeholders until the real sales line and inbox exist; the site renders
+    | them with a visible "TBC" marker.
+    |
+    */
+
+    'contact' => [
+        'email' => env('MARKETING_CONTACT_EMAIL', 'sales@example.co.ke'),
+        'phone' => env('MARKETING_CONTACT_PHONE', '+254 700 000 000'),
+    ],
+
 ];

@@ -1,9 +1,93 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/*
+ * "Equatorial Precision" tokens — design/stitch/.../equatorial_precision/DESIGN.md.
+ * The prose spec is canonical where it disagrees with Stitch's generated palette.
+ */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+    --color-canvas: #0f0a1e;
+    --color-surface: #1a1430;
+    --color-elevated: #221b3d;
+    --color-line: #2a2245;
+    --color-line-strong: #3b315e;
+
+    --color-ink: #ffffff;
+    --color-muted: #b8b2cc;
+    --color-subtle: #8a84a0;
+
+    /* White text on coral is 3.2:1 (fails WCAG AA), so filled buttons use canvas-coloured text (6.1:1). */
+    --color-coral: #f4622a;
+    --color-coral-hover: #ff7a45;
+    --color-mpesa: #00a344;
+    --color-success: #10b981;
+    --color-pending: #f59e0b;
+    --color-danger: #ef4444;
+
+    --color-paper: #faf8f5;
+    --color-paper-line: #e5dfd7;
+
+    --text-display: 2.25rem;
+    --text-display--line-height: 2.75rem;
+    --text-display--letter-spacing: -0.02em;
+    --text-display-lg: 4rem;
+    --text-display-lg--line-height: 4.5rem;
+    --text-display-lg--letter-spacing: -0.025em;
+    --text-headline: 1.75rem;
+    --text-headline--line-height: 2.25rem;
+    --text-headline--letter-spacing: -0.015em;
+    --text-headline-lg: 2.5rem;
+    --text-headline-lg--line-height: 3rem;
+    --text-headline-lg--letter-spacing: -0.02em;
+
+    --radius-card: 0.75rem;
+    --radius-control: 0.5rem;
+
+    --shadow-glow: 0 0 24px rgb(244 98 42 / 0.25);
+    --shadow-float: 0 20px 40px -15px rgb(0 0 0 / 0.7), 0 0 0 1px #3b315e;
+}
+
+@layer base {
+    html {
+        color-scheme: dark;
+        -webkit-text-size-adjust: 100%;
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-canvas font-sans text-ink antialiased;
+    }
+
+    :focus-visible {
+        @apply outline-2 outline-offset-2 outline-coral;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+}
+
+@utility tabular {
+    font-variant-numeric: tabular-nums;
+}
+
+@utility container-page {
+    @apply mx-auto w-full max-w-[1200px] px-4 lg:px-8;
+}
+
+/* Ambient coral wash behind key figures (DESIGN.md "Ambient Aura"). */
+@utility aura {
+    background-image: radial-gradient(60% 50% at 50% 0%, rgb(244 98 42 / 0.15), transparent 70%);
 }
