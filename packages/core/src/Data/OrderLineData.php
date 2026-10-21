@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace VendaPOS\Core\Data;
 
+use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use VendaPOS\Core\Enums\VatCategory;
 use VendaPOS\Core\ValueObjects\Money;
 
+/** One line of a sale. Prices are VAT-inclusive, in KES cents. */
 final class OrderLineData extends Data
 {
     public function __construct(
@@ -35,9 +37,9 @@ final class OrderLineData extends Data
         return [
             'item_id' => ['required', 'string', 'uuid'],
             'name' => ['required', 'string', 'max:255'],
-            'quantity' => ['required', 'integer', 'min:1'],
+            'quantity' => ['required', 'integer', 'min:1', 'max:100000'],
             'unit_price_cents' => ['required', 'integer', 'min:0'],
-            'vat_category' => ['required', 'string'],
+            'vat_category' => ['required', Rule::enum(VatCategory::class)],
             'line_total_cents' => ['required', 'integer', 'min:0'],
         ];
     }
