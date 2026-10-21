@@ -15,6 +15,14 @@ it('links the language switcher to the same page in the other language', functio
         ->assertSee('<span class="sr-only">Kiswahili</span>', false);
 });
 
+it('serves public pages without a session so they can be cached', function () {
+    $response = $this->get('/en')->assertOk();
+
+    expect($response->headers->getCookies())->toBe([])
+        ->and($response->headers->get('Cache-Control'))->toContain('public')
+        ->and($response->headers->get('ETag'))->not->toBeNull();
+});
+
 it('ships no JavaScript bundle', function () {
     $this->get('/en')->assertDontSee('<script', false);
 });
