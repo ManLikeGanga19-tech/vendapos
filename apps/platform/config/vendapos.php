@@ -69,6 +69,18 @@ return [
 
         // Callbacks per minute per source IP.
         'callback_rate_limit' => (int) env('VENDAPOS_PAYMENTS_CALLBACK_RATE_LIMIT', 600),
+
+        // payments:reconcile (every minute) for late or missing callbacks.
+        'reconcile' => [
+            // Ask the provider once the customer has had time to answer the prompt.
+            'first_query_after_seconds' => 60,
+            // Time out only if the provider still says "processing" this long after the push.
+            'give_up_after_minutes' => 10,
+            // A payment never pushed (queue down) fails after this, under the row lock.
+            'never_pushed_after_minutes' => 10,
+            // Older pending payments are left for manual review.
+            'stop_after_hours' => 24,
+        ],
     ],
 
     // Business days are counted here; storage stays UTC (CLAUDE.md §4).
