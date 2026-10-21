@@ -37,6 +37,32 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Company and legal pages
+    |--------------------------------------------------------------------------
+    |
+    | Facts shown on the privacy policy and terms. Unknown values stay null
+    | and render with a "TBC" marker. Both documents show a "draft" notice
+    | until `reviewed` is true (after DanamoTech's legal advisers sign off).
+    |
+    */
+
+    'company' => [
+        'name' => 'DanamoTech Ltd',
+        'location' => 'Mombasa, Kenya',
+        'registration_number' => env('COMPANY_REGISTRATION_NUMBER'),
+        'postal_address' => env('COMPANY_POSTAL_ADDRESS'),
+        'odpc_registration' => env('COMPANY_ODPC_REGISTRATION'),
+        'hosting_region' => env('COMPANY_HOSTING_REGION'),
+        'privacy_email' => env('COMPANY_PRIVACY_EMAIL'),
+    ],
+
+    'legal' => [
+        'updated' => '2026-10-21',
+        'reviewed' => (bool) env('MARKETING_LEGAL_REVIEWED', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | KRA eTIMS certification
     |--------------------------------------------------------------------------
     |

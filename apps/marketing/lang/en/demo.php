@@ -84,6 +84,7 @@ return [
         'retention' => 'We keep them for :months months, then delete them.',
         'rights' => 'To see, correct or delete your details, email :email.',
         'law' => 'We handle your data in line with the Kenya Data Protection Act, 2019.',
+        'read_policy' => 'Read our full privacy policy',
     ],
 
     'validation' => [

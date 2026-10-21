@@ -84,6 +84,7 @@ return [
         'retention' => 'Tunazihifadhi kwa miezi :months, kisha tunazifuta.',
         'rights' => 'Ili kuona, kurekebisha au kufuta taarifa zako, tuma barua pepe kwa :email.',
         'law' => 'Tunashughulikia data yako kwa mujibu wa Sheria ya Ulinzi wa Data ya Kenya, 2019.',
+        'read_policy' => 'Soma sera yetu kamili ya faragha',
     ],
 
     'validation' => [

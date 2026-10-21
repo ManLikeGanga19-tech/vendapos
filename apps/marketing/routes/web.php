@@ -37,6 +37,8 @@ Route::prefix('{locale}')
                 Route::view('product', 'pages.product')->name('product');
                 Route::view('pricing', 'pages.pricing')->name('pricing');
                 Route::view('compliance', 'pages.compliance')->name('compliance');
+                Route::view('privacy', 'pages.legal', ['document' => 'privacy'])->name('privacy');
+                Route::view('terms', 'pages.legal', ['document' => 'terms'])->name('terms');
                 Route::view('solutions', 'pages.solutions.index')->name('solutions');
                 Route::view('solutions/restaurants', 'pages.solutions.restaurants')->name('solutions.restaurants');
 
