@@ -40,7 +40,7 @@
 
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row">
                     <x-button :href="$demoUrl" size="lg" icon="arrow-right">{{ __('home.hero.primary_cta') }}</x-button>
-                    <x-button href="#pricing" variant="secondary" size="lg">{{ __('home.hero.secondary_cta') }}</x-button>
+                    <x-button :href="route('pricing')" variant="secondary" size="lg">{{ __('home.hero.secondary_cta') }}</x-button>
                 </div>
             </div>
 
@@ -217,65 +217,19 @@
 
             <ul class="mt-12 grid gap-6 lg:grid-cols-3">
                 @foreach (config('marketing.plans') as $key => $plan)
-                    <li @class([
-                        'relative flex flex-col rounded-card border bg-canvas p-6',
-                        'border-coral' => $plan['popular'],
-                        'border-line' => ! $plan['popular'],
-                    ])>
-                        @if ($plan['popular'])
-                            <x-badge variant="coral" class="absolute -top-3 left-6 bg-canvas">{{ __('home.pricing.popular') }}</x-badge>
-                        @endif
-
-                        <h3 class="text-xl font-semibold">{{ __("home.pricing.plans.{$key}.name") }}</h3>
-                        <p class="mt-1 text-sm text-muted">{{ __("home.pricing.plans.{$key}.summary") }}</p>
-
-                        <p class="mt-6 flex flex-wrap items-baseline gap-x-2">
-                            @if ($plan['monthly_cents'] === null)
-                                <span class="text-3xl font-bold">{{ __('home.pricing.custom') }}</span>
-                            @else
-                                <span class="tabular text-3xl font-bold">
-                                    <x-placeholder :confirmed="config('marketing.prices_confirmed')">KES {{ number_format(intdiv($plan['monthly_cents'], 100)) }}</x-placeholder>
-                                </span>
-                                <span class="text-sm text-muted">{{ __('home.pricing.per_month') }}</span>
-                            @endif
-                        </p>
-
-                        <ul class="mt-6 flex-1 space-y-3 text-sm">
-                            @foreach (__("home.pricing.plans.{$key}.features") as $feature)
-                                <li class="flex gap-2">
-                                    <x-icon name="check" class="size-5 text-success" />{{ $feature }}
-                                </li>
-                            @endforeach
-                        </ul>
-
-                        <x-button :href="$demoUrl" :variant="$plan['popular'] ? 'primary' : 'secondary'" class="mt-8">
-                            {{ __('home.pricing.cta') }}
-                        </x-button>
-                    </li>
+                    <x-plan-card :key="$key" :plan="$plan" :cta-url="$demoUrl" />
                 @endforeach
             </ul>
+
+            <p class="mt-10 text-center">
+                <a href="{{ route('pricing') }}" class="inline-flex items-center gap-2 font-semibold text-coral hover:text-coral-hover">
+                    {{ __('home.pricing.compare') }} <x-icon name="arrow-right" class="size-4" />
+                </a>
+            </p>
         </div>
     </section>
 
-    {{-- Closing call to action --}}
-    <section id="get-started" class="scroll-mt-20 py-16 lg:py-24">
-        <div class="container-page">
-            <div class="grid items-center gap-10 overflow-hidden rounded-card border border-line bg-surface lg:grid-cols-2">
-                <div class="p-8 lg:p-12">
-                    <h2 class="text-headline font-bold text-balance lg:text-headline-lg">{{ __('home.cta.title') }}</h2>
-                    <p class="mt-4 text-lg text-muted">{{ __('home.cta.lead') }}</p>
-                    <div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
-                        <x-button :href="$demoUrl" size="lg" icon="arrow-right">{{ __('home.cta.button') }}</x-button>
-                        <p class="flex flex-wrap items-center gap-2 text-sm text-muted">
-                            {{ __('home.cta.call') }}
-                            <x-placeholder :confirmed="config('marketing.contact.confirmed')">{{ config('marketing.contact.phone') }}</x-placeholder>
-                        </p>
-                    </div>
-                </div>
-                <x-picture name="cta/owner" :alt="__('home.cta.photo_alt')" icon="trending-up"
-                           ratio="4/3" sizes="(min-width: 1024px) 600px, 100vw" class="h-full" />
-            </div>
-        </div>
-    </section>
+    <x-closing-cta :title="__('home.cta.title')" :lead="__('home.cta.lead')" :button="__('home.cta.button')"
+                   photo="cta/owner" :photo-alt="__('home.cta.photo_alt')" />
 
 </x-layouts.site>

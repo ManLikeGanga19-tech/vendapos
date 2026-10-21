@@ -34,6 +34,8 @@ Route::prefix('{locale}')
             ->middleware('cache.headers:public;max_age=300;etag')
             ->group(function () {
                 Route::view('/', 'pages.home')->name('home');
+                Route::view('product', 'pages.product')->name('product');
+                Route::view('pricing', 'pages.pricing')->name('pricing');
             });
 
         // Form pages keep the session for CSRF protection and validation errors.

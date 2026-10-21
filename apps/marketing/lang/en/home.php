@@ -175,49 +175,13 @@ return [
         'eyebrow' => 'Pricing',
         'title' => 'Simple monthly plans. No cut of your sales.',
         'lead' => 'Pay a flat subscription per branch. M-Pesa and card charges are your provider’s standard rates.',
-        'per_month' => '/ month',
-        'custom' => 'Custom',
-        'popular' => 'Most popular',
-        'cta' => 'Book a demo',
-        'plans' => [
-            'starter' => [
-                'name' => 'Starter',
-                'summary' => 'A single shop, café or kinyozi getting started.',
-                'features' => [
-                    'tills' => '1 till',
-                    'mpesa' => 'M-Pesa STK Push',
-                    'etims' => 'KRA eTIMS receipts',
-                    'offline' => 'Works offline',
-                ],
-            ],
-            'business' => [
-                'name' => 'Business',
-                'summary' => 'Busy restaurants, bars and multi-till shops.',
-                'features' => [
-                    'tills' => 'Up to 5 tills',
-                    'kds' => 'Kitchen display and table service',
-                    'batches' => 'Batch and expiry tracking',
-                    'reports' => 'Multi-branch reports',
-                ],
-            ],
-            'enterprise' => [
-                'name' => 'Enterprise',
-                'summary' => 'Chains and franchises with 10 or more branches.',
-                'features' => [
-                    'tills' => 'Unlimited tills',
-                    'erp' => 'ERP integrations',
-                    'manager' => 'Dedicated account manager',
-                    'sla' => 'Tailored service levels',
-                ],
-            ],
-        ],
+        'compare' => 'Compare every plan in detail',
     ],
 
     'cta' => [
         'title' => 'See VendaPOS on your counter.',
         'lead' => 'Book a walkthrough tailored to your business, in English or Kiswahili.',
         'button' => 'Book a demo',
-        'call' => 'Or call sales:',
         'photo_alt' => 'A trader checking her phone at her fruit stall',
     ],
 ];

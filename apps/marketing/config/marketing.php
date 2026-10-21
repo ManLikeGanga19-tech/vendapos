@@ -71,6 +71,54 @@ return [
         'enterprise' => ['monthly_cents' => null, 'popular' => false],
     ],
 
+    // Paying yearly charges this many months (10 = two months free).
+    'annual_months_charged' => 10,
+
+    // What each plan includes, row by row, for the comparison table:
+    // true = included, false = not included, string = lang key under pricing.matrix.values.
+    'plan_contents_confirmed' => false,
+
+    'plan_matrix' => [
+        'selling' => [
+            'offline' => [true, true, true],
+            'tills' => ['one', 'up_to_five', 'unlimited'],
+            'mpesa' => [true, true, true],
+            'cards' => [true, true, true],
+            'split_bills' => [false, true, true],
+            'tabs' => [false, true, true],
+        ],
+        'compliance' => [
+            'etims' => [true, true, true],
+            'vat' => [true, true, true],
+            'audit' => [true, true, true],
+        ],
+        'operations' => [
+            'stock' => [true, true, true],
+            'batches' => [false, true, true],
+            'transfers' => [false, true, true],
+            'kds' => [false, true, true],
+            'approvals' => [false, true, true],
+        ],
+        'management' => [
+            'dashboard' => [true, true, true],
+            'multi_branch' => [false, true, true],
+            'erp' => [false, false, true],
+        ],
+        'support' => [
+            'help' => [true, true, true],
+            'priority' => [false, true, true],
+            'manager' => [false, false, true],
+        ],
+    ],
+
+    // Optional extras on any plan, in KES cents; `per` is a lang key under pricing.addons.per.
+    'addons' => [
+        'till' => ['cents' => 120_000, 'per' => 'till_month', 'icon' => 'monitor'],
+        'kds' => ['cents' => 180_000, 'per' => 'screen_month', 'icon' => 'chef-hat'],
+        'messaging' => ['cents' => 250_000, 'per' => 'bundle', 'icon' => 'mail'],
+        'onsite' => ['cents' => 450_000, 'per' => 'visit', 'icon' => 'headset'],
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Headline figures
