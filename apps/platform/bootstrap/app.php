@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Api\V1\Middleware\EnsureDeviceBinding;
+use App\Http\Api\V1\Middleware\LimitRequestBody;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'device.bound' => EnsureDeviceBinding::class,
+            'body.limit' => LimitRequestBody::class,
             'ability' => CheckForAnyAbility::class,
         ]);
     })

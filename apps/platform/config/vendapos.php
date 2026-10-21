@@ -31,4 +31,7 @@ return [
         'tenant' => (int) env('VENDAPOS_RATE_LIMIT_TENANT', 5000),
     ],
 
+    // Largest accepted API body, in KB (architecture §5).
+    'api_body_limit_kb' => (int) env('VENDAPOS_API_BODY_LIMIT_KB', 64),
+
 ];

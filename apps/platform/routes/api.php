@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Api\V1\Controllers\RefreshDeviceToken;
 use App\Http\Api\V1\Controllers\ShowCatalogue;
 use App\Http\Api\V1\Controllers\ShowDevice;
+use App\Http\Api\V1\Controllers\SyncOrders;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,4 +19,7 @@ Route::prefix('v1')
         Route::get('device', ShowDevice::class)->name('api.v1.device');
         Route::post('device/token', RefreshDeviceToken::class)->name('api.v1.device.token');
         Route::get('catalogue', ShowCatalogue::class)->name('api.v1.catalogue');
+        Route::post('orders/sync', SyncOrders::class)
+            ->middleware(['ability:orders:sync', 'body.limit'])
+            ->name('api.v1.orders.sync');
     });
