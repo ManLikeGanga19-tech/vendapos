@@ -114,6 +114,55 @@ jobs:
         working-directory: packages/core
         run: ./vendor/bin/pest
 
+  marketing:
+    name: Marketing Site
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_sqlite, intl, gd
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/marketing/package-lock.json
+
+      - name: Install Composer dependencies
+        working-directory: apps/marketing
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Install and build front-end assets
+        working-directory: apps/marketing
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare environment
+        working-directory: apps/marketing
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Pint (formatting)
+        working-directory: apps/marketing
+        run: ./vendor/bin/pint --test
+
+      - name: Larastan (static analysis)
+        working-directory: apps/marketing
+        run: ./vendor/bin/phpstan analyse --memory-limit=512M
+
+      - name: Pest (tests)
+        working-directory: apps/marketing
+        run: ./vendor/bin/pest
+
   terminal:
     name: POS Terminal
     runs-on: ubuntu-latest

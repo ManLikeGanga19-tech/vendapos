@@ -51,6 +51,25 @@ terminal-test:
 terminal-lint:
 	docker compose exec app bash -c "cd apps/pos-terminal && vendor/bin/pint --test"
 
+# --- Marketing site ---
+marketing-install:
+	docker compose exec app bash -c "cd apps/marketing && composer install && npm ci"
+
+marketing-build:
+	docker compose exec app bash -c "cd apps/marketing && npm run build"
+
+marketing-serve:
+	docker compose exec app php apps/marketing/artisan serve --host=0.0.0.0 --port=8001
+
+marketing-test:
+	docker compose exec app bash -c "cd apps/marketing && vendor/bin/pest"
+
+marketing-lint:
+	docker compose exec app bash -c "cd apps/marketing && vendor/bin/pint --test"
+
+marketing-analyse:
+	docker compose exec app bash -c "cd apps/marketing && vendor/bin/phpstan analyse"
+
 # --- Core package ---
 core-install:
 	docker compose exec app composer install -d packages/core
@@ -59,10 +78,10 @@ core-test:
 	docker compose exec app bash -c "cd packages/core && vendor/bin/pest"
 
 # --- All ---
-install: platform-install terminal-install core-install
+install: platform-install terminal-install core-install marketing-install
 
-test: core-test platform-test terminal-test
+test: core-test platform-test terminal-test marketing-test
 
-lint: platform-lint terminal-lint
+lint: platform-lint terminal-lint marketing-lint
 
-analyse: platform-analyse
+analyse: platform-analyse marketing-analyse

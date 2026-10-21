@@ -8,8 +8,11 @@ services:
       - platform_vendor:/app/apps/platform/vendor
       - terminal_vendor:/app/apps/pos-terminal/vendor
       - core_vendor:/app/packages/core/vendor
+      - marketing_vendor:/app/apps/marketing/vendor
+      - marketing_node_modules:/app/apps/marketing/node_modules
     ports:
       - "8000:8000"
+      - "8001:8001"
     depends_on:
       postgres:
         condition: service_healthy
@@ -60,6 +63,8 @@ volumes:
   platform_vendor:
   terminal_vendor:
   core_vendor:
+  marketing_vendor:
+  marketing_node_modules:
 
 networks:
   vendapos:
