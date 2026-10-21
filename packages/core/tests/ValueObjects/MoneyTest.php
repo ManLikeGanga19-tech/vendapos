@@ -82,3 +82,9 @@ it('is immutable', function () {
     expect($original->cents)->toBe(1000);
     expect($result->cents)->toBe(1500);
 });
+
+it('converts to whole shillings for mobile money and refuses amounts with cents', function () {
+    expect(Money::fromCents(185_000)->toWholeShillings())->toBe(1_850)
+        ->and(Money::fromCents(123_450)->isWholeShillings())->toBeFalse()
+        ->and(fn () => Money::fromCents(123_450)->toWholeShillings())->toThrow(InvalidArgumentException::class);
+});

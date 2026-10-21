@@ -75,6 +75,24 @@ final readonly class Money implements JsonSerializable
         return $this->cents > 0;
     }
 
+    public function isWholeShillings(): bool
+    {
+        return $this->cents % 100 === 0;
+    }
+
+    /**
+     * Whole shillings for mobile-money APIs, which take no cents. Amounts with
+     * cents are refused, never rounded (approved by Daniel, M1).
+     */
+    public function toWholeShillings(): int
+    {
+        if (! $this->isWholeShillings()) {
+            throw new InvalidArgumentException("{$this->cents} cents is not a whole number of shillings.");
+        }
+
+        return intdiv($this->cents, 100);
+    }
+
     public function equals(self $other): bool
     {
         return $this->cents === $other->cents;
