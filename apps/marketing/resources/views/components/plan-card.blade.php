@@ -17,7 +17,7 @@
     pricing page's billing switch shows one of them with CSS (no JavaScript).
 --}}
 <li @class([
-    'relative flex flex-col border bg-canvas p-6',
+    'reveal relative flex flex-col border bg-canvas p-6',
     'border-coral' => $plan['popular'],
     'border-line' => ! $plan['popular'],
 ])>

@@ -54,7 +54,7 @@
     {{-- Floor plan illustration --}}
     <section class="border-y border-line bg-surface py-14">
         <div class="container-page">
-            <figure role="img" aria-label="{{ __('restaurants.floor.label') }}" class="border border-line bg-canvas p-5 sm:p-6">
+            <figure role="img" aria-label="{{ __('restaurants.floor.label') }}" class="reveal border border-line bg-canvas p-5 sm:p-6">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <p class="flex items-center gap-2 font-semibold"><x-icon name="layout-grid" class="size-5 text-coral" />{{ __('restaurants.floor.title') }}</p>
                     <x-badge variant="success" dot>{{ __('restaurants.floor.occupied', ['count' => $occupied, 'total' => count($tables)]) }}</x-badge>
@@ -113,7 +113,7 @@
         <div class="container-page">
             <x-section-heading :eyebrow="__('restaurants.features.eyebrow')" :title="__('restaurants.features.title')" />
 
-            <ul class="mt-12 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+            <ul class="reveal-children mt-12 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
                 @foreach (__('restaurants.features.items') as $key => $feature)
                     <li class="bg-canvas p-6">
                         <x-feature-icon :icon="$featureIcons[$key][0]" :brand="$featureIcons[$key][1]" />

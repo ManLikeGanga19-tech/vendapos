@@ -46,7 +46,7 @@
     <section class="border-y border-line bg-surface py-14">
         <div class="container-page">
             <h2 class="text-center text-xl font-semibold">{{ __('pricing.included.title') }}</h2>
-            <ul class="mt-8 grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+            <ul class="reveal-children mt-8 grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach (__('pricing.included.items') as $key => $item)
                     <li class="flex items-center gap-3">
                         <x-feature-icon :icon="$includedIcons[$key][0]" :brand="$includedIcons[$key][1]" />
@@ -68,7 +68,7 @@
             </div>
 
             {{-- Scrolls sideways on phones, with the feature names pinned. --}}
-            <div class="mt-8 overflow-x-auto border border-line">
+            <div class="reveal mt-8 overflow-x-auto border border-line">
                 <table class="w-full min-w-[640px] border-collapse text-left text-sm">
                     <thead>
                         <tr class="border-b border-line bg-surface">
@@ -145,7 +145,7 @@
         <div class="container-page max-w-3xl">
             <h2 class="text-center text-headline font-bold lg:text-headline-lg">{{ __('pricing.faq.title') }}</h2>
 
-            <div class="mt-10 divide-y divide-line border-y border-line">
+            <div class="reveal-children mt-10 divide-y divide-line border-y border-line">
                 @foreach (__('pricing.faq.items') as $item)
                     <details class="group/faq">
                         <summary class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 font-semibold transition-colors hover:text-coral [&::-webkit-details-marker]:hidden">

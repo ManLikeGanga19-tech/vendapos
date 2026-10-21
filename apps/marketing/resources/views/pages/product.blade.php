@@ -199,7 +199,7 @@
     <section class="border-t border-line bg-surface py-16 lg:py-24">
         <div class="container-page">
             <x-section-heading :eyebrow="__('product.hardware.eyebrow')" :title="__('product.hardware.title')" :lead="__('product.hardware.lead')" />
-            <ul class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ul class="reveal-children mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach (__('product.hardware.items') as $key => $item)
                     <li class="flex items-center gap-4 border border-line bg-canvas p-5">
                         <x-feature-icon :icon="$hardwareIcons[$key]" />

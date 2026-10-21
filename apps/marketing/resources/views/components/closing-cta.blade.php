@@ -10,7 +10,7 @@
 {{-- Shared end-of-page call to action: book a demo or call sales, beside a photo. --}}
 <section id="get-started" class="scroll-mt-20 py-16 lg:py-24">
     <div class="container-page">
-        <div class="grid items-center gap-10 overflow-hidden border border-line bg-surface lg:grid-cols-2">
+        <div class="reveal grid items-center gap-10 overflow-hidden border border-line bg-surface lg:grid-cols-2">
             <div class="p-8 lg:p-12">
                 <h2 class="text-headline font-bold text-balance lg:text-headline-lg">{{ $title }}</h2>
                 <p class="mt-4 text-lg text-muted">{{ $lead }}</p>

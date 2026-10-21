@@ -12,7 +12,7 @@
 {{-- One product feature: copy and bullet points beside a visual (the slot), alternating sides on desktop. --}}
 <section id="{{ $id }}" {{ $attributes->class(['scroll-mt-24 py-14 lg:py-20']) }}>
     <div class="container-page grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-        <div @class(['lg:order-2' => $reverse])>
+        <div @class(['reveal', 'lg:order-2' => $reverse])>
             <div class="flex items-center gap-3">
                 <x-feature-icon :icon="$icon" :brand="$brand" />
                 <p class="text-xs font-semibold uppercase tracking-widest text-coral">{{ $eyebrow }}</p>
@@ -28,7 +28,7 @@
             </ul>
         </div>
 
-        <div @class(['lg:order-1' => $reverse])>
+        <div @class(['reveal', 'lg:order-1' => $reverse])>
             {{ $slot }}
         </div>
     </div>

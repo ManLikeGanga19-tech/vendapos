@@ -5,7 +5,7 @@
     'align' => 'center',
 ])
 
-<div {{ $attributes->class(['max-w-3xl', 'mx-auto text-center' => $align === 'center']) }}>
+<div {{ $attributes->class(['reveal max-w-3xl', 'mx-auto text-center' => $align === 'center']) }}>
     @if ($eyebrow)
         <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-coral">{{ $eyebrow }}</p>
     @endif

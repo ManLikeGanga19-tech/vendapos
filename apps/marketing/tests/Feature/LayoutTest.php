@@ -95,3 +95,17 @@ it('uses supplied partner logos and falls back to icons until then', function ()
         File::delete($logo);
     }
 });
+
+it('animates sections on scroll with CSS only, guarded for support and reduced motion', function () {
+    $css = (string) file_get_contents(resource_path('css/app.css'));
+
+    expect($css)->toMatch('/@media \(prefers-reduced-motion: no-preference\)\s*\{\s*@supports \(animation-timeline: view\(\)\)/')
+        ->and($css)->toContain('animation-timeline: view();');
+
+    foreach (['/en', '/en/pricing', '/en/product', '/en/compliance', '/en/solutions/restaurants'] as $page) {
+        $html = $this->get($page)->getContent();
+
+        expect($html)->toMatch('/class="[^"]*\breveal(-children)?\b/')
+            ->and($html)->not->toContain('<script src');
+    }
+});

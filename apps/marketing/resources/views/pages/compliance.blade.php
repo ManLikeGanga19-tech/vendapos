@@ -42,7 +42,7 @@
         <div class="container-page">
             <x-section-heading :eyebrow="__('compliance.etims.eyebrow')" :title="__('compliance.etims.title')" />
 
-            <ol class="mt-12 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-5">
+            <ol class="reveal-children mt-12 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-5">
                 @foreach (__('compliance.etims.steps') as $key => $step)
                     <li class="bg-canvas p-6">
                         <div class="flex items-center justify-between">
@@ -55,7 +55,7 @@
                 @endforeach
             </ol>
 
-            <div class="mt-10 border border-line bg-canvas p-6">
+            <div class="reveal mt-10 border border-line bg-canvas p-6">
                 <h3 class="font-semibold">{{ __('compliance.vat.title') }}</h3>
                 <ul class="mt-4 grid gap-4 md:grid-cols-3">
                     @foreach (__('compliance.vat.items') as $item)
@@ -95,7 +95,7 @@
                 <h2 class="text-headline font-bold text-balance lg:text-headline-lg">{{ __('compliance.data.title') }}</h2>
             </div>
 
-            <ul class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <ul class="reveal-children mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach (__('compliance.data.items') as $key => $item)
                     <li class="border border-paper-line bg-white p-6">
                         <x-icon :name="$dataIcons[$key]" class="size-7 text-paper-accent" />

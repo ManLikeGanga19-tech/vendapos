@@ -110,7 +110,7 @@
         <div class="container-page">
             <x-section-heading :eyebrow="__('home.verticals.eyebrow')" :title="__('home.verticals.title')" :lead="__('home.verticals.lead')" />
 
-            <ul class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <ul class="reveal-children mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach (__('home.verticals.items') as $key => $vertical)
                     <li class="overflow-hidden border border-line bg-canvas">
                         <x-picture :name="'verticals/'.$key" :alt="$vertical['alt']" :icon="$verticalIcons[$key]"
@@ -155,13 +155,13 @@
     {{-- Getting started --}}
     <section class="border-y border-line bg-surface py-16 lg:py-24">
         <div class="container-page grid items-center gap-12 lg:grid-cols-2">
-            <x-picture name="onboarding/training" :alt="__('home.steps.photo_alt')" icon="users"
+            <x-picture name="onboarding/training" :alt="__('home.steps.photo_alt')" icon="users" class="reveal"
                        sizes="(min-width: 1024px) 568px, 100vw" />
 
             <div>
                 <x-section-heading :eyebrow="__('home.steps.eyebrow')" :title="__('home.steps.title')" align="start" />
 
-                <ol class="mt-8 space-y-6">
+                <ol class="reveal-children mt-8 space-y-6">
                     @foreach (__('home.steps.items') as $step)
                         <li class="flex gap-4">
                             <span class="tabular flex size-10 shrink-0 items-center justify-center border border-coral/40 font-bold text-coral">
@@ -186,7 +186,7 @@
                 <h2 class="text-headline font-bold text-balance lg:text-headline-lg">{{ __('home.trust.title') }}</h2>
             </div>
 
-            <ul class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <ul class="reveal-children mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach (__('home.trust.items') as $key => $item)
                     <li class="border border-paper-line bg-white p-6">
                         <x-icon :name="$trustIcons[$key]" class="size-7 text-paper-accent" />
@@ -202,7 +202,7 @@
     <section class="py-16" aria-labelledby="stats-title">
         <div class="container-page">
             <h2 id="stats-title" class="sr-only">{{ __('home.stats.title') }}</h2>
-            <dl class="grid grid-cols-2 gap-8 lg:grid-cols-4">
+            <dl class="reveal-children grid grid-cols-2 gap-8 lg:grid-cols-4">
                 @foreach (config('marketing.stats') as $key => $stat)
                     <div class="flex flex-col-reverse items-center text-center">
                         <dt class="mt-2 text-sm text-muted">{{ __("home.stats.items.{$key}") }}</dt>

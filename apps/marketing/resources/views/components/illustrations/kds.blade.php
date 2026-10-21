@@ -1,5 +1,5 @@
 {{-- Kitchen display illustration (product and restaurant pages). Copy lives in lang/*/product.php under kds. --}}
-<figure role="img" aria-label="{{ __('product.kds.label') }}" class="border border-line bg-surface p-5">
+<figure role="img" aria-label="{{ __('product.kds.label') }}" class="reveal border border-line bg-surface p-5">
     <p class="flex items-center gap-2 text-sm font-semibold"><x-icon name="chef-hat" class="size-4 text-coral" />{{ __('product.kds.station') }}</p>
     <ul class="mt-4 grid gap-3 sm:grid-cols-3">
         @foreach (__('product.kds.tickets') as $ticket => $item)
