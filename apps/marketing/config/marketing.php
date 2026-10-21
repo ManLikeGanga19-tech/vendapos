@@ -51,10 +51,11 @@ return [
         'location' => 'Mombasa, Kenya',
         'registration_number' => env('COMPANY_REGISTRATION_NUMBER', 'PVT-J61587ER'),
         'kra_pin' => env('COMPANY_KRA_PIN', 'P052477504F'),
-        'postal_address' => env('COMPANY_POSTAL_ADDRESS'),
+        'postal_address' => env('COMPANY_POSTAL_ADDRESS', 'P.O. Box 93294 – 80102, Mombasa'),
         'odpc_registration' => env('COMPANY_ODPC_REGISTRATION'),
+        'hosting_provider' => env('COMPANY_HOSTING_PROVIDER', 'Contabo VPS'),
         'hosting_region' => env('COMPANY_HOSTING_REGION'),
-        'privacy_email' => env('COMPANY_PRIVACY_EMAIL'),
+        'privacy_email' => env('COMPANY_PRIVACY_EMAIL', 'privacy@vendapos.com'),
     ],
 
     'legal' => [

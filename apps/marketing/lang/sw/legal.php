@@ -14,7 +14,8 @@ return [
             'kra_pin' => 'PIN ya KRA',
             'postal_address' => 'Anwani ya posta',
             'odpc_registration' => 'Usajili wa ODPC',
-            'hosting_region' => 'Eneo la kuhifadhi data',
+            'hosting_provider' => 'Mtoa huduma wa kuhifadhi data',
+            'hosting_region' => 'Mahali kituo cha data kilipo',
             'privacy_email' => 'Mawasiliano ya faragha',
         ],
         'privacy' => 'Sera ya faragha',
@@ -72,7 +73,7 @@ return [
             'transfers' => [
                 'title' => 'Mahali data yako inapohifadhiwa',
                 'body' => [
-                    'Data binafsi inaweza kuhifadhiwa au kuchakatwa nje ya Kenya na watoa huduma wetu. Hilo linapotokea, tunahakikisha uhamisho unatimiza masharti ya Sheria ya Ulinzi wa Data ya Kenya, 2019, ikiwa ni pamoja na kinga zinazofaa. Eneo letu la kuhifadhi data limeorodheshwa kwenye taarifa za kampuni katika ukurasa huu.',
+                    'Data binafsi inaweza kuhifadhiwa au kuchakatwa nje ya Kenya na watoa huduma wetu. Hilo linapotokea, tunahakikisha uhamisho unatimiza masharti ya Sheria ya Ulinzi wa Data ya Kenya, 2019, ikiwa ni pamoja na kinga zinazofaa. Mtoa huduma wetu wa kuhifadhi data na mahali kituo cha data kilipo vimeorodheshwa kwenye taarifa za kampuni katika ukurasa huu.',
                 ],
             ],
             'retention' => [

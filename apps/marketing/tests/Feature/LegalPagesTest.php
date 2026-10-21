@@ -30,8 +30,8 @@ it('marks the documents as drafts until legal review is complete', function () {
 it('shows the registered company details and marks the rest as TBC', function () {
     $this->get('/en/privacy')
         ->assertSeeInOrder(['Company', 'Danamo Tech Limited', 'Based in', 'Mombasa, Kenya'])
-        ->assertSeeInOrder(['Registration number', 'PVT-J61587ER', 'KRA PIN', 'P052477504F', 'Postal address', 'TBC'])
-        ->assertSeeInOrder(['ODPC registration', 'TBC', 'Data hosting region', 'TBC', 'Privacy contact', 'TBC']);
+        ->assertSeeInOrder(['Registration number', 'PVT-J61587ER', 'KRA PIN', 'P052477504F', 'Postal address', 'P.O. Box 93294 – 80102, Mombasa'])
+        ->assertSeeInOrder(['ODPC registration', 'TBC', 'Hosting provider', 'Contabo VPS', 'Data centre location', 'TBC', 'Privacy contact', 'privacy@vendapos.com']);
 
     $this->get('/sw/terms')->assertSeeInOrder(['Namba ya usajili', 'PVT-J61587ER', 'PIN ya KRA', 'P052477504F']);
 
@@ -57,4 +57,8 @@ it('links the legal pages from every footer and the privacy policy from the demo
 
 it('serves the legal pages without cookies, like other public pages', function () {
     expect($this->get('/en/privacy')->headers->getCookies())->toBe([]);
+});
+
+it('points data-rights requests from the demo form to the privacy address', function () {
+    $this->get('/en/demo')->assertSee('email privacy@vendapos.com');
 });

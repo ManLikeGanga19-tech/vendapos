@@ -14,7 +14,8 @@ return [
             'kra_pin' => 'KRA PIN',
             'postal_address' => 'Postal address',
             'odpc_registration' => 'ODPC registration',
-            'hosting_region' => 'Data hosting region',
+            'hosting_provider' => 'Hosting provider',
+            'hosting_region' => 'Data centre location',
             'privacy_email' => 'Privacy contact',
         ],
         'privacy' => 'Privacy policy',
@@ -72,7 +73,7 @@ return [
             'transfers' => [
                 'title' => 'Where your data is stored',
                 'body' => [
-                    'Personal data may be stored or processed outside Kenya by our hosting and service providers. When it is, we make sure the transfer meets the requirements of the Kenya Data Protection Act, 2019, including appropriate safeguards. Our hosting region is listed in the company details on this page.',
+                    'Personal data may be stored or processed outside Kenya by our hosting and service providers. When it is, we make sure the transfer meets the requirements of the Kenya Data Protection Act, 2019, including appropriate safeguards. Our hosting provider and data centre location are listed in the company details on this page.',
                 ],
             ],
             'retention' => [

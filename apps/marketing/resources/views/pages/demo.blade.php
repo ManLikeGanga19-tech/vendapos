@@ -140,7 +140,7 @@
                     <p class="mt-2">
                         <x-placeholder :confirmed="config('marketing.leads.retention_confirmed')">{{ __('demo.privacy.retention', ['months' => config('marketing.leads.retention_months')]) }}</x-placeholder>
                     </p>
-                    <p class="mt-2">{{ __('demo.privacy.rights', ['email' => config('marketing.contact.email')]) }}</p>
+                    <p class="mt-2">{{ __('demo.privacy.rights', ['email' => config('marketing.company.privacy_email')]) }}</p>
                     <p class="mt-2">{{ __('demo.privacy.law') }}</p>
                     <p class="mt-3">
                         <a href="{{ route('privacy') }}" class="inline-flex items-center gap-1.5 font-semibold text-coral hover:text-coral-hover">
