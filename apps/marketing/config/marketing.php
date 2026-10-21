@@ -133,6 +133,102 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Solution pages
+    |--------------------------------------------------------------------------
+    |
+    | One page per business type at /{locale}/solutions/{key}, rendered from
+    | pages/solutions/show.blade.php with copy in lang/{locale}/solutions.php.
+    | Restaurants has its own bespoke page. `panel` rows feed the screen
+    | illustration: amounts in KES cents (null = none) and a badge variant.
+    |
+    */
+
+    'solutions' => [
+        'bars' => [
+            'icon' => 'beer',
+            'panel' => ['icon' => 'receipt-text', 'badge' => 'pending', 'rows' => [
+                'table3' => ['cents' => 160_000, 'state' => 'success'],
+                'seat6' => ['cents' => 650_000, 'state' => 'success'],
+                'table8' => ['cents' => 330_000, 'state' => 'coral'],
+                'staff' => ['cents' => 25_000, 'state' => 'pending'],
+            ]],
+            'problems' => ['tabs' => 'receipt-text', 'pricing' => 'clock', 'shrinkage' => 'shield-check'],
+            'features' => ['tabs' => 'receipt-text', 'bottles' => 'beer', 'happy' => 'timer', 'cover' => 'users'],
+            'hardware' => ['till' => 'monitor', 'printer' => 'printer'],
+        ],
+        'salons' => [
+            'icon' => 'scissors',
+            'panel' => ['icon' => 'calendar', 'badge' => 'neutral', 'rows' => [
+                'amina' => ['cents' => 350_000, 'state' => 'success'],
+                'brian' => ['cents' => 80_000, 'state' => 'coral'],
+                'halima' => ['cents' => 120_000, 'state' => 'neutral'],
+                'fatma' => ['cents' => 1_500_000, 'state' => 'pending'],
+            ]],
+            'problems' => ['noshows' => 'calendar', 'commission' => 'hand-coins', 'packages' => 'package'],
+            'features' => ['calendar' => 'calendar', 'timed' => 'timer', 'staff' => 'users', 'commission' => 'hand-coins'],
+            'hardware' => ['tablet' => 'monitor', 'phone' => 'smartphone'],
+        ],
+        'shops' => [
+            'icon' => 'store',
+            'panel' => ['icon' => 'users', 'badge' => 'neutral', 'rows' => [
+                'otieno' => ['cents' => 85_000, 'state' => 'success'],
+                'hassan' => ['cents' => 470_000, 'state' => 'pending'],
+                'grace' => ['cents' => 0, 'state' => 'neutral'],
+            ]],
+            'problems' => ['queue' => 'scan-barcode', 'deni' => 'users', 'stock' => 'package'],
+            'features' => ['scan' => 'scan-barcode', 'keys' => 'layout-grid', 'deni' => 'users', 'reports' => 'trending-up'],
+            'hardware' => ['scanner' => 'scan-barcode', 'printer' => 'printer'],
+        ],
+        'supermarkets' => [
+            'icon' => 'shopping-cart',
+            'panel' => ['icon' => 'shopping-cart', 'badge' => 'success', 'rows' => [
+                'lane1' => ['cents' => 4_812_000, 'state' => 'success'],
+                'lane2' => ['cents' => 3_955_000, 'state' => 'success'],
+                'lane3' => ['cents' => 2_210_000, 'state' => 'success'],
+                'lane4' => ['cents' => 3_640_000, 'state' => 'neutral'],
+            ]],
+            'problems' => ['queues' => 'scan-barcode', 'promos' => 'sparkles', 'cashups' => 'banknote'],
+            'features' => ['scale' => 'scan-barcode', 'promos' => 'sparkles', 'lanes' => 'shopping-cart', 'loyalty' => 'users'],
+            'hardware' => ['scanner' => 'scan-barcode', 'scale' => 'package', 'drawer' => 'banknote', 'display' => 'monitor'],
+        ],
+        'hardware' => [
+            'icon' => 'hammer',
+            'panel' => ['icon' => 'receipt-text', 'badge' => 'coral', 'rows' => [
+                'cement' => ['cents' => 3_120_000, 'state' => null],
+                'steel' => ['cents' => 1_440_000, 'state' => null],
+                'nails' => ['cents' => 562_500, 'state' => null],
+            ]],
+            'problems' => ['units' => 'package', 'quotes' => 'receipt-text', 'credit' => 'id-card'],
+            'features' => ['units' => 'package', 'quotes' => 'receipt-text', 'delivery' => 'send', 'contractors' => 'id-card'],
+            'hardware' => ['scanner' => 'scan-barcode', 'a4' => 'printer'],
+        ],
+        'pharmacy' => [
+            'icon' => 'pill',
+            'panel' => ['icon' => 'pill', 'badge' => 'coral', 'rows' => [
+                'a23' => ['cents' => null, 'state' => 'coral'],
+                'b07' => ['cents' => null, 'state' => 'success'],
+                'a11' => ['cents' => null, 'state' => 'pending'],
+            ]],
+            'problems' => ['expiry' => 'calendar', 'records' => 'receipt-text', 'signoff' => 'badge-check'],
+            'features' => ['batches' => 'package', 'prescriptions' => 'receipt-text', 'register' => 'lock', 'insurance' => 'shield-check'],
+            'hardware' => ['scanner' => 'scan-barcode', 'printer' => 'printer'],
+        ],
+        'liquor' => [
+            'icon' => 'package',
+            'panel' => ['icon' => 'shield-check', 'badge' => 'success', 'rows' => [
+                'age' => ['cents' => null, 'state' => 'pending'],
+                'hours' => ['cents' => null, 'state' => 'success'],
+                'case' => ['cents' => 480_000, 'state' => 'coral'],
+                'single' => ['cents' => 25_000, 'state' => null],
+            ]],
+            'problems' => ['age' => 'id-card', 'hours' => 'clock', 'bulk' => 'package'],
+            'features' => ['age' => 'id-card', 'hours' => 'clock', 'cases' => 'package', 'stock' => 'warehouse'],
+            'hardware' => ['scanner' => 'scan-barcode', 'printer' => 'printer'],
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Headline figures
     |--------------------------------------------------------------------------
     |

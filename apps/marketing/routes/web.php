@@ -38,6 +38,11 @@ Route::prefix('{locale}')
                 Route::view('pricing', 'pages.pricing')->name('pricing');
                 Route::view('compliance', 'pages.compliance')->name('compliance');
                 Route::view('solutions/restaurants', 'pages.solutions.restaurants')->name('solutions.restaurants');
+
+                foreach (array_keys(config('marketing.solutions')) as $vertical) {
+                    Route::view("solutions/{$vertical}", 'pages.solutions.show', ['vertical' => $vertical])
+                        ->name("solutions.{$vertical}");
+                }
             });
 
         // Form pages keep the session for CSRF protection and validation errors.

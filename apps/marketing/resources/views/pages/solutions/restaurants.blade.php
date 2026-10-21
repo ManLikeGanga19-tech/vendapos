@@ -149,4 +149,6 @@
     <x-closing-cta :title="__('restaurants.cta.title')" :lead="__('restaurants.cta.lead')" :button="__('restaurants.cta.button')"
                    photo="verticals/bars" :photo-alt="__('restaurants.cta.photo_alt')" photo-icon="beer" />
 
+    <x-solutions-nav current="restaurants" />
+
 </x-layouts.site>
