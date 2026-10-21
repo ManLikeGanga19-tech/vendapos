@@ -49,7 +49,6 @@
     --radius-card: 0.75rem;
     --radius-control: 0.5rem;
 
-    --shadow-glow: 0 0 24px rgb(244 98 42 / 0.25);
     --shadow-float: 0 20px 40px -15px rgb(0 0 0 / 0.7), 0 0 0 1px #3b315e;
 }
 
@@ -83,6 +82,39 @@
 }
 
 @layer components {
+    /*
+     * One interaction for every button-like control: a 1px lift with a neutral
+     * shadow on hover, pressed back down on click, trailing icon nudges forward.
+     * Flat colours only across the site (enforced by LayoutTest).
+     */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-card font-semibold;
+        transition:
+            background-color 150ms ease,
+            border-color 150ms ease,
+            color 150ms ease,
+            box-shadow 150ms ease,
+            transform 150ms ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px -8px rgb(0 0 0 / 0.7);
+    }
+
+    .btn:active {
+        transform: translateY(0) scale(0.98);
+        box-shadow: none;
+    }
+
+    .btn .btn-icon {
+        transition: transform 150ms ease;
+    }
+
+    .btn:hover .btn-icon {
+        transform: translateX(2px);
+    }
+
     /* 16px text stops mobile browsers zooming in on focus; 48px tall for thumbs. */
     .field-control {
         @apply block min-h-12 w-full rounded-control border border-line bg-surface px-3 py-2.5 text-base text-ink placeholder:text-subtle;
@@ -100,9 +132,4 @@
 
 @utility container-page {
     @apply mx-auto w-full max-w-[1200px] px-4 lg:px-8;
-}
-
-/* Ambient coral wash behind key figures (DESIGN.md "Ambient Aura"). */
-@utility aura {
-    background-image: radial-gradient(60% 50% at 50% 0%, rgb(244 98 42 / 0.15), transparent 70%);
 }

@@ -5,7 +5,7 @@
         <div class="max-w-sm">
             <x-site.logo />
             <p class="mt-4 text-sm text-muted">{{ __('footer.tagline') }}</p>
-            <x-site.language-switcher :alternates="$alternates" class="mt-6" />
+            <x-site.language-switcher :alternates="$alternates" direction="up" align="left" class="mt-6 inline-block" />
         </div>
 
         <div>
@@ -38,7 +38,7 @@
 
     <div class="border-t border-line">
         <div class="container-page flex flex-col gap-2 py-6 text-xs text-subtle sm:flex-row sm:justify-between">
-            <p>&copy; {{ now('Africa/Nairobi')->year }} VendaPOS. {{ __('footer.rights') }}</p>
+            <p>&copy; {{ now('Africa/Nairobi')->year }} DanamoTech Ltd. {{ __('footer.rights') }} {{ __('footer.built_by') }}</p>
             <p>{{ __('footer.billing') }}</p>
         </div>
     </div>

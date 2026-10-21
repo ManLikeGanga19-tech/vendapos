@@ -13,7 +13,8 @@ return [
         'liquor' => 'Maduka ya vileo',
     ],
     'contact' => 'Wasiliana nasi',
-    'location' => 'Nairobi, Kenya',
+    'location' => 'Mombasa, Kenya',
     'rights' => 'Haki zote zimehifadhiwa.',
+    'built_by' => 'VendaPOS imetengenezwa na DanamoTech Ltd, Mombasa, Kenya.',
     'billing' => 'Imetengenezwa Kenya kwa ajili ya Afrika Mashariki.',
 ];

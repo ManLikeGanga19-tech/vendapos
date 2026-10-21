@@ -32,7 +32,7 @@
 @else
     {{-- Photo not supplied yet: a branded tile that keeps the layout and the alt text. --}}
     <div role="img" aria-label="{{ $alt }}" data-image-placeholder="{{ $name }}"
-         {{ $attributes->merge(['class' => 'flex w-full items-center justify-center overflow-hidden bg-elevated aura']) }}
+         {{ $attributes->merge(['class' => 'flex w-full items-center justify-center overflow-hidden bg-elevated']) }}
          style="aspect-ratio: {{ $ratio }}">
         <x-icon :name="$icon" class="size-12 text-coral/60" />
     </div>

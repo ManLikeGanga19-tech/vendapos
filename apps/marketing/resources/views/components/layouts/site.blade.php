@@ -27,7 +27,7 @@
     <meta property="og:site_name" content="VendaPOS">
     <meta property="og:title" content="{{ $title }}">
     <meta property="og:description" content="{{ $description }}">
-    <meta property="og:locale" content="{{ app()->getLocale() === 'sw' ? 'sw_KE' : 'en_KE' }}">
+    <meta property="og:locale" content="{{ config('marketing.locales.'.app()->getLocale().'.og') }}">
 
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
 
@@ -62,5 +62,19 @@
     </main>
 
     <x-site.footer :alternates="$alternates" />
+
+    {{-- Progressive enhancement only (menus work without it): close open dropdowns on outside click or Escape. ES5 for old browsers. --}}
+    <script>
+        (function () {
+            function openMenus() { return document.querySelectorAll('details[data-dismissible][open]'); }
+            document.addEventListener('click', function (e) {
+                Array.prototype.forEach.call(openMenus(), function (d) { if (!d.contains(e.target)) d.removeAttribute('open'); });
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key !== 'Escape') return;
+                Array.prototype.forEach.call(openMenus(), function (d) { d.removeAttribute('open'); d.querySelector('summary').focus(); });
+            });
+        })();
+    </script>
 </body>
 </html>

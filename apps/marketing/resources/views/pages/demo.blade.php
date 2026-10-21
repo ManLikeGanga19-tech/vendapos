@@ -11,7 +11,7 @@
 @endphp
 
 <x-layouts.site :title="__('demo.meta.title')" :description="__('demo.meta.description')">
-    <section class="aura">
+    <section>
         <div class="container-page grid gap-12 py-12 lg:grid-cols-[1fr_1.1fr] lg:py-20">
 
             <div>
@@ -127,9 +127,9 @@
                         @enderror
                     </div>
 
-                    <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-card bg-coral px-6 font-semibold text-canvas shadow-glow transition hover:bg-coral-hover active:scale-[0.98]">
+                    <button type="submit" class="btn min-h-12 w-full bg-coral px-6 text-canvas hover:bg-coral-hover">
                         {{ __('demo.form.submit') }}
-                        <x-icon name="arrow-right" class="size-4" />
+                        <x-icon name="arrow-right" class="btn-icon size-4" />
                     </button>
                 </form>
 
@@ -137,6 +137,7 @@
                     <h3 id="privacy-title" class="flex items-center gap-2 font-semibold text-ink">
                         <x-icon name="lock" class="size-4" />{{ __('demo.privacy.title') }}
                     </h3>
+                    <p class="mt-2">{{ __('demo.privacy.controller') }}</p>
                     <p class="mt-2">{{ __('demo.privacy.use') }}</p>
                     <p class="mt-2">
                         <x-placeholder :confirmed="config('marketing.leads.retention_confirmed')">{{ __('demo.privacy.retention', ['months' => config('marketing.leads.retention_months')]) }}</x-placeholder>

@@ -13,7 +13,8 @@ return [
         'liquor' => 'Liquor stores',
     ],
     'contact' => 'Contact',
-    'location' => 'Nairobi, Kenya',
+    'location' => 'Mombasa, Kenya',
     'rights' => 'All rights reserved.',
+    'built_by' => 'VendaPOS is built by DanamoTech Ltd, Mombasa, Kenya.',
     'billing' => 'Built in Kenya for East Africa.',
 ];

@@ -25,13 +25,13 @@
 <x-layouts.site :title="__('home.meta.title')" :description="__('home.meta.description')">
 
     {{-- Hero --}}
-    <section class="aura overflow-hidden">
+    <section class="overflow-hidden">
         <div class="container-page grid items-center gap-12 py-12 lg:grid-cols-[1.1fr_1fr] lg:py-24">
             <div>
                 <ul class="flex flex-wrap gap-2">
-                    <li><x-badge variant="success" dot>{{ __('home.hero.chips.offline') }}</x-badge></li>
-                    <li><x-badge variant="coral">{{ __('home.hero.chips.etims') }}</x-badge></li>
-                    <li><x-badge variant="mpesa">{{ __('home.hero.chips.mpesa') }}</x-badge></li>
+                    <li><x-badge variant="success"><x-icon name="cloud-off" class="size-3.5" />{{ __('home.hero.chips.offline') }}</x-badge></li>
+                    <li><x-badge variant="coral"><x-brand-mark name="etims" icon="receipt-text" />{{ __('home.hero.chips.etims') }}</x-badge></li>
+                    <li><x-badge variant="mpesa"><x-brand-mark name="mpesa" icon="smartphone" />{{ __('home.hero.chips.mpesa') }}</x-badge></li>
                 </ul>
 
                 <h1 class="mt-6 text-display font-bold text-balance lg:text-display-lg">{{ __('home.hero.title') }}</h1>
@@ -220,7 +220,7 @@
                 @foreach (config('marketing.plans') as $key => $plan)
                     <li @class([
                         'relative flex flex-col rounded-card border bg-canvas p-6',
-                        'border-coral shadow-glow' => $plan['popular'],
+                        'border-coral' => $plan['popular'],
                         'border-line' => ! $plan['popular'],
                     ])>
                         @if ($plan['popular'])
@@ -261,7 +261,7 @@
     {{-- Closing call to action --}}
     <section id="get-started" class="scroll-mt-20 py-16 lg:py-24">
         <div class="container-page">
-            <div class="aura grid items-center gap-10 overflow-hidden rounded-card border border-line bg-surface lg:grid-cols-2">
+            <div class="grid items-center gap-10 overflow-hidden rounded-card border border-line bg-surface lg:grid-cols-2">
                 <div class="p-8 lg:p-12">
                     <h2 class="text-headline font-bold text-balance lg:text-headline-lg">{{ __('home.cta.title') }}</h2>
                     <p class="mt-4 text-lg text-muted">{{ __('home.cta.lead') }}</p>

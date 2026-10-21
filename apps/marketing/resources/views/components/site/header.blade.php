@@ -42,8 +42,8 @@
             @endif
 
             {{-- <details> gives a working menu with zero JavaScript. --}}
-            <details class="group lg:hidden">
-                <summary class="flex size-11 cursor-pointer list-none items-center justify-center rounded-control border border-line text-ink [&::-webkit-details-marker]:hidden">
+            <details class="group lg:hidden" data-dismissible>
+                <summary class="btn size-11 cursor-pointer list-none rounded-control border border-line text-ink hover:border-line-strong hover:bg-white/5 [&::-webkit-details-marker]:hidden">
                     <x-icon name="menu" class="size-5 group-open:hidden" />
                     <x-icon name="x" class="hidden size-5 group-open:block" />
                     <span class="sr-only">{{ __('nav.menu') }}</span>
@@ -60,7 +60,7 @@
                         </ul>
 
                         <div class="mt-4 flex flex-wrap items-center justify-between gap-4">
-                            <x-site.language-switcher :alternates="$alternates" />
+                            <x-site.language-switcher :alternates="$alternates" direction="up" align="left" />
                             @if (Route::has('demo'))
                                 <x-button :href="route('demo')">{{ __('nav.book_demo') }}</x-button>
                             @endif

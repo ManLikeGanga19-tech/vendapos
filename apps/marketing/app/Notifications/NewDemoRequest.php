@@ -40,7 +40,7 @@ class NewDemoRequest extends Notification implements ShouldQueue
             ->line(__('demo.fields.email').': '.$lead->email)
             ->line(__('demo.fields.phone').': '.$lead->phone)
             ->line(__('demo.fields.contact_window').': '.($lead->contact_window ? __('demo.contact_windows.'.$lead->contact_window->value) : '—'))
-            ->line(__('demo.mail.sales.language').': '.config("marketing.locales.{$lead->locale}"))
+            ->line(__('demo.mail.sales.language').': '.config("marketing.locales.{$lead->locale}.label"))
             ->line(__('demo.fields.message').': '.($lead->message ?? '—'))
             ->line(__('demo.mail.sales.reference').': '.$lead->id);
     }

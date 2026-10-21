@@ -1,5 +1,5 @@
 <x-layouts.site :title="__('demo.meta.title')" :description="__('demo.meta.description')">
-    <section class="aura">
+    <section>
         <div class="container-page flex flex-col items-center py-20 text-center lg:py-32">
             <span class="flex size-16 items-center justify-center rounded-full bg-success/10 text-success">
                 <x-icon name="circle-check" class="size-9" />
