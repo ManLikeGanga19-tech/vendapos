@@ -5,6 +5,7 @@ return [
     'language' => 'Language',
     'to_be_confirmed' => 'TBC',
     'call_sales' => 'Or call sales:',
+    'learn_more' => 'Learn more',
     'breadcrumb' => 'Breadcrumb',
     'outdated_browser' => [
         'message' => 'Your browser is out of date, so this page may not display correctly. Update your browser for a clean view.',

@@ -11,10 +11,6 @@
     $vat = Money::fromCents(intdiv($total->cents * $rate + intdiv(10_000 + $rate, 2), 10_000 + $rate));
     $net = $total->subtract($vat);
 
-    $verticalIcons = [
-        'restaurants' => 'utensils', 'bars' => 'beer', 'salons' => 'scissors', 'shops' => 'store',
-        'supermarkets' => 'shopping-cart', 'hardware' => 'hammer', 'pharmacy' => 'pill', 'liquor' => 'package',
-    ];
     $pillarIcons = [
         'offline' => 'wifi-off', 'mpesa' => 'smartphone', 'etims' => 'receipt-text',
         'branches' => 'network', 'stock' => 'warehouse', 'staff' => 'id-card',
@@ -110,26 +106,15 @@
         <div class="container-page">
             <x-section-heading :eyebrow="__('home.verticals.eyebrow')" :title="__('home.verticals.title')" :lead="__('home.verticals.lead')" />
 
-            <ul class="reveal-children mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach (__('home.verticals.items') as $key => $vertical)
-                    <li class="overflow-hidden border border-line bg-canvas">
-                        <x-picture :name="'verticals/'.$key" :alt="$vertical['alt']" :icon="$verticalIcons[$key]"
-                                   sizes="(min-width: 1024px) 280px, (min-width: 640px) 50vw, 100vw" />
-                        <div class="p-5">
-                            <h3 class="flex items-center gap-2 font-semibold">
-                                <x-icon :name="$verticalIcons[$key]" class="size-5 text-coral" />
-                                {{ $vertical['title'] }}
-                            </h3>
-                            <p class="mt-2 text-sm text-muted">{{ $vertical['body'] }}</p>
-                            @if (Route::has("solutions.{$key}"))
-                                <a href="{{ route("solutions.{$key}") }}" class="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-coral hover:text-coral-hover">
-                                    {{ __('home.verticals.more') }} <x-icon name="arrow-right" class="size-4" />
-                                </a>
-                            @endif
-                        </div>
-                    </li>
+            <ul class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                @foreach (array_keys(__('home.verticals.items')) as $key)
+                    <li><x-solution-card :key="$key" /></li>
                 @endforeach
             </ul>
+
+            <p class="mt-10 text-center">
+                <x-button :href="route('solutions')" variant="secondary" icon="arrow-right">{{ __('home.verticals.all') }}</x-button>
+            </p>
         </div>
     </section>
 

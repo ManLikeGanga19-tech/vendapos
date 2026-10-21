@@ -41,7 +41,7 @@ return [
 
     'verticals' => [
         'eyebrow' => 'Built for your counter',
-        'more' => 'See how it works',
+        'all' => 'See all solutions',
         'title' => 'One platform. The right tools for each kind of business.',
         'lead' => 'Every branch switches on the features its trade needs, on top of the same reliable sales, payments and eTIMS core.',
         'items' => [

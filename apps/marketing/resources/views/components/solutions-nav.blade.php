@@ -1,25 +1,22 @@
 @props(['current'])
 
 @php
-    $icons = [
-        'restaurants' => 'utensils', 'bars' => 'beer', 'salons' => 'scissors', 'shops' => 'store',
-        'supermarkets' => 'shopping-cart', 'hardware' => 'hammer', 'pharmacy' => 'pill', 'liquor' => 'package',
-    ];
+    $others = array_values(array_filter(
+        array_keys(__('home.verticals.items')),
+        fn (string $key) => $key !== $current && Route::has("solutions.{$key}"),
+    ));
 @endphp
 
-{{-- Cross-links between solution pages; labels come from the home page's vertical titles. --}}
-<section class="border-t border-line py-14" aria-labelledby="other-solutions">
+{{-- End-of-page cross-links: every other business type as a clickable card. --}}
+<section class="border-t border-line bg-surface py-16 lg:py-20" aria-labelledby="other-solutions">
     <div class="container-page">
-        <h2 id="other-solutions" class="text-center text-xl font-semibold">{{ __('solutions.common.other') }}</h2>
-        <ul class="reveal-children mt-8 grid grid-cols-2 gap-px border border-line bg-line sm:grid-cols-4">
-            @foreach ($icons as $key => $icon)
-                @continue($key === $current || ! Route::has("solutions.{$key}"))
-                <li>
-                    <a href="{{ route("solutions.{$key}") }}" class="flex h-full items-center gap-3 bg-canvas p-4 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-ink">
-                        <x-icon :name="$icon" class="size-5 text-coral" />
-                        {{ __("home.verticals.items.{$key}.title") }}
-                    </a>
-                </li>
+        <div class="flex flex-wrap items-end justify-between gap-4">
+            <h2 id="other-solutions" class="text-headline font-bold">{{ __('solutions.common.other') }}</h2>
+            <x-button :href="route('solutions')" variant="secondary" icon="arrow-right">{{ __('home.verticals.all') }}</x-button>
+        </div>
+        <ul class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach ($others as $key)
+                <li @class(['hidden lg:block' => $loop->index >= 4])><x-solution-card :key="$key" /></li>
             @endforeach
         </ul>
     </div>

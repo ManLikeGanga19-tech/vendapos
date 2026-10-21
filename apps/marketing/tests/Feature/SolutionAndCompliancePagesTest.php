@@ -21,8 +21,9 @@ it('reuses the kitchen display illustration', function () {
 
 it('links Solutions in the header and the restaurant card on the home page', function () {
     $this->get('/sw')
+        ->assertSee('href="'.url('/sw/solutions').'"', false)
         ->assertSee('href="'.url('/sw/solutions/restaurants').'"', false)
-        ->assertSee('Ona jinsi inavyofanya kazi');
+        ->assertSee('Jifunze zaidi');
 
     $this->get('/en/solutions/restaurants')->assertSee('aria-current="page"', false);
 });

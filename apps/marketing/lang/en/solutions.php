@@ -1,6 +1,19 @@
 <?php
 
 return [
+    'index' => [
+        'meta' => [
+            'title' => 'Solutions by business type',
+            'description' => 'VendaPOS for restaurants, bars, salons, shops, supermarkets, hardware stores, chemists and liquor stores, on one sales, payments and KRA eTIMS core.',
+        ],
+        'eyebrow' => 'Solutions',
+        'title' => 'Built for the way your business sells.',
+        'lead' => 'Choose your type of business to see the screens, features and setup made for it. Every one runs on the same reliable core: M-Pesa, KRA eTIMS and offline selling.',
+        'other_title' => 'Don’t see your type of business?',
+        'other_body' => 'VendaPOS also works for any other shop or service business, with your own products, services and custom fields.',
+        'other_cta' => 'Talk to us',
+    ],
+
     'common' => [
         'breadcrumb' => 'Solutions',
         'secondary_cta' => 'See pricing',

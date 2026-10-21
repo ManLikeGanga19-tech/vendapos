@@ -1,6 +1,19 @@
 <?php
 
 return [
+    'index' => [
+        'meta' => [
+            'title' => 'Suluhisho kwa aina ya biashara',
+            'description' => 'VendaPOS kwa migahawa, baa, saluni, maduka, supamaketi, maduka ya vifaa vya ujenzi, kemisti na maduka ya vileo, juu ya msingi mmoja wa mauzo, malipo na KRA eTIMS.',
+        ],
+        'eyebrow' => 'Suluhisho',
+        'title' => 'Imeundwa kwa jinsi biashara yako inavyouza.',
+        'lead' => 'Chagua aina ya biashara yako uone skrini, vipengele na mpangilio ulioandaliwa kwa ajili yake. Zote zinaendeshwa na msingi uleule thabiti: M-Pesa, KRA eTIMS na mauzo bila mtandao.',
+        'other_title' => 'Huioni aina ya biashara yako?',
+        'other_body' => 'VendaPOS pia inafanya kazi kwa duka au biashara yoyote ya huduma, ikiwa na bidhaa zako, huduma zako na sehemu zako maalum.',
+        'other_cta' => 'Zungumza nasi',
+    ],
+
     'common' => [
         'breadcrumb' => 'Suluhisho',
         'secondary_cta' => 'Angalia bei',

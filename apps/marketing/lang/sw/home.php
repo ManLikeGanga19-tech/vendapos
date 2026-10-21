@@ -41,7 +41,7 @@ return [
 
     'verticals' => [
         'eyebrow' => 'Imeundwa kwa kaunta yako',
-        'more' => 'Ona jinsi inavyofanya kazi',
+        'all' => 'Ona suluhisho zote',
         'title' => 'Mfumo mmoja. Zana sahihi kwa kila aina ya biashara.',
         'lead' => 'Kila tawi huwasha vipengele vinavyohitajika na biashara yake, juu ya msingi uleule thabiti wa mauzo, malipo na eTIMS.',
         'items' => [

@@ -1,11 +1,10 @@
 @props(['alternates'])
 
 @php
-    // route => [label, pattern that marks it active]. Solutions points at the first
-    // solution page until there are enough of them for a dropdown.
+    // route => [label, pattern that marks it active].
     $links = collect([
         'product' => ['nav.product', 'product'],
-        'solutions.restaurants' => ['nav.solutions', 'solutions.*'],
+        'solutions' => ['nav.solutions', 'solutions*'],
         'pricing' => ['nav.pricing', 'pricing'],
         'compliance' => ['nav.compliance', 'compliance'],
     ])->filter(fn (array $link, string $route) => Route::has($route));

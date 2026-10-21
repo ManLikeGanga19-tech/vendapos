@@ -51,3 +51,25 @@ it('keeps the language switcher on the same solution page', function () {
 it('returns 404 for business types without a page', function () {
     $this->get('/en/solutions/casinos')->assertNotFound();
 });
+
+it('lists every business type as a clickable card with a photo on the solutions page', function (string $locale) {
+    $html = $this->get("/{$locale}/solutions")->assertOk()->getContent();
+
+    foreach (array_keys(__('home.verticals.items', [], $locale)) as $vertical) {
+        // The whole card is one link that wraps the photo slot and the Learn more button.
+        expect($html)->toMatch('#<a href="'.preg_quote(url("/{$locale}/solutions/{$vertical}"), '#').'"[^>]*>.*?verticals/'.$vertical.'.*?'.preg_quote(__('common.learn_more', [], $locale), '#').'.*?</a>#s');
+    }
+
+    expect($html)->toContain(e(__('solutions.index.other_title', [], $locale)));
+})->with(['en', 'sw']);
+
+it('marks Solutions active in the header on the index and on every solution page', function (string $path) {
+    $this->get($path)->assertSee('href="'.url('/en/solutions').'"', false)->assertSee('aria-current="page"', false);
+})->with(['/en/solutions', '/en/solutions/bars', '/en/solutions/restaurants']);
+
+it('shows other business types as cards at the end of each solution page', function () {
+    $html = $this->get('/en/solutions/pharmacy')->getContent();
+
+    expect(substr_count($html, 'Learn more'))->toBe(7)
+        ->and($html)->toContain('See all solutions');
+});
