@@ -25,6 +25,11 @@ final class RequestPaymentRequest extends ApiRequest
                 $provider = MobileMoneyProvider::tryFrom((string) $this->input('provider'));
                 $phone = (string) $this->input('phone');
 
+                // Providers without a gateway yet (Airtel is deferred) are refused up front, not failed later.
+                if ($provider !== null && ! config('vendapos.payments.fake') && config("vendapos.payments.gateways.{$provider->value}") === null) {
+                    $validator->errors()->add('provider', "{$provider->value} is not available yet.");
+                }
+
                 // An M-Pesa Kenya push can only go to a Kenyan number, and so on.
                 if ($provider !== null && ! $validator->errors()->has('phone') && ! str_starts_with($phone, '+'.$provider->dialCode())) {
                     $validator->errors()->add('phone', "The phone must be a +{$provider->dialCode()} number for {$provider->value}.");

@@ -187,13 +187,14 @@ it('records the provider’s reason when it refuses the push', function () {
         ->failure_code->toBe('400.002.02');
 });
 
-it('fails the payment when no gateway is configured for the provider', function () {
-    config(['vendapos.payments.fake' => false, 'vendapos.payments.gateways' => []]);
-    $request = paymentOf(['provider' => 'airtel_ke', 'phone' => '0733 123 456']);
+it('refuses a provider that has no gateway yet, such as Airtel Money', function () {
+    config(['vendapos.payments.fake' => false]);
 
-    requestPayment($request)->assertAccepted();
+    requestPayment(paymentOf(['provider' => 'airtel_ke', 'phone' => '0733 123 456']))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['provider' => 'airtel_ke is not available yet.']);
 
-    expect(paymentIn($this->tenant, $request['uuid'])->status)->toBe(PaymentStatus::Failed);
+    expect($this->tenant->run(fn () => Payment::count()))->toBe(0);
 });
 
 it('applies the first final answer only, once', function () {
