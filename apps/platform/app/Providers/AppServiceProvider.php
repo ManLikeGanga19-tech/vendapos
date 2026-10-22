@@ -11,6 +11,7 @@ use App\Domain\Inventory\Jobs\RestoreStock;
 use App\Domain\Orders\Events\OrderRecorded;
 use App\Domain\Orders\Events\OrderVoided;
 use App\Domain\Payments\Events\PaymentRequested;
+use App\Domain\Payments\Jobs\FlagPaymentsForCancelledOrder;
 use App\Domain\Payments\Jobs\InitiatePayment;
 use App\Domain\Tenancy\Models\Device;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -59,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
             DecrementStock::dispatch($event->tenantId, $event->eventId);
             UpdateSalesSummaries::dispatch($event->tenantId, $event->eventId);
             SubmitSaleToEtims::dispatch($event->tenantId, $event->eventId);
+            FlagPaymentsForCancelledOrder::dispatch($event->tenantId, $event->eventId);
         });
 
         Event::listen(OrderVoided::class, function (OrderVoided $event) {

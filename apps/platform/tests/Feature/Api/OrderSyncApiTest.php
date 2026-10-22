@@ -132,6 +132,36 @@ it('voids a completed order on resend, but never un-voids it', function () {
     Event::assertDispatchedTimes(OrderVoided::class, 1);
 });
 
+it('accepts an order cancelled before completion, and never lets it change', function () {
+    $order = saleOf([[$this->nyama, 1]], overrides: ['status' => 'cancelled']);
+
+    sync([$order])->assertJsonPath('results.0.status', 'accepted');
+    sync([$order])->assertJsonPath('results.0.status', 'duplicate');
+
+    foreach (['completed', 'voided'] as $status) {
+        sync([[...$order, 'status' => $status]])
+            ->assertJsonPath('results.0.status', 'rejected')
+            ->assertJsonPath('results.0.reason', 'status_conflict');
+    }
+
+    expect($this->tenant->run(fn () => Order::findOrFail($order['uuid'])->status->value))->toBe('cancelled');
+    Event::assertNotDispatched(OrderVoided::class);
+});
+
+it('rejects cancelling an order that was already completed', function () {
+    $sale = saleOf([[$this->nyama, 1]]);
+    sync([$sale]);
+
+    sync([[...$sale, 'status' => 'cancelled']])
+        ->assertJsonPath('results.0.status', 'rejected')
+        ->assertJsonPath('results.0.reason', 'status_conflict');
+
+    sync([[...$sale, 'status' => 'voided']]);
+    sync([[...$sale, 'status' => 'cancelled']])->assertJsonPath('results.0.reason', 'status_conflict');
+
+    expect($this->tenant->run(fn () => Order::findOrFail($sale['uuid'])->status->value))->toBe('voided');
+});
+
 it('rejects a second order with the same sequence number from the same device', function () {
     sync([saleOf([[$this->nyama, 1]], sequence: 7)]);
 

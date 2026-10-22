@@ -29,6 +29,12 @@ final class UpdateSalesSummaries extends TenantEventJob
         }
 
         $payload = $event->payload;
+
+        // Never a sale. Counted for loss prevention once the hourly rollups land (slice G2).
+        if (($payload['status'] ?? null) === 'cancelled') {
+            return;
+        }
+
         $voided = $event->event_type === 'order.voided';
         // An order that first syncs already voided ends where a sale plus its void would: one void, nothing sold.
         $voidedBeforeSync = ! $voided && ($payload['status'] ?? null) === 'voided';

@@ -19,8 +19,9 @@ final class DecrementStock extends TenantEventJob
 
     protected function process(DomainEvent $event): void
     {
-        // Rung up and voided while offline: nothing left the shelf, and no order.voided will follow to put it back.
-        if (($event->payload['status'] ?? null) === 'voided') {
+        // Voided while offline, or cancelled before completion: nothing left the shelf, and no
+        // order.voided will follow to put it back.
+        if (in_array($event->payload['status'] ?? null, ['voided', 'cancelled'], true)) {
             return;
         }
 

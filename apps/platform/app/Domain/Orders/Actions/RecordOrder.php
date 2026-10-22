@@ -113,7 +113,9 @@ final class RecordOrder
 
     /**
      * Lines are immutable once accepted. The only change a resend can make is
-     * completed → voided; a stale "completed" never undoes a void.
+     * completed → voided. Resending the current status, or a stale "completed"
+     * from a retried batch after a void, is a duplicate; any other change
+     * (e.g. completed → cancelled) is a terminal bug and is rejected.
      */
     private function applyResend(Order $order, OrderData $data, DeviceContext $context): SyncResult
     {
@@ -121,8 +123,14 @@ final class RecordOrder
             return SyncResult::rejected($data->uuid, 'uuid_conflict');
         }
 
-        if ($order->status !== OrderStatus::Completed || $data->status !== OrderStatus::Voided) {
+        if ($data->status === $order->status || $order->status->hasMovedPast($data->status)) {
             return SyncResult::duplicate($order->id);
+        }
+
+        if (! $order->status->canBecome($data->status)) {
+            return SyncResult::rejected($data->uuid, 'status_conflict', [
+                'status' => "The order is {$order->status->value} and cannot become {$data->status->value}.",
+            ]);
         }
 
         $order->update(['status' => OrderStatus::Voided]);
