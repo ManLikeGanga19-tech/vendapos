@@ -36,7 +36,8 @@ return [
 
         'database' => [
             'driver' => 'database',
-            'connection' => null,
+            // Flags live centrally (scoped per branch), so they resolve the same inside a tenant.
+            'connection' => env('PENNANT_DB_CONNECTION', env('DB_CONNECTION')),
             'table' => 'features',
         ],
 

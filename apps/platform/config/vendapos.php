@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Domain\Etims\Clients\FakeEtimsClient;
+use App\Domain\Etims\Clients\NullEtimsClient;
 use App\Domain\Payments\Gateways\DarajaGateway;
 
 return [
@@ -81,6 +83,34 @@ return [
             // Older pending payments are left for manual review.
             'stop_after_hours' => 24,
         ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | KRA eTIMS
+    |--------------------------------------------------------------------------
+    |
+    | Every order gets an eTIMS status. A branch sends documents only once its
+    | Pennant flag EtimsEnabled is on; until a certified client exists, `null`
+    | makes such a branch's documents fail and retry, never count as sent.
+    |
+    */
+
+    'etims' => [
+        'client' => env('VENDAPOS_ETIMS_CLIENT', 'null'),
+        'clients' => [
+            'null' => NullEtimsClient::class,
+            'fake' => FakeEtimsClient::class,
+        ],
+        // A worker holds a document this long while sending; longer than any client timeout.
+        'lease_seconds' => 300,
+        // After each failed attempt, then hourly (architecture §6.1).
+        'retry_delays_seconds' => [30, 60, 120],
+        'retry_every_seconds' => 3600,
+        // About three days of hourly retries, then the document is marked failed for the Admin panel.
+        'max_attempts' => 75,
+        // Documents one RetryFailedEtims job sends per tenant per run.
+        'retry_batch_size' => 200,
     ],
 
     // Business days are counted here; storage stays UTC (CLAUDE.md §4).

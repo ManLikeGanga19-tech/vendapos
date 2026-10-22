@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Settles payments whose provider callback is late or missing.
 Schedule::command('payments:reconcile')->everyMinute()->withoutOverlapping()->onOneServer();
+
+// Resends eTIMS documents whose retry is due (30 s, 60 s, 120 s, then hourly).
+Schedule::command('etims:retry')->everyMinute()->withoutOverlapping()->onOneServer();

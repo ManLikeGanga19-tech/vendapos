@@ -160,7 +160,10 @@ final class RecordOrder
             'total_cents' => $order->total_cents,
             'lines' => $order->lines->map(fn (OrderLine $line) => [
                 'item_id' => $line->item_id,
+                'name' => $line->name,
                 'quantity' => $line->quantity,
+                'unit_price_cents' => $line->unit_price_cents,
+                'vat_category' => $line->vat_category->value,
                 'line_total_cents' => $line->line_total_cents,
                 'vat_cents' => $line->vat_cents,
             ])->values()->all(),

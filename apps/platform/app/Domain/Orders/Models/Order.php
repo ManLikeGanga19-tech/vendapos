@@ -7,6 +7,7 @@ namespace App\Domain\Orders\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use VendaPOS\Core\Enums\EtimsStatus;
 use VendaPOS\Core\Enums\OrderStatus;
 use VendaPOS\Core\Enums\PaymentType;
 use VendaPOS\Core\ValueObjects\Money;
@@ -24,7 +25,7 @@ use VendaPOS\Core\ValueObjects\Money;
  * @property int $subtotal_cents
  * @property int $vat_cents
  * @property int $total_cents
- * @property string|null $etims_status
+ * @property EtimsStatus|null $etims_status
  * @property array<string, mixed>|null $etims_receipt
  */
 class Order extends Model
@@ -45,6 +46,7 @@ class Order extends Model
             'subtotal_cents' => 'integer',
             'vat_cents' => 'integer',
             'total_cents' => 'integer',
+            'etims_status' => EtimsStatus::class,
             'etims_receipt' => 'array',
         ];
     }

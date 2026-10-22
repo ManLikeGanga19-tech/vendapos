@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Domain\Analytics\Jobs\UpdateSalesSummaries;
+use App\Domain\Etims\Contracts\EtimsClient;
+use App\Domain\Etims\Jobs\SubmitCreditNoteToEtims;
+use App\Domain\Etims\Jobs\SubmitSaleToEtims;
 use App\Domain\Inventory\Jobs\DecrementStock;
 use App\Domain\Inventory\Jobs\RestoreStock;
 use App\Domain\Orders\Events\OrderRecorded;
@@ -23,7 +26,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(EtimsClient::class, function () {
+            /** @var array<string, class-string<EtimsClient>> $clients */
+            $clients = config('vendapos.etims.clients');
+
+            return $this->app->make($clients[(string) config('vendapos.etims.client')]);
+        });
     }
 
     /**
@@ -50,11 +58,13 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(OrderRecorded::class, function (OrderRecorded $event) {
             DecrementStock::dispatch($event->tenantId, $event->eventId);
             UpdateSalesSummaries::dispatch($event->tenantId, $event->eventId);
+            SubmitSaleToEtims::dispatch($event->tenantId, $event->eventId);
         });
 
         Event::listen(OrderVoided::class, function (OrderVoided $event) {
             RestoreStock::dispatch($event->tenantId, $event->eventId);
             UpdateSalesSummaries::dispatch($event->tenantId, $event->eventId);
+            SubmitCreditNoteToEtims::dispatch($event->tenantId, $event->eventId);
         });
 
         Event::listen(PaymentRequested::class, fn (PaymentRequested $event) => InitiatePayment::dispatch($event->tenantId, $event->eventId));
