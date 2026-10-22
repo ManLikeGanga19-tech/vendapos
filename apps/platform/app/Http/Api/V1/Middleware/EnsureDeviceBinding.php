@@ -42,6 +42,8 @@ final class EnsureDeviceBinding
             return $this->reject($request, 'tenant_missing', $device);
         }
 
+        $this->markSeen($device);
+
         tenancy()->initialize($tenant);
 
         try {
@@ -49,6 +51,14 @@ final class EnsureDeviceBinding
         } finally {
             // Octane reuses workers: never let one request's tenant leak into the next.
             tenancy()->end();
+        }
+    }
+
+    /** Shown to staff as "last seen"; written at most once a minute so busy tills don't write on every request. */
+    private function markSeen(Device $device): void
+    {
+        if ($device->last_seen_at === null || $device->last_seen_at->lessThanOrEqualTo(now()->subMinute())) {
+            Device::query()->whereKey($device->id)->update(['last_seen_at' => now()]);
         }
     }
 

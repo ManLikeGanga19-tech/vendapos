@@ -71,6 +71,35 @@ it('ends the tenant context when the request finishes', function () {
     expect(tenancy()->initialized)->toBeFalse();
 });
 
+it('records when a device was last seen, at most once a minute', function () {
+    [$tenant, $branch] = tenantWithBranch();
+    $enrolment = enrolFor($tenant, $branch);
+    $this->freezeSecond();
+
+    deviceRequest('GET', '/api/v1/device', $enrolment->plainTextToken, $enrolment->device->id)->assertOk();
+    $first = $enrolment->device->fresh()?->last_seen_at;
+
+    $this->travel(30)->seconds();
+    deviceRequest('GET', '/api/v1/device', $enrolment->plainTextToken, $enrolment->device->id)->assertOk();
+    $second = $enrolment->device->fresh()?->last_seen_at;
+
+    $this->travel(31)->seconds();
+    deviceRequest('GET', '/api/v1/device', $enrolment->plainTextToken, $enrolment->device->id)->assertOk();
+
+    expect($first?->toIso8601String())->toBe(now()->subSeconds(61)->toIso8601String())
+        ->and($second?->equalTo($first))->toBeTrue()
+        ->and($enrolment->device->fresh()?->last_seen_at?->toIso8601String())->toBe(now()->toIso8601String());
+});
+
+it('does not mark a rejected request as seen', function () {
+    [$tenant, $branch] = tenantWithBranch();
+    $enrolment = enrolFor($tenant, $branch);
+
+    deviceRequest('GET', '/api/v1/device', $enrolment->plainTextToken, 'not-this-device')->assertUnauthorized();
+
+    expect($enrolment->device->fresh()?->last_seen_at)->toBeNull();
+});
+
 it('rejects revoked devices', function () {
     [$tenant, $branch] = tenantWithBranch();
     $enrolment = enrolFor($tenant, $branch);
