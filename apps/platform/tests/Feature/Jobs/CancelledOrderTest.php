@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Domain\Analytics\Models\DailySales;
+use App\Domain\Analytics\Models\ItemSalesDaily;
+use App\Domain\Analytics\Models\SalesHourly;
 use App\Domain\Catalogue\Models\Item;
 use App\Domain\Etims\Features\EtimsEnabled;
 use App\Domain\Etims\Models\EtimsSubmission;
@@ -44,7 +45,10 @@ it('moves no stock, adds no sales and owes eTIMS nothing for a cancelled order',
 
     $this->tenant->run(function () use ($order) {
         expect(StockMovement::query()->count())->toBe(0)
-            ->and(DailySales::query()->count())->toBe(0)
+            ->and((int) SalesHourly::query()->sum('order_count'))->toBe(0)
+            ->and((int) SalesHourly::query()->sum('cancelled_count'))->toBe(1)
+            ->and((int) SalesHourly::query()->sum('total_cents'))->toBe(0)
+            ->and(ItemSalesDaily::query()->count())->toBe(0)
             ->and(EtimsSubmission::query()->count())->toBe(0)
             ->and(Order::query()->findOrFail($order['uuid'])->etims_status)->toBe(EtimsStatus::NotRequired);
     });

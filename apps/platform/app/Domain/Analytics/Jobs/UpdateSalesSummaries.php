@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Analytics\Jobs;
 
-use App\Domain\Analytics\Models\DailySales;
+use App\Domain\Analytics\Models\ItemSalesDaily;
+use App\Domain\Analytics\Models\SalesHourly;
 use App\Infrastructure\Outbox\DomainEvent;
 use App\Infrastructure\Queue\TenantEventJob;
 use Illuminate\Support\Carbon;
@@ -12,8 +13,10 @@ use Illuminate\Support\Facades\DB;
 use LogicException;
 
 /**
- * order.recorded / order.voided → the branch's daily sales. The day is the
- * Africa/Nairobi business day the sale was placed on, not the day it synced.
+ * order.recorded / order.voided → the branch's hourly sales and per-item
+ * daily sales (architecture §7.3). The hour and day are Africa/Nairobi, from
+ * when the sale was placed, not when it synced. Every change is additive, so
+ * a void processed before its sale still nets out.
  */
 final class UpdateSalesSummaries extends TenantEventJob
 {
@@ -29,43 +32,81 @@ final class UpdateSalesSummaries extends TenantEventJob
         }
 
         $payload = $event->payload;
+        $status = $payload['status'] ?? null;
+        $voidEvent = $event->event_type === 'order.voided';
 
-        // Never a sale. Counted for loss prevention once the hourly rollups land (slice G2).
-        if (($payload['status'] ?? null) === 'cancelled') {
-            return;
-        }
-
-        $voided = $event->event_type === 'order.voided';
-        // An order that first syncs already voided ends where a sale plus its void would: one void, nothing sold.
-        $voidedBeforeSync = ! $voided && ($payload['status'] ?? null) === 'voided';
+        // Sign applied to the order count, amounts and items:
+        //   recorded completed +1 · order.voided −1 · recorded already voided or cancelled 0.
         $sign = match (true) {
-            $voided => -1,
-            $voidedBeforeSync => 0,
+            $voidEvent => -1,
+            $status === 'voided', $status === 'cancelled' => 0,
             default => 1,
         };
+        $voids = $voidEvent || $status === 'voided' ? 1 : 0;
+        $cancels = ! $voidEvent && $status === 'cancelled' ? 1 : 0;
+
+        $placedAt = Carbon::parse($payload['placed_at'])->setTimezone((string) config('vendapos.business_timezone'));
+        $date = $placedAt->toDateString();
         $now = now();
 
-        DailySales::query()->upsert(
+        SalesHourly::query()->upsert(
             [[
                 'branch_id' => $event->branch_id,
-                'business_date' => Carbon::parse($payload['placed_at'])
-                    ->setTimezone((string) config('vendapos.business_timezone'))
-                    ->toDateString(),
+                'business_date' => $date,
+                'hour' => $placedAt->hour,
                 'order_count' => $sign,
-                'void_count' => $voided || $voidedBeforeSync ? 1 : 0,
+                'void_count' => $voids,
+                'cancelled_count' => $cancels,
                 'subtotal_cents' => $sign * (int) $payload['subtotal_cents'],
                 'vat_cents' => $sign * (int) $payload['vat_cents'],
                 'total_cents' => $sign * (int) $payload['total_cents'],
                 'created_at' => $now,
                 'updated_at' => $now,
             ]],
-            ['branch_id', 'business_date'],
+            ['branch_id', 'business_date', 'hour'],
             [
-                'order_count' => DB::raw('daily_sales.order_count + excluded.order_count'),
-                'void_count' => DB::raw('daily_sales.void_count + excluded.void_count'),
-                'subtotal_cents' => DB::raw('daily_sales.subtotal_cents + excluded.subtotal_cents'),
-                'vat_cents' => DB::raw('daily_sales.vat_cents + excluded.vat_cents'),
-                'total_cents' => DB::raw('daily_sales.total_cents + excluded.total_cents'),
+                'order_count' => DB::raw('sales_hourly.order_count + excluded.order_count'),
+                'void_count' => DB::raw('sales_hourly.void_count + excluded.void_count'),
+                'cancelled_count' => DB::raw('sales_hourly.cancelled_count + excluded.cancelled_count'),
+                'subtotal_cents' => DB::raw('sales_hourly.subtotal_cents + excluded.subtotal_cents'),
+                'vat_cents' => DB::raw('sales_hourly.vat_cents + excluded.vat_cents'),
+                'total_cents' => DB::raw('sales_hourly.total_cents + excluded.total_cents'),
+                'updated_at' => DB::raw('excluded.updated_at'),
+            ],
+        );
+
+        if ($sign === 0) {
+            return;
+        }
+
+        $items = [];
+
+        /** @var list<array{item_id: string, quantity: int, line_total_cents: int, vat_cents: int}> $lines */
+        $lines = $payload['lines'];
+
+        foreach ($lines as $line) {
+            $row = $items[$line['item_id']] ?? ['quantity' => 0, 'total_cents' => 0, 'vat_cents' => 0];
+            $items[$line['item_id']] = [
+                'quantity' => $row['quantity'] + $sign * (int) $line['quantity'],
+                'total_cents' => $row['total_cents'] + $sign * (int) $line['line_total_cents'],
+                'vat_cents' => $row['vat_cents'] + $sign * (int) $line['vat_cents'],
+            ];
+        }
+
+        ItemSalesDaily::query()->upsert(
+            array_map(fn (string $itemId, array $row) => [
+                'branch_id' => $event->branch_id,
+                'business_date' => $date,
+                'item_id' => $itemId,
+                ...$row,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ], array_keys($items), $items),
+            ['branch_id', 'business_date', 'item_id'],
+            [
+                'quantity' => DB::raw('item_sales_daily.quantity + excluded.quantity'),
+                'total_cents' => DB::raw('item_sales_daily.total_cents + excluded.total_cents'),
+                'vat_cents' => DB::raw('item_sales_daily.vat_cents + excluded.vat_cents'),
                 'updated_at' => DB::raw('excluded.updated_at'),
             ],
         );

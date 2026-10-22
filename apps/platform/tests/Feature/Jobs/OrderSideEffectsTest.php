@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 use App\Domain\Analytics\Jobs\UpdateSalesSummaries;
-use App\Domain\Analytics\Models\DailySales;
+use App\Domain\Analytics\Models\ItemSalesDaily;
+use App\Domain\Analytics\Models\SalesHourly;
 use App\Domain\Catalogue\Models\Item;
 use App\Domain\Inventory\Jobs\DecrementStock;
 use App\Domain\Inventory\Jobs\RestoreStock;
@@ -49,17 +50,45 @@ function stockIn(Tenant $tenant): array
         ->all());
 }
 
-/** @return list<array<string, mixed>> */
+/** A day's figures are the sum of its hours. @return list<array<string, mixed>> */
 function dailySalesIn(Tenant $tenant): array
 {
-    return $tenant->run(fn () => DailySales::query()->orderBy('business_date')->get()
-        ->map(fn (DailySales $day) => [
-            'date' => $day->business_date->toDateString(),
-            'orders' => $day->order_count,
-            'voids' => $day->void_count,
-            'total' => $day->total_cents,
-            'vat' => $day->vat_cents,
+    return $tenant->run(fn () => SalesHourly::query()->orderBy('business_date')->get()
+        ->groupBy(fn (SalesHourly $hour) => $hour->business_date->toDateString())
+        ->map(fn ($hours, string $date) => [
+            'date' => $date,
+            'orders' => (int) $hours->sum('order_count'),
+            'voids' => (int) $hours->sum('void_count'),
+            'total' => (int) $hours->sum('total_cents'),
+            'vat' => (int) $hours->sum('vat_cents'),
+        ])->values()->all());
+}
+
+/** @return list<array{date: string, hour: int, orders: int, voids: int, cancels: int, total: int}> */
+function hourlySalesIn(Tenant $tenant): array
+{
+    return $tenant->run(fn () => SalesHourly::query()->orderBy('business_date')->orderBy('hour')->get()
+        ->map(fn (SalesHourly $h) => [
+            'date' => $h->business_date->toDateString(),
+            'hour' => $h->hour,
+            'orders' => $h->order_count,
+            'voids' => $h->void_count,
+            'cancels' => $h->cancelled_count,
+            'total' => $h->total_cents,
         ])->all());
+}
+
+/** @return array<string, array{quantity: int, total: int, vat: int}> item name => what it sold */
+function itemSalesIn(Tenant $tenant, string $date = '2026-10-21'): array
+{
+    return $tenant->run(fn () => ItemSalesDaily::query()
+        ->join('items', 'items.id', '=', 'item_sales_daily.item_id')
+        ->whereDate('business_date', $date)
+        ->orderBy('items.name')
+        ->get(['items.name', 'item_sales_daily.quantity', 'item_sales_daily.total_cents', 'item_sales_daily.vat_cents'])
+        ->mapWithKeys(fn (ItemSalesDaily $row) => [(string) $row->getAttribute('name') => [
+            'quantity' => $row->quantity, 'total' => $row->total_cents, 'vat' => $row->vat_cents,
+        ]])->all());
 }
 
 function eventIdFor(string $orderId, string $type): string
@@ -98,6 +127,35 @@ it('puts stock back and takes the sale out of the day’s figures when an order 
     expect(stockIn($this->tenant))->toBe(['Nyama choma' => 0])
         ->and(dailySalesIn($this->tenant))->toBe([['date' => '2026-10-21', 'orders' => 0, 'voids' => 1, 'total' => 0, 'vat' => 0]])
         ->and($this->tenant->run(fn () => StockMovement::query()->orderBy('id')->pluck('reason')->all()))->toBe(['sale', 'void']);
+});
+
+it('files each sale under its Africa/Nairobi hour', function () {
+    sync([
+        saleOf([[$this->nyama, 1]], sequence: 1, overrides: ['placed_at' => '2026-10-21T19:15:00+03:00']),
+        saleOf([[$this->water, 2]], sequence: 2, overrides: ['placed_at' => '2026-10-21T19:59:59+03:00']),
+        // 17:05 UTC is 20:05 in Nairobi.
+        saleOf([[$this->water, 1]], sequence: 3, overrides: ['placed_at' => '2026-10-21T17:05:00Z']),
+        saleOf([[$this->nyama, 1]], sequence: 4, overrides: ['placed_at' => '2026-10-21T20:30:00+03:00', 'status' => 'cancelled']),
+    ]);
+
+    expect(hourlySalesIn($this->tenant))->toBe([
+        ['date' => '2026-10-21', 'hour' => 19, 'orders' => 2, 'voids' => 0, 'cancels' => 0, 'total' => 195_000],
+        ['date' => '2026-10-21', 'hour' => 20, 'orders' => 1, 'voids' => 0, 'cancels' => 1, 'total' => 5_000],
+    ]);
+});
+
+it('adds up what each item sold per day, net of voids, and leaves out cancellations', function () {
+    $kept = saleOf([[$this->nyama, 2], [$this->water, 1], [$this->nyama, 1]], sequence: 1);
+    $voided = saleOf([[$this->water, 3]], sequence: 2);
+
+    sync([$kept, $voided, saleOf([[$this->shave, 1]], sequence: 3, overrides: ['status' => 'cancelled'])]);
+    sync([[...$voided, 'status' => 'voided']]);
+
+    expect(itemSalesIn($this->tenant))->toBe([
+        // VAT is per line, then summed: 51,034 (2 × 1,850) + 25,517 (1 × 1,850), not 16/116 of 5,550.
+        'Nyama choma' => ['quantity' => 3, 'total' => 555_000, 'vat' => 76_551],
+        'Water 500 ml' => ['quantity' => 1, 'total' => 5_000, 'vat' => 0],
+    ]);
 });
 
 it('moves no stock and counts only a void when an order first syncs already voided', function () {
