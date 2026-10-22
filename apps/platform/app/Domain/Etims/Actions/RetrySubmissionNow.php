@@ -22,11 +22,11 @@ final class RetrySubmissionNow
         $submission = EtimsSubmission::query()->findOrFail($submissionId);
 
         if (! in_array($submission->status, [EtimsStatus::Pending, EtimsStatus::Failed], true)) {
-            throw new DomainException('Only pending or failed documents can be retried.');
+            throw new DomainException(__('etims.only_pending_or_failed'));
         }
 
         if ($submission->locked_until?->isFuture()) {
-            throw new DomainException('This document is being sent right now.');
+            throw new DomainException(__('etims.being_sent'));
         }
 
         $submission->update([

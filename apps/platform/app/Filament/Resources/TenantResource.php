@@ -10,6 +10,7 @@ use BackedEnum;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -62,6 +63,21 @@ class TenantResource extends Resource
             'index' => Pages\ListTenants::route('/'),
             'create' => Pages\CreateTenant::route('/create'),
             'edit' => Pages\EditTenant::route('/{record}/edit'),
+            'branches' => Pages\TenantBranches::route('/{record}/branches'),
+            'devices' => Pages\TenantDevices::route('/{record}/devices'),
+            'etims' => Pages\TenantEtims::route('/{record}/etims'),
+            'negative-stock' => Pages\TenantNegativeStock::route('/{record}/negative-stock'),
         ];
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\EditTenant::class,
+            Pages\TenantBranches::class,
+            Pages\TenantDevices::class,
+            Pages\TenantEtims::class,
+            Pages\TenantNegativeStock::class,
+        ]);
     }
 }
