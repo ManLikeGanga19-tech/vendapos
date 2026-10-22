@@ -9,6 +9,8 @@ use App\Domain\Etims\Features\EtimsEnabled;
 use App\Domain\Etims\Models\EtimsSubmission;
 use App\Domain\Tenancy\Models\Device;
 use App\Domain\Tenancy\Models\Tenant;
+use App\Filament\Resources\TenantResource\Pages\EditTenant;
+use App\Filament\Resources\TenantResource\Pages\ListTenants;
 use App\Filament\Resources\TenantResource\Pages\TenantBranches;
 use App\Filament\Resources\TenantResource\Pages\TenantDevices;
 use App\Filament\Resources\TenantResource\Pages\TenantEtims;
@@ -153,6 +155,16 @@ it('flags items below zero in the tenant’s branches', function () {
     Livewire::test(TenantNegativeStock::class, ['record' => $this->tenant->id])
         ->assertSee('Nyama choma')
         ->assertSee('-2');
+});
+
+it('offers no way to delete a tenant from the panel', function () {
+    Livewire::test(EditTenant::class, ['record' => $this->tenant->id])
+        ->assertActionDoesNotExist('delete');
+
+    Livewire::test(ListTenants::class)
+        ->assertTableBulkActionDoesNotExist('delete');
+
+    expect(Tenant::find($this->tenant->id))->not->toBeNull();
 });
 
 it('keeps non-staff out of every tenant page', function (string $page) {

@@ -7,7 +7,6 @@ namespace App\Filament\Resources\TenantResource\Pages;
 use App\Filament\Resources\TenantResource;
 use App\Filament\Resources\TenantResource\Widgets\TenantSalesByHour;
 use App\Filament\Resources\TenantResource\Widgets\TenantToday;
-use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditTenant extends EditRecord
@@ -22,10 +21,12 @@ class EditTenant extends EditRecord
         ];
     }
 
+    /**
+     * No delete here: deleting a tenant drops its whole schema. Tenants are
+     * suspended first and purged later by a separate, notified process.
+     */
     protected function getHeaderActions(): array
     {
-        return [
-            DeleteAction::make(),
-        ];
+        return [];
     }
 }

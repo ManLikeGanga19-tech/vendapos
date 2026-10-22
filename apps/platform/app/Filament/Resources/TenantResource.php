@@ -7,7 +7,6 @@ namespace App\Filament\Resources;
 use App\Domain\Tenancy\Models\Tenant;
 use App\Filament\Resources\TenantResource\Pages;
 use BackedEnum;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\Page;
@@ -51,9 +50,6 @@ class TenantResource extends Resource
             ])
             ->actions([
                 EditAction::make(),
-            ])
-            ->bulkActions([
-                DeleteBulkAction::make(),
             ]);
     }
 
