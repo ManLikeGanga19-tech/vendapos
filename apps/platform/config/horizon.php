@@ -232,7 +232,9 @@ return [
 
         'local' => [
             'supervisor-1' => [
-                'maxProcesses' => 3,
+                // Two workers sharing every queue in order; auto-balancing would start one per queue (8).
+                'balance' => false,
+                'maxProcesses' => 2,
             ],
         ],
     ],
