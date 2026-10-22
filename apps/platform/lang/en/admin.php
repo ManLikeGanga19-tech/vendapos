@@ -65,6 +65,19 @@ return [
         'empty' => 'No item is below zero.',
     ],
 
+    'today' => [
+        'sales' => 'Sales today',
+        'vat' => 'Including :vat VAT',
+        'orders' => 'Orders today',
+        'voids_cancels' => 'Voids / cancellations',
+        'voids_cancels_help' => 'A high share can point to till losses.',
+        'etims' => 'eTIMS pending / failed',
+        'etims_help' => 'Documents still owed to KRA.',
+        'sales_by_hour' => 'Sales by hour today (Africa/Nairobi)',
+        'sales_kes' => 'Sales (KES)',
+        'no_sales' => 'No sales yet today.',
+    ],
+
     'errors' => [
         'action_failed' => 'That could not be done.',
     ],

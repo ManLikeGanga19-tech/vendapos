@@ -66,6 +66,19 @@ return [
         'empty' => 'Hakuna bidhaa iliyo chini ya sifuri.',
     ],
 
+    'today' => [
+        'sales' => 'Mauzo ya leo',
+        'vat' => 'Pamoja na VAT ya :vat',
+        'orders' => 'Oda za leo',
+        'voids_cancels' => 'Zilizobatilishwa / zilizoghairiwa',
+        'voids_cancels_help' => 'Kiwango kikubwa kinaweza kuashiria hasara kwenye kaunta.',
+        'etims' => 'eTIMS zinazosubiri / zilizoshindikana',
+        'etims_help' => 'Hati ambazo bado hazijatumwa kwa KRA.',
+        'sales_by_hour' => 'Mauzo kwa saa leo (Afrika/Nairobi)',
+        'sales_kes' => 'Mauzo (KES)',
+        'no_sales' => 'Hakuna mauzo bado leo.',
+    ],
+
     'errors' => [
         'action_failed' => 'Haikuwezekana kufanya hivyo.',
     ],
