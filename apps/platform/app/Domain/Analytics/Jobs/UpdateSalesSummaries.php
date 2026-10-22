@@ -28,9 +28,15 @@ final class UpdateSalesSummaries extends TenantEventJob
             throw new LogicException("Order event {$event->event_id} has no branch.");
         }
 
-        $voided = $event->event_type === 'order.voided';
-        $sign = $voided ? -1 : 1;
         $payload = $event->payload;
+        $voided = $event->event_type === 'order.voided';
+        // An order that first syncs already voided ends where a sale plus its void would: one void, nothing sold.
+        $voidedBeforeSync = ! $voided && ($payload['status'] ?? null) === 'voided';
+        $sign = match (true) {
+            $voided => -1,
+            $voidedBeforeSync => 0,
+            default => 1,
+        };
         $now = now();
 
         DailySales::query()->upsert(
@@ -40,7 +46,7 @@ final class UpdateSalesSummaries extends TenantEventJob
                     ->setTimezone((string) config('vendapos.business_timezone'))
                     ->toDateString(),
                 'order_count' => $sign,
-                'void_count' => $voided ? 1 : 0,
+                'void_count' => $voided || $voidedBeforeSync ? 1 : 0,
                 'subtotal_cents' => $sign * (int) $payload['subtotal_cents'],
                 'vat_cents' => $sign * (int) $payload['vat_cents'],
                 'total_cents' => $sign * (int) $payload['total_cents'],

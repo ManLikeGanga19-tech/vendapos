@@ -100,6 +100,15 @@ it('puts stock back and takes the sale out of the day’s figures when an order 
         ->and($this->tenant->run(fn () => StockMovement::query()->orderBy('id')->pluck('reason')->all()))->toBe(['sale', 'void']);
 });
 
+it('moves no stock and counts only a void when an order first syncs already voided', function () {
+    // Rung up and voided while the terminal was offline: no order.voided event will ever follow.
+    sync([saleOf([[$this->nyama, 2]], overrides: ['status' => 'voided'])])->assertJsonPath('results.0.status', 'accepted');
+
+    expect(stockIn($this->tenant))->toBe([])
+        ->and($this->tenant->run(fn () => StockMovement::query()->count()))->toBe(0)
+        ->and(dailySalesIn($this->tenant))->toBe([['date' => '2026-10-21', 'orders' => 0, 'voids' => 1, 'total' => 0, 'vat' => 0]]);
+});
+
 it('nets to zero when a void’s jobs run before its sale’s jobs', function () {
     Queue::fake();
     $sale = saleOf([[$this->nyama, 1]]);

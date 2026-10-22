@@ -19,6 +19,11 @@ final class DecrementStock extends TenantEventJob
 
     protected function process(DomainEvent $event): void
     {
+        // Rung up and voided while offline: nothing left the shelf, and no order.voided will follow to put it back.
+        if (($event->payload['status'] ?? null) === 'voided') {
+            return;
+        }
+
         app(ApplyOrderToStock::class)->handle(...StockEvent::arguments($event, StockMovement::REASON_SALE));
     }
 }
