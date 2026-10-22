@@ -37,9 +37,9 @@ final class SetPaymentCredentialsCommand extends Command
             return self::FAILURE;
         }
 
-        $fields = match ($provider) {
-            MobileMoneyProvider::MpesaKe => DarajaGateway::CREDENTIAL_FIELDS,
-            MobileMoneyProvider::AirtelKe => null,
+        [$fields, $options] = match ($provider) {
+            MobileMoneyProvider::MpesaKe => [DarajaGateway::CREDENTIAL_FIELDS, DarajaGateway::CREDENTIAL_OPTIONS],
+            MobileMoneyProvider::AirtelKe => [null, []],
         };
 
         if ($fields === null) {
@@ -55,6 +55,13 @@ final class SetPaymentCredentialsCommand extends Command
 
             if (! is_string($value) || trim($value) === '') {
                 $this->error("{$field} is required.");
+
+                return self::FAILURE;
+            }
+
+            // A wrong value here is only refused by the provider at the first payment, so stop it now.
+            if (isset($options[$field]) && ! in_array(trim($value), $options[$field], true)) {
+                $this->error("{$field} must be one of: ".implode(', ', $options[$field]).'. Nothing was saved.');
 
                 return self::FAILURE;
             }

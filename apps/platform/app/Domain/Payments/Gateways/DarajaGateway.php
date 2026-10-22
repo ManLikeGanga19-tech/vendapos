@@ -23,8 +23,13 @@ use VendaPOS\Core\Enums\PaymentStatus;
  */
 final class DarajaGateway extends MobileMoneyGateway
 {
-    /** What `payments:credentials` asks for. transaction_type: CustomerPayBillOnline or CustomerBuyGoodsOnline. */
+    /** What `payments:credentials` asks for. */
     public const array CREDENTIAL_FIELDS = ['consumer_key', 'consumer_secret', 'passkey', 'shortcode', 'party_b', 'transaction_type'];
+
+    /** Fields Daraja only accepts fixed values for: paybill or till (buy goods). */
+    public const array CREDENTIAL_OPTIONS = [
+        'transaction_type' => ['CustomerPayBillOnline', 'CustomerBuyGoodsOnline'],
+    ];
 
     private const array BASE_URLS = [
         PaymentCredential::SANDBOX => 'https://sandbox.safaricom.co.ke',

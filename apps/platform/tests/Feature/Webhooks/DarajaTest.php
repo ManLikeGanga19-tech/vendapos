@@ -311,3 +311,19 @@ it('stores keys encrypted and takes them from prompts, never arguments', functio
         ->and($stored->environment)->toBe('production')
         ->and($stored->credentials['passkey'])->toBe('live-passkey-0f9e8d7c6b5a');
 });
+
+it('refuses a transaction type daraja does not accept and keeps the saved keys', function () {
+    $this->artisan('payments:credentials', ['tenant' => $this->tenant->id, 'provider' => 'mpesa_ke'])
+        ->expectsQuestion('consumer_key', 'new-consumer-key')
+        ->expectsQuestion('consumer_secret', 'new-consumer-secret')
+        ->expectsQuestion('passkey', 'new-passkey')
+        ->expectsQuestion('shortcode', '174379')
+        ->expectsQuestion('party_b', '174379')
+        ->expectsQuestion('transaction_type', 'Test')
+        ->expectsOutputToContain('transaction_type must be one of: CustomerPayBillOnline, CustomerBuyGoodsOnline')
+        ->assertFailed();
+
+    expect($this->tenant->run(fn () => PaymentCredential::query()->sole())->credentials)
+        ->consumer_key->toBe('sandbox-consumer-key')
+        ->transaction_type->toBe('CustomerPayBillOnline');
+});
