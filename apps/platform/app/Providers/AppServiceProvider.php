@@ -14,6 +14,7 @@ use App\Domain\Payments\Events\PaymentRequested;
 use App\Domain\Payments\Jobs\FlagPaymentsForCancelledOrder;
 use App\Domain\Payments\Jobs\InitiatePayment;
 use App\Domain\Tenancy\Models\Device;
+use Filament\Support\Facades\FilamentTimezone;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
@@ -44,6 +45,9 @@ class AppServiceProvider extends ServiceProvider
             database_path('migrations'),
             database_path('migrations/central'),
         ]);
+
+        // Stored in UTC, shown in the business timezone in every panel (CLAUDE.md §4).
+        FilamentTimezone::set((string) config('vendapos.business_timezone'));
 
         // Keyed on the authenticated device, so they run after auth:sanctum and device.bound.
         RateLimiter::for('device', fn (Request $request) => Limit::perMinute((int) config('vendapos.rate_limits.device'))

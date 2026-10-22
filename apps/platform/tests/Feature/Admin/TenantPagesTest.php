@@ -90,6 +90,16 @@ it('lists and revokes only the tenant’s own devices', function () {
         ->and($this->otherDevice->fresh()?->isRevoked())->toBeFalse();
 });
 
+it('shows times in Africa/Nairobi, though they are stored in UTC', function () {
+    $this->travelTo(Carbon\Carbon::parse('2026-10-22T10:00:00Z'));
+    $device = enrolFor($this->tenant, $this->branch)->device; // token expires 22:00 UTC
+
+    Livewire::test(TenantDevices::class, ['record' => $this->tenant->id])
+        ->assertCanSeeTableRecords([$device])
+        ->assertSee('Oct 23, 2026 01:00:00')
+        ->assertDontSee('Oct 22, 2026 22:00:00');
+});
+
 it('cannot revoke another tenant’s device from this tenant’s page', function () {
     $page = Livewire::test(TenantDevices::class, ['record' => $this->tenant->id]);
 
