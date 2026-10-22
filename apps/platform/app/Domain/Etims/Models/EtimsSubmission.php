@@ -23,6 +23,7 @@ use VendaPOS\Core\Enums\EtimsStatus;
  * @property array<string, mixed>|null $receipt
  * @property int $attempts
  * @property Carbon|null $next_attempt_at
+ * @property Carbon|null $locked_until
  * @property Carbon|null $submitted_at
  */
 class EtimsSubmission extends Model
@@ -40,6 +41,7 @@ class EtimsSubmission extends Model
             'receipt' => 'array',
             'attempts' => 'integer',
             'next_attempt_at' => 'datetime',
+            'locked_until' => 'datetime',
             'submitted_at' => 'datetime',
         ];
     }

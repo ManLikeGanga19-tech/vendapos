@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Catalogue\Models\Item;
+use App\Domain\Etims\Actions\RetrySubmissionNow;
 use App\Domain\Etims\Actions\TransmitEtimsDocument;
 use App\Domain\Etims\Contracts\EtimsClient;
 use App\Domain\Etims\Data\EtimsResult;
@@ -176,6 +177,49 @@ it('does not resend before the retry is due', function () {
     (new SendEtimsDocument($this->tenant->id, submissionIn($this->tenant, $sale['uuid'])->id))->handle(app(TransmitEtimsDocument::class));
 
     expect($this->client->sent)->toHaveCount(1);
+});
+
+it('never lets a second worker or "Retry now" take a document that is being sent', function () {
+    enableEtims($this->branch);
+    $this->client->script = [EtimsResult::rejected('kra_down', 'Service unavailable')];
+    $sale = saleOf([[$this->nyama, 1]]);
+    sync([$sale]);
+    $submissionId = submissionIn($this->tenant, $sale['uuid'])->id;
+
+    // A worker is mid-send: the document is due but locked.
+    $this->tenant->run(fn () => EtimsSubmission::query()->whereKey($submissionId)
+        ->update(['next_attempt_at' => now()->subMinute(), 'locked_until' => now()->addMinutes(4)]));
+
+    $this->artisan('etims:retry')->assertSuccessful();
+    expect(fn () => $this->tenant->run(fn () => app(RetrySubmissionNow::class)->handle($this->tenant->id, $submissionId, 'ops@vendapos.test')))
+        ->toThrow(DomainException::class, 'being sent right now');
+
+    // Once the lease runs out (the worker crashed), the document is due again.
+    $this->travel(5)->minutes();
+    $this->artisan('etims:retry')->assertSuccessful();
+
+    expect($this->client->sent)->toHaveCount(2)
+        ->and(submissionIn($this->tenant, $sale['uuid'])->status)->toBe(EtimsStatus::Submitted);
+});
+
+it('gives a failed document exactly one more attempt on "Retry now"', function () {
+    config(['vendapos.etims.max_attempts' => 1]);
+    enableEtims($this->branch);
+    $this->client->script = array_fill(0, 2, EtimsResult::rejected('invalid_item', 'Unknown item class'));
+    $sale = saleOf([[$this->nyama, 1]]);
+    sync([$sale]);
+    $submissionId = submissionIn($this->tenant, $sale['uuid'])->id;
+    expect(submissionIn($this->tenant, $sale['uuid'])->status)->toBe(EtimsStatus::Failed);
+
+    $this->tenant->run(fn () => app(RetrySubmissionNow::class)->handle($this->tenant->id, $submissionId, 'ops@vendapos.test'));
+
+    expect(submissionIn($this->tenant, $sale['uuid'])->status)->toBe(EtimsStatus::Failed)
+        ->and($this->client->sent)->toHaveCount(2);
+
+    $this->client->script = [];
+    $this->tenant->run(fn () => app(RetrySubmissionNow::class)->handle($this->tenant->id, $submissionId, 'ops@vendapos.test'));
+
+    expect(orderIn($this->tenant, $sale['uuid'])->etims_status)->toBe(EtimsStatus::Submitted);
 });
 
 it('counts a client exception as a failed attempt', function () {

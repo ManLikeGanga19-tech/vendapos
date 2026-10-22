@@ -17,9 +17,10 @@ use VendaPOS\Core\Enums\EtimsStatus;
 
 /**
  * Sends one due document to eTIMS. The call to KRA happens outside any
- * transaction: a worker claims the submission by pushing its next attempt
- * out by a lease, so two workers never send it at once and a crashed send
- * becomes due again when the lease runs out.
+ * transaction: a worker claims the submission by locking it for a lease, so
+ * two workers never send it at once and a crashed send becomes due again
+ * when the lease runs out. The lock is separate from next_attempt_at, so
+ * rescheduling a document can never release a send in progress.
  */
 final class TransmitEtimsDocument
 {
@@ -45,7 +46,7 @@ final class TransmitEtimsDocument
                 ->first();
 
             if ($sale?->status === EtimsStatus::NotRequired) {
-                $submission->update(['status' => EtimsStatus::NotRequired, 'next_attempt_at' => null]);
+                $submission->update(['status' => EtimsStatus::NotRequired, 'next_attempt_at' => null, 'locked_until' => null]);
 
                 return;
             }
@@ -83,7 +84,8 @@ final class TransmitEtimsDocument
             ->whereKey($submissionId)
             ->where('status', EtimsStatus::Pending)
             ->where('next_attempt_at', '<=', now())
-            ->update(['next_attempt_at' => now()->addSeconds((int) config('vendapos.etims.lease_seconds'))]) === 1;
+            ->where(fn ($query) => $query->whereNull('locked_until')->orWhere('locked_until', '<=', now()))
+            ->update(['locked_until' => now()->addSeconds((int) config('vendapos.etims.lease_seconds'))]) === 1;
     }
 
     private function recordAccepted(EtimsSubmission $submission, EtimsResult $result): void
@@ -94,6 +96,7 @@ final class TransmitEtimsDocument
                 'receipt' => $result->receipt,
                 'attempts' => $submission->attempts + 1,
                 'next_attempt_at' => null,
+                'locked_until' => null,
                 'submitted_at' => now(),
             ]);
 
@@ -118,6 +121,7 @@ final class TransmitEtimsDocument
                 'status' => $givesUp ? EtimsStatus::Failed : EtimsStatus::Pending,
                 'attempts' => $attempt,
                 'next_attempt_at' => $givesUp ? null : now()->addSeconds($this->retryDelay($attempt)),
+                'locked_until' => null,
             ]);
 
             EtimsFailure::query()->create([
