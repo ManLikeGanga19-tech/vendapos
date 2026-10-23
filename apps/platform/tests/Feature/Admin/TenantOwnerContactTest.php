@@ -61,6 +61,16 @@ it('rejects a phone number that cannot be normalised', function () {
     expect(Tenant::find('tbad-phone'))->toBeNull();
 });
 
+it('requires the owner name and phone', function () {
+    Livewire::test(CreateTenant::class)
+        ->fillForm(['id' => 'tno-owner', 'name' => 'No Owner'])
+        ->call('create')
+        ->assertHasFormErrors(['owner_name' => 'required', 'owner_phone' => 'required'])
+        ->assertHasNoFormErrors(['owner_email']);
+
+    expect(Tenant::find('tno-owner'))->toBeNull();
+});
+
 it('lets an admin add an owner to a tenant created before contacts existed', function () {
     $tenant = Tenant::create(['id' => 'tolder', 'name' => 'Older Kiosk']);
 

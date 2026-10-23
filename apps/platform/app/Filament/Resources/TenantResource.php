@@ -45,10 +45,12 @@ class TenantResource extends Resource
                     ->schema([
                         TextInput::make('owner_name')
                             ->label(__('admin.tenant_form.owner_name'))
+                            ->required()
                             ->maxLength(255),
                         TextInput::make('owner_phone')
                             ->label(__('admin.tenant_form.owner_phone'))
                             ->tel()
+                            ->required()
                             ->rule(new PhoneNumber(__('admin.tenant_form.owner_phone_invalid')))
                             // Stored as E.164 so SMS providers can use it as-is.
                             ->dehydrateStateUsing(fn (?string $state): ?string => blank($state) ? null : PhoneNumber::normalize($state)),
