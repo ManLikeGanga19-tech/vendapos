@@ -73,9 +73,10 @@ return [
     |
     */
 
-    // Always the central connection: tenancy switches the default connection
-    // to the tenant schema mid-request, and sessions live in one central table.
-    'connection' => env('SESSION_CONNECTION', env('DB_CONNECTION')),
+    // Database sessions always use the central connection: tenancy switches the
+    // default connection to the tenant schema mid-request, and sessions live in
+    // one central table. Any other driver (redis) uses its own default connection.
+    'connection' => env('SESSION_CONNECTION', env('SESSION_DRIVER', 'database') === 'database' ? env('DB_CONNECTION') : null),
 
     /*
     |--------------------------------------------------------------------------
