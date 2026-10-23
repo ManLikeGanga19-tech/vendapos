@@ -12,7 +12,6 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -40,6 +39,8 @@ class OwnerPanelProvider extends PanelProvider
             ->id('owner')
             ->path('')
             ->authGuard('tenant')
+            // The owner's own business, not ours, heads every page.
+            ->brandName(fn (): string => (string) (tenant('name') ?? 'VendaPOS'))
             ->login(Login::class)
             ->multiFactorAuthentication(
                 AppAuthentication::make()->brandName('VendaPOS')->recoverable(),
@@ -52,9 +53,6 @@ class OwnerPanelProvider extends PanelProvider
             ->routes(fn () => Route::get('setup/{token}', SetUpAccount::class)->name('auth.setup'))
             ->discoverResources(in: app_path('Filament/Owner/Resources'), for: 'App\Filament\Owner\Resources')
             ->discoverPages(in: app_path('Filament/Owner/Pages'), for: 'App\Filament\Owner\Pages')
-            ->pages([
-                Dashboard::class,
-            ])
             ->discoverWidgets(in: app_path('Filament/Owner/Widgets'), for: 'App\Filament\Owner\Widgets')
             ->middleware([
                 EncryptCookies::class,
