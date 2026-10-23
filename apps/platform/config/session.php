@@ -73,7 +73,9 @@ return [
     |
     */
 
-    'connection' => env('SESSION_CONNECTION'),
+    // Always the central connection: tenancy switches the default connection
+    // to the tenant schema mid-request, and sessions live in one central table.
+    'connection' => env('SESSION_CONNECTION', env('DB_CONNECTION')),
 
     /*
     |--------------------------------------------------------------------------

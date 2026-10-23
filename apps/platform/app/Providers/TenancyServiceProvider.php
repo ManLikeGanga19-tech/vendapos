@@ -8,6 +8,7 @@ use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Spatie\Permission\PermissionRegistrar;
 use Stancl\JobPipeline\JobPipeline;
 use Stancl\Tenancy\Events;
 use Stancl\Tenancy\Jobs;
@@ -80,9 +81,13 @@ class TenancyServiceProvider extends ServiceProvider
             ],
 
             Events\BootstrappingTenancy::class => [],
-            Events\TenancyBootstrapped::class => [],
+            Events\TenancyBootstrapped::class => [
+                $this->resetPermissionCache(...),
+            ],
             Events\RevertingToCentralContext::class => [],
-            Events\RevertedToCentralContext::class => [],
+            Events\RevertedToCentralContext::class => [
+                $this->resetPermissionCache(...),
+            ],
 
             // Resource syncing
             Events\SyncedResourceSaved::class => [
@@ -105,6 +110,16 @@ class TenancyServiceProvider extends ServiceProvider
         $this->mapRoutes();
 
         $this->makeTenancyMiddlewareHighestPriority();
+    }
+
+    /**
+     * Each tenant schema has its own roles. The permission registrar is a
+     * long-lived singleton under Octane, so drop whatever it loaded for the
+     * previous context and re-read the (tenant-tagged) cache store.
+     */
+    protected function resetPermissionCache(): void
+    {
+        $this->app->make(PermissionRegistrar::class)->initializeCache();
     }
 
     protected function bootEvents(): void

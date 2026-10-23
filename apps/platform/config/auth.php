@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Tenancy\Models\Staff;
 use App\Models\User;
 
 return [
@@ -42,6 +43,12 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Owner panel on a tenant's own domain; staff live in the tenant schema.
+        'tenant' => [
+            'driver' => 'session',
+            'provider' => 'staff',
+        ],
     ],
 
     /*
@@ -65,6 +72,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+
+        'staff' => [
+            'driver' => 'eloquent',
+            'model' => Staff::class,
         ],
 
         // 'users' => [
