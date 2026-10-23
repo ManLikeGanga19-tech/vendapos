@@ -13,7 +13,6 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use UnitEnum;
@@ -56,10 +55,9 @@ class SalesReport extends Page implements HasTable
 
     public function table(Table $table): Table
     {
-        return $table
+        return $this->withReportFilters($table)
             ->records(fn (?array $filters): array => $this->days($filters))
             ->description(fn (): string => $this->totalsLine())
-            ->filters($this->reportFilters(), layout: FiltersLayout::AboveContent)
             ->paginated(false)
             ->columns([
                 TextColumn::make('date')->label(__('owner.reports.date'))

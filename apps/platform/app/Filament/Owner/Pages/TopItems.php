@@ -6,22 +6,28 @@ namespace App\Filament\Owner\Pages;
 
 use App\Domain\Analytics\Actions\ListTopItems;
 use App\Domain\Analytics\Actions\SummariseSalesByDay;
+use App\Domain\Catalogue\Actions\FindItemIdsByName;
 use App\Domain\Catalogue\Actions\FindItemNames;
 use App\Filament\Owner\Concerns\HasReportFilters;
 use BackedEnum;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\EmbeddedTable;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use UnitEnum;
 use VendaPOS\Core\ValueObjects\Money;
 
-/** Best sellers by revenue over a period, net of voids, with each one's share of sales. */
+/**
+ * Best sellers over a period, by revenue or quantity, net of voids, with
+ * each one's share of all sales in the period. Searching by name happens in
+ * the database, so an item is found even when it ranks outside the top 50.
+ */
 class TopItems extends Page implements HasTable
 {
     use HasReportFilters;
@@ -34,6 +40,9 @@ class TopItems extends Page implements HasTable
     protected static ?int $navigationSort = 2;
 
     protected static ?string $slug = 'reports/top-items';
+
+    /** @var array{items: int, total_cents: int, from: string, to: string}|null */
+    private ?array $summary = null;
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
@@ -57,31 +66,33 @@ class TopItems extends Page implements HasTable
 
     public function table(Table $table): Table
     {
-        return $table
-            ->records(function (?array $filters): array {
-                [$from, $to] = $this->rangeFrom($filters);
-                $branchIds = $this->reportBranchIds($filters);
-                $top = app(ListTopItems::class)->handle($from, $to, $branchIds, self::LIMIT);
-                $names = app(FindItemNames::class)->handle(array_column($top, 'item_id'));
-                // Share of all sales in the period, not just of the items listed.
-                $all = max(1, array_sum(array_column(app(SummariseSalesByDay::class)->handle($from, $to, $branchIds), 'total_cents')));
+        $rankBy = Filter::make('rank')
+            ->schema([
+                ToggleButtons::make('by')
+                    ->label(__('owner.reports.rank_by'))
+                    ->options([
+                        ListTopItems::BY_REVENUE => __('owner.dashboard.revenue'),
+                        ListTopItems::BY_QUANTITY => __('owner.reports.quantity_sold'),
+                    ])
+                    ->default(ListTopItems::BY_REVENUE)
+                    // A shared link may leave the ranking out; show what is applied.
+                    ->formatStateUsing(fn (?string $state): string => $state === ListTopItems::BY_QUANTITY ? $state : ListTopItems::BY_REVENUE)
+                    ->grouped()
+                    ->live(),
+            ])
+            ->indicateUsing(fn (array $data) => ($data['by'] ?? null) === ListTopItems::BY_QUANTITY
+                ? __('owner.reports.ranked_by_quantity')
+                : null);
 
-                $rows = [];
-                foreach ($top as $rank => $row) {
-                    $rows[$row['item_id']] = [
-                        'rank' => $rank + 1,
-                        'item' => $names[$row['item_id']] ?? __('owner.dashboard.unknown_item'),
-                        'quantity' => $row['quantity'],
-                        'total_cents' => $row['total_cents'],
-                        'share' => round($row['total_cents'] * 100 / $all, 1),
-                    ];
-                }
-
-                return $rows;
-            })
-            ->filters($this->reportFilters(), layout: FiltersLayout::AboveContent)
+        return $this->withReportFilters($table, $rankBy)
+            ->records(fn (?array $filters, ?string $search): array => $this->rows($filters, $search))
+            ->searchable()
+            ->searchPlaceholder(__('owner.reports.search_items'))
+            ->description(fn (): ?string => $this->summaryLine())
             ->paginated(false)
-            ->emptyStateHeading(__('owner.reports.no_sales'))
+            ->emptyStateHeading(fn (): string => filled($this->getTableSearch())
+                ? __('owner.reports.no_match', ['search' => $this->getTableSearch()])
+                : __('owner.reports.no_sales'))
             ->columns([
                 TextColumn::make('rank')->label('#'),
                 TextColumn::make('item')->label(__('owner.dashboard.item')),
@@ -91,5 +102,53 @@ class TopItems extends Page implements HasTable
                 TextColumn::make('share')->label(__('owner.reports.share'))->alignEnd()
                     ->formatStateUsing(fn (float $state) => number_format($state, 1).'%'),
             ]);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $filters
+     * @return array<string, array{rank: int, item: string, quantity: int, total_cents: int, share: float}>
+     */
+    private function rows(?array $filters, ?string $search): array
+    {
+        [$from, $to] = $this->rangeFrom($filters);
+        $branchIds = $this->reportBranchIds($filters);
+        $rankBy = ($filters['rank']['by'] ?? null) === ListTopItems::BY_QUANTITY ? ListTopItems::BY_QUANTITY : ListTopItems::BY_REVENUE;
+        $itemIds = filled($search) ? app(FindItemIdsByName::class)->handle((string) $search) : null;
+
+        $top = app(ListTopItems::class)->handle($from, $to, $branchIds, self::LIMIT, $rankBy, $itemIds);
+        $names = app(FindItemNames::class)->handle(array_column($top, 'item_id'));
+        // Share of all sales in the period, not just of the items listed.
+        $periodTotal = (int) array_sum(array_column(app(SummariseSalesByDay::class)->handle($from, $to, $branchIds), 'total_cents'));
+
+        $this->summary = ['items' => count($top), 'total_cents' => $periodTotal, 'from' => $from, 'to' => $to];
+
+        $rows = [];
+        foreach ($top as $rank => $row) {
+            $rows[$row['item_id']] = [
+                'rank' => $rank + 1,
+                'item' => $names[$row['item_id']] ?? __('owner.dashboard.unknown_item'),
+                'quantity' => $row['quantity'],
+                'total_cents' => $row['total_cents'],
+                'share' => round($row['total_cents'] * 100 / max(1, $periodTotal), 1),
+            ];
+        }
+
+        return $rows;
+    }
+
+    private function summaryLine(): ?string
+    {
+        $summary = $this->summary ?? null;
+
+        if ($summary === null) {
+            $this->rows($this->tableFilters, $this->getTableSearch());
+            $summary = $this->summary;
+        }
+
+        return $summary === null ? null : trans_choice('owner.reports.top_items_summary', $summary['items'], [
+            'count' => $summary['items'],
+            'total' => Money::fromCents($summary['total_cents'])->format(),
+            'range' => $this->rangeLabel($summary['from'], $summary['to']),
+        ]);
     }
 }

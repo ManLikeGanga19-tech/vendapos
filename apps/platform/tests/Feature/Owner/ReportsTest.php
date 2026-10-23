@@ -125,6 +125,7 @@ it('falls back to today for a range the browser should never have sent', functio
     'backwards' => [periodFilter('custom', '2026-10-23', '2026-10-01')],
     'too long' => [periodFilter('custom', '2026-01-01', '2026-10-23')],
     'not dates' => [periodFilter('custom', 'drop table', '<script>')],
+    'impossible dates' => [periodFilter('custom', '2026-99-99', '2026-02-31')],
     'unknown period' => [periodFilter('forever')],
 ]);
 
@@ -170,4 +171,57 @@ it('ranks top items with each one’s share of all sales in the period', functio
     Livewire::test(TopItems::class)
         ->set('tableFilters', periodFilter('today'))
         ->assertSeeInOrder(['Tilapia', 'KES 2,800.00', '80.0%', 'Ugali', 'KES 700.00', '20.0%']);
+});
+
+it('covers this week from Monday and the whole of last month', function () {
+    signInForReports($this->tenant, $this->owner);
+
+    // Friday 23 October: the week began on Monday 19 October.
+    Livewire::test(SalesReport::class)
+        ->set('tableFilters', periodFilter('this_week'))
+        ->assertSee('Mon 19 Oct 2026')
+        ->assertDontSee('Sun 18 Oct 2026');
+
+    Livewire::test(SalesReport::class)
+        ->set('tableFilters', periodFilter('last_month'))
+        ->assertSee('Tue 1 Sep 2026')
+        ->assertSee('Wed 30 Sep 2026')
+        ->assertSee('Total KES 70.00')
+        ->assertDontSee('Thu 1 Oct 2026');
+});
+
+it('ranks top items by quantity when asked', function () {
+    signInForReports($this->tenant, $this->owner);
+
+    // Ugali sold 7 for KES 700; tilapia 4 for KES 2,800.
+    Livewire::test(TopItems::class)
+        ->set('tableFilters', periodFilter('today') + ['rank' => ['by' => 'quantity']])
+        ->assertSeeInOrder(['Ugali', '7', 'Tilapia', '4'])
+        ->assertSee(__('owner.reports.ranked_by_quantity'));
+});
+
+it('searches items by name in the database, ignoring case and wildcards', function () {
+    signInForReports($this->tenant, $this->owner);
+
+    Livewire::test(TopItems::class)
+        ->set('tableFilters', periodFilter('today'))
+        ->set('tableSearch', 'UGA')
+        ->assertSee('Ugali')
+        ->assertDontSee('Tilapia')
+        ->set('tableSearch', '%')
+        ->assertDontSee('Ugali')
+        ->assertSee(__('owner.reports.no_match', ['search' => '%']));
+});
+
+it('starts a custom range from the period that was on screen', function () {
+    signInForReports($this->tenant, $this->owner);
+
+    $page = Livewire::test(SalesReport::class)
+        ->set('tableFilters.period.period', 'last_7_days')
+        ->set('tableFilters.period.period', 'custom');
+
+    // The picker may add a time to its state; only the date matters.
+    expect(substr((string) $page->get('tableFilters.period.from'), 0, 10))->toBe('2026-10-17')
+        ->and(substr((string) $page->get('tableFilters.period.until'), 0, 10))->toBe('2026-10-23');
+    $page->assertSee('Sat 17 Oct 2026')->assertSee('Fri 23 Oct 2026');
 });
