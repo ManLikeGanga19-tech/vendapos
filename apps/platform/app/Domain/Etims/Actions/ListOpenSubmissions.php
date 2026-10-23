@@ -12,13 +12,15 @@ use VendaPOS\Core\Enums\EtimsStatus;
 final class ListOpenSubmissions
 {
     /**
+     * @param  list<string>|null  $branchIds  null for every branch
      * @return array<string, array{id: string, order_id: string, branch_id: string, document_type: string, status: string,
      *     attempts: int, next_attempt_at: string|null, last_error: string|null, created_at: string}> keyed by submission ID
      */
-    public function handle(int $limit = 200): array
+    public function handle(int $limit = 200, ?array $branchIds = null): array
     {
         $submissions = EtimsSubmission::query()
             ->whereIn('status', [EtimsStatus::Pending, EtimsStatus::Failed])
+            ->when($branchIds !== null, fn ($query) => $query->whereIn('branch_id', $branchIds))
             ->orderBy('created_at')
             ->limit($limit)
             ->get();

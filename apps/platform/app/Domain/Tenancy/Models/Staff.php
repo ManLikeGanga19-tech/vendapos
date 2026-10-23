@@ -81,6 +81,25 @@ class Staff extends Authenticatable implements FilamentUser, HasAppAuthenticatio
 
     protected $hidden = ['password', 'remember_token', 'app_authentication_secret', 'app_authentication_recovery_codes'];
 
+    /**
+     * The branches whose data this person may see in the Owner panel: every
+     * branch for an owner, the assigned ones for a manager, none for anyone
+     * else. Always a concrete list, so a missing assignment shows nothing
+     * rather than everything. Run inside the tenant's context.
+     *
+     * @return list<string>
+     */
+    public function visibleBranchIds(): array
+    {
+        $ids = match (true) {
+            $this->hasRole('owner') => Branch::query()->pluck('id'),
+            $this->hasRole('manager') => $this->branches()->pluck('branches.id'),
+            default => collect(),
+        };
+
+        return array_values($ids->map(fn (mixed $id): string => (string) $id)->all());
+    }
+
     /** @return BelongsToMany<Branch, $this> */
     public function branches(): BelongsToMany
     {

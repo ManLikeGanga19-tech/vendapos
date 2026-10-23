@@ -10,11 +10,15 @@ use VendaPOS\Core\Enums\EtimsStatus;
 /** How many of the current tenant's eTIMS documents are waiting, and how many have failed. */
 final class CountOpenSubmissions
 {
-    /** @return array{pending: int, failed: int} */
-    public function handle(): array
+    /**
+     * @param  list<string>|null  $branchIds  null for every branch
+     * @return array{pending: int, failed: int}
+     */
+    public function handle(?array $branchIds = null): array
     {
         $counts = EtimsSubmission::query()
             ->whereIn('status', [EtimsStatus::Pending, EtimsStatus::Failed])
+            ->when($branchIds !== null, fn ($query) => $query->whereIn('branch_id', $branchIds))
             ->selectRaw('status, count(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');

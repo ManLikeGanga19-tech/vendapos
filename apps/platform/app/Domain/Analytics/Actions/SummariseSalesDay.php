@@ -8,16 +8,21 @@ use App\Domain\Analytics\Models\SalesHourly;
 
 /**
  * The current tenant's sales for one Africa/Nairobi business day, across all
- * branches, read from the hourly rollup (never from the orders tables).
+ * branches or only the given ones, read from the hourly rollup (never from
+ * the orders tables).
  */
 final class SummariseSalesDay
 {
     /**
+     * @param  list<string>|null  $branchIds  null for every branch
      * @return array{orders: int, voids: int, cancels: int, total_cents: int, vat_cents: int, hourly_total_cents: array<int, int>}
      */
-    public function handle(string $businessDate): array
+    public function handle(string $businessDate, ?array $branchIds = null): array
     {
-        $hours = SalesHourly::query()->whereDate('business_date', $businessDate)->get();
+        $hours = SalesHourly::query()
+            ->whereDate('business_date', $businessDate)
+            ->when($branchIds !== null, fn ($query) => $query->whereIn('branch_id', $branchIds))
+            ->get();
 
         $hourly = array_fill(0, 24, 0);
         foreach ($hours as $hour) {

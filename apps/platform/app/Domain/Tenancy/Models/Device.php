@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Tenancy\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,6 +43,18 @@ class Device extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    /**
+     * One tenant's devices at the given branches. Devices live in a central
+     * table, so the tenant is always part of the filter, never just the branch.
+     *
+     * @param  Builder<Device>  $query
+     * @param  list<string>  $branchIds
+     */
+    public function scopeOfTenantBranches(Builder $query, string $tenantId, array $branchIds): void
+    {
+        $query->where('tenant_id', $tenantId)->whereIn('branch_id', $branchIds);
     }
 
     public function isRevoked(): bool
