@@ -134,7 +134,9 @@ return [
          * disable asset() helper tenancy and explicitly use tenant_asset() calls in places
          * where you want to use tenant-specific assets (product images, avatars, etc).
          */
-        'asset_helper_tenancy' => true,
+        // Off: Filament loads its CSS/JS through asset(), which must stay global.
+        // Tenant files (product images, logos) use tenant_asset() explicitly.
+        'asset_helper_tenancy' => false,
     ],
 
     /**

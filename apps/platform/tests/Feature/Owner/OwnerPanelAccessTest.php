@@ -57,6 +57,13 @@ it('serves the owner sign-in on the tenant’s domain and asks for a username', 
         ->assertSee(__('owner.auth.username'));
 });
 
+it('loads the panel’s styles and scripts from the global assets on tenant domains', function () {
+    $this->get('http://mama.localhost/login')
+        ->assertOk()
+        ->assertSee('http://mama.localhost/css/filament/filament/app.css', false)
+        ->assertDontSee('/tenancy/assets/', false);
+});
+
 it('keeps the admin panel off tenant domains and the owner panel off central ones', function () {
     $this->get('http://mama.localhost/admin/login')->assertNotFound();
     $this->get('http://localhost/login')->assertRedirect('/admin');
