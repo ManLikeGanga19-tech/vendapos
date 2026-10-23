@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $expires_at
  * @property Carbon|null $used_at
  * @property Carbon $created_at
+ * @property-read Staff $staff
  */
 class StaffSetupLink extends Model
 {

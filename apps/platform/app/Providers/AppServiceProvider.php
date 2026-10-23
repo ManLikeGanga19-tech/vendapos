@@ -14,12 +14,15 @@ use App\Domain\Payments\Events\PaymentRequested;
 use App\Domain\Payments\Jobs\FlagPaymentsForCancelledOrder;
 use App\Domain\Payments\Jobs\InitiatePayment;
 use App\Domain\Tenancy\Models\Device;
+use App\Domain\Tenancy\Models\Staff;
 use Filament\Support\Facades\FilamentTimezone;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -74,6 +77,18 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Event::listen(PaymentRequested::class, fn (PaymentRequested $event) => InitiatePayment::dispatch($event->tenantId, $event->eventId));
+
+        Event::listen(Login::class, function (Login $event) {
+            if ($event->user instanceof Staff) {
+                $event->user->forceFill(['last_login_at' => now()])->save();
+            }
+        });
+
+        // Tenant-only routes (the Owner panel at /) on a VendaPOS domain: send
+        // people to the Admin panel instead of a bare 404.
+        PreventAccessFromCentralDomains::$abortRequest = fn (Request $request) => $request->isMethod('GET')
+            ? redirect('/admin')
+            : abort(404);
     }
 
     private function deviceOf(Request $request): ?Device

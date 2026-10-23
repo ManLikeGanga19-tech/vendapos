@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace App\Domain\Tenancy\Models;
 
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Carbon;
+use SensitiveParameter;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -21,17 +26,58 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $password
  * @property bool $is_active
  * @property Carbon|null $last_login_at
+ * @property string|null $app_authentication_secret
+ * @property array<string>|null $app_authentication_recovery_codes
  */
-class Staff extends Authenticatable
+class Staff extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery
 {
     use HasRoles;
     use HasUuids;
+
+    /** Owners and managers who finished setting up may use the Owner panel. */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $panel->getId() === 'owner'
+            && $this->is_active
+            && $this->username !== null
+            && $this->hasAnyRole(['owner', 'manager']);
+    }
+
+    public function getAppAuthenticationSecret(): ?string
+    {
+        return $this->app_authentication_secret;
+    }
+
+    public function saveAppAuthenticationSecret(#[SensitiveParameter] ?string $secret): void
+    {
+        $this->forceFill(['app_authentication_secret' => $secret])->save();
+    }
+
+    public function getAppAuthenticationHolderName(): string
+    {
+        return (string) $this->username;
+    }
+
+    /** @return array<string>|null */
+    public function getAppAuthenticationRecoveryCodes(): ?array
+    {
+        return $this->app_authentication_recovery_codes;
+    }
+
+    /** @param array<string>|null $codes */
+    public function saveAppAuthenticationRecoveryCodes(#[SensitiveParameter] ?array $codes): void
+    {
+        $this->forceFill(['app_authentication_recovery_codes' => $codes])->save();
+    }
 
     protected $table = 'staff';
 
     protected string $guard_name = 'tenant';
 
     protected $fillable = ['name', 'username', 'password', 'is_active'];
+
+    /** Mirrors the column default so a freshly created model is active too. */
+    protected $attributes = ['is_active' => true];
 
     protected $hidden = ['password', 'remember_token', 'app_authentication_secret', 'app_authentication_recovery_codes'];
 

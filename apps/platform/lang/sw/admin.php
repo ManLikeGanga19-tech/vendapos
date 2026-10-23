@@ -22,6 +22,14 @@ return [
         'owner_phone_invalid' => 'Weka nambari sahihi ya simu, kwa mfano 0712 345 678.',
     ],
 
+    'owner_login' => [
+        'action' => 'Kiungo cha kuingia cha mmiliki',
+        'confirm' => 'Hii inaunda kiungo cha mara moja kwa :name kuchagua jina la mtumiaji na nenosiri. Kiungo chochote cha awali kitaacha kufanya kazi.',
+        'created' => 'Kiungo cha :name, kinafanya kazi kwa saa :hours',
+        'copy_hint' => 'Nakili sasa na umtumie mmiliki. Hakiwezi kuonyeshwa tena.',
+        'no_domain' => 'Mpangaji huyu bado hana kikoa, kwa hivyo hakuna mahali pa kuingia.',
+    ],
+
     'branches' => [
         'name' => 'Tawi',
         'business_type' => 'Aina ya biashara',

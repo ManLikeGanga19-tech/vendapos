@@ -21,6 +21,14 @@ return [
         'owner_phone_invalid' => 'Enter a valid phone number, for example 0712 345 678.',
     ],
 
+    'owner_login' => [
+        'action' => 'Owner login link',
+        'confirm' => 'This creates a one-time link for :name to choose a username and password. Any earlier link stops working.',
+        'created' => 'Link for :name, valid for :hours hours',
+        'copy_hint' => 'Copy it now and send it to the owner. It cannot be shown again.',
+        'no_domain' => 'This tenant has no domain yet, so there is nowhere to sign in.',
+    ],
+
     'branches' => [
         'name' => 'Branch',
         'business_type' => 'Business type',
