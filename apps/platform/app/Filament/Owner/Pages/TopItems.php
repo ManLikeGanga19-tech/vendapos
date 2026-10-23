@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Owner\Pages;
 
+use App\Domain\Analytics\Actions\CountSoldItems;
 use App\Domain\Analytics\Actions\ListTopItems;
-use App\Domain\Analytics\Actions\SummariseSalesByDay;
+use App\Domain\Analytics\Actions\SummariseSalesPeriod;
 use App\Domain\Catalogue\Actions\FindItemIdsByName;
 use App\Domain\Catalogue\Actions\FindItemNames;
 use App\Filament\Owner\Concerns\HasReportFilters;
@@ -20,20 +21,20 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Pagination\LengthAwarePaginator;
 use UnitEnum;
 use VendaPOS\Core\ValueObjects\Money;
 
 /**
- * Best sellers over a period, by revenue or quantity, net of voids, with
- * each one's share of all sales in the period. Searching by name happens in
- * the database, so an item is found even when it ranks outside the top 50.
+ * Every item sold over a period, by revenue or quantity, net of voids, with
+ * each one's share of all sales in the period. Paginated on the server: the
+ * database returns one page and a count. Searching by name happens in the
+ * database too, so an item is found wherever it ranks.
  */
 class TopItems extends Page implements HasTable
 {
     use HasReportFilters;
     use InteractsWithTable;
-
-    public const int LIMIT = 50;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-trophy';
 
@@ -85,11 +86,12 @@ class TopItems extends Page implements HasTable
                 : null);
 
         return $this->withReportFilters($table, $rankBy)
-            ->records(fn (?array $filters, ?string $search): array => $this->rows($filters, $search))
+            ->records(fn (?array $filters, ?string $search, int|string $page, int|string $recordsPerPage): LengthAwarePaginator => $this->rows($filters, $search, (int) $page, (int) $recordsPerPage))
+            ->paginated([10, 25, 50])
+            ->defaultPaginationPageOption(25)
             ->searchable()
             ->searchPlaceholder(__('owner.reports.search_items'))
             ->description(fn (): ?string => $this->summaryLine())
-            ->paginated(false)
             ->emptyStateHeading(fn (): string => filled($this->getTableSearch())
                 ? __('owner.reports.no_match', ['search' => $this->getTableSearch()])
                 : __('owner.reports.no_sales'))
@@ -106,44 +108,47 @@ class TopItems extends Page implements HasTable
 
     /**
      * @param  array<string, mixed>|null  $filters
-     * @return array<string, array{rank: int, item: string, quantity: int, total_cents: int, share: float}>
+     * @return LengthAwarePaginator<string, array{rank: int, item: string, quantity: int, total_cents: int, share: float}>
      */
-    private function rows(?array $filters, ?string $search): array
+    private function rows(?array $filters, ?string $search, int $page, int $perPage): LengthAwarePaginator
     {
         [$from, $to] = $this->rangeFrom($filters);
         $branchIds = $this->reportBranchIds($filters);
         $rankBy = ($filters['rank']['by'] ?? null) === ListTopItems::BY_QUANTITY ? ListTopItems::BY_QUANTITY : ListTopItems::BY_REVENUE;
         $itemIds = filled($search) ? app(FindItemIdsByName::class)->handle((string) $search) : null;
+        $perPage = max(1, $perPage);
+        $page = max(1, $page);
+        $offset = ($page - 1) * $perPage;
 
-        $top = app(ListTopItems::class)->handle($from, $to, $branchIds, self::LIMIT, $rankBy, $itemIds);
+        $count = app(CountSoldItems::class)->handle($from, $to, $branchIds, $itemIds);
+        $top = app(ListTopItems::class)->handle($from, $to, $branchIds, $perPage, $rankBy, $itemIds, $offset);
         $names = app(FindItemNames::class)->handle(array_column($top, 'item_id'));
         // Share of all sales in the period, not just of the items listed.
-        $periodTotal = (int) array_sum(array_column(app(SummariseSalesByDay::class)->handle($from, $to, $branchIds), 'total_cents'));
+        $periodTotal = app(SummariseSalesPeriod::class)->handle($from, $to, $branchIds)['total_cents'];
 
-        $this->summary = ['items' => count($top), 'total_cents' => $periodTotal, 'from' => $from, 'to' => $to];
+        $this->summary = ['items' => $count, 'total_cents' => $periodTotal, 'from' => $from, 'to' => $to];
 
         $rows = [];
-        foreach ($top as $rank => $row) {
+        foreach ($top as $i => $row) {
             $rows[$row['item_id']] = [
-                'rank' => $rank + 1,
-                'item' => $names[$row['item_id']] ?? __('owner.dashboard.unknown_item'),
+                'rank' => $offset + $i + 1,
+                'item' => $names[$row['item_id']] ?? (string) __('owner.dashboard.unknown_item'),
                 'quantity' => $row['quantity'],
                 'total_cents' => $row['total_cents'],
                 'share' => round($row['total_cents'] * 100 / max(1, $periodTotal), 1),
             ];
         }
 
-        return $rows;
+        return new LengthAwarePaginator($rows, $count, $perPage, $page);
     }
 
     private function summaryLine(): ?string
     {
-        $summary = $this->summary ?? null;
-
-        if ($summary === null) {
-            $this->rows($this->tableFilters, $this->getTableSearch());
-            $summary = $this->summary;
+        if ($this->summary === null) {
+            $this->rows($this->tableFilters, $this->getTableSearch(), (int) $this->getTablePage(), (int) $this->getTableRecordsPerPage());
         }
+
+        $summary = $this->summary;
 
         return $summary === null ? null : trans_choice('owner.reports.top_items_summary', $summary['items'], [
             'count' => $summary['items'],

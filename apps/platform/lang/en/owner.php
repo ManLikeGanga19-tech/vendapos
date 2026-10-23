@@ -72,5 +72,12 @@ return [
         'totals' => 'Total :total, including :vat VAT, from :orders orders',
         'share' => 'Share of sales',
         'no_sales' => 'No sales in this period',
+        'sales_per_day' => 'Sales per day',
+        'busiest_hours' => 'Busiest hours',
+        'kpi' => [
+            'sales' => 'Sales',
+            'average_order' => 'Average order',
+            'average_order_help' => 'Sales divided by orders',
+        ],
     ],
 ];

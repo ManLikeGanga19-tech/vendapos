@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Analytics\Actions\CountSoldItems;
 use App\Domain\Analytics\Actions\SummariseSalesByDay;
 use App\Domain\Analytics\Models\ItemSalesDaily;
 use App\Domain\Analytics\Models\SalesHourly;
@@ -11,6 +12,9 @@ use App\Domain\Tenancy\Models\Staff;
 use App\Domain\Tenancy\Models\Tenant;
 use App\Filament\Owner\Pages\SalesReport;
 use App\Filament\Owner\Pages\TopItems;
+use App\Filament\Owner\Reports\Widgets\BusiestHours;
+use App\Filament\Owner\Reports\Widgets\SalesKpis;
+use App\Filament\Owner\Reports\Widgets\SalesPerDay;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Livewire\Livewire;
@@ -100,7 +104,8 @@ it('refuses backwards ranges and ranges longer than the limit', function (string
 it('shows the owner each period’s days and totals', function (array $filters, array $dates, string $total) {
     signInForReports($this->tenant, $this->owner);
 
-    $page = Livewire::test(SalesReport::class)->set('tableFilters', $filters);
+    // A whole month on one page, so every date can be checked.
+    $page = Livewire::test(SalesReport::class)->set('tableFilters', $filters)->set('tableRecordsPerPage', 31);
 
     foreach ($dates as $date) {
         $page->assertSee($date);
@@ -184,6 +189,7 @@ it('covers this week from Monday and the whole of last month', function () {
 
     Livewire::test(SalesReport::class)
         ->set('tableFilters', periodFilter('last_month'))
+        ->set('tableRecordsPerPage', 31)
         ->assertSee('Tue 1 Sep 2026')
         ->assertSee('Wed 30 Sep 2026')
         ->assertSee('Total KES 70.00')
@@ -224,4 +230,60 @@ it('starts a custom range from the period that was on screen', function () {
     expect(substr((string) $page->get('tableFilters.period.from'), 0, 10))->toBe('2026-10-17')
         ->and(substr((string) $page->get('tableFilters.period.until'), 0, 10))->toBe('2026-10-23');
     $page->assertSee('Sat 17 Oct 2026')->assertSee('Fri 23 Oct 2026');
+});
+
+it('pages the sales table on the server, newest days first', function () {
+    signInForReports($this->tenant, $this->owner);
+
+    // This month is 1–23 October: 23 days, 7 per page.
+    Livewire::test(SalesReport::class)
+        ->set('tableFilters', periodFilter('this_month'))
+        ->set('tableRecordsPerPage', 7)
+        ->assertSee('Fri 23 Oct 2026')
+        ->assertDontSee('Fri 16 Oct 2026')
+        ->call('gotoPage', 4)
+        ->assertSee('Fri 2 Oct 2026')
+        ->assertSee('Thu 1 Oct 2026')
+        ->assertDontSee('Sat 3 Oct 2026');
+});
+
+it('pages top items on the server and keeps the overall rank', function () {
+    signInForReports($this->tenant, $this->owner);
+
+    Livewire::test(TopItems::class)
+        ->set('tableFilters', periodFilter('today'))
+        ->set('tableRecordsPerPage', 1)
+        ->assertSee('Tilapia')
+        ->assertDontSee('Ugali')
+        ->call('gotoPage', 2)
+        ->assertSeeInOrder(['2', 'Ugali'])
+        ->assertDontSee('Tilapia');
+
+    $this->tenant->run(fn () => expect(app(CountSoldItems::class)->handle('2026-10-23', '2026-10-23'))->toBe(2)
+        ->and(app(CountSoldItems::class)->handle('2026-10-23', '2026-10-23', [$this->nyali->id], [$this->ugali->id]))->toBe(1));
+});
+
+it('heads the sales report with the period’s figures and charts', function () {
+    signInForReports($this->tenant, $this->owner);
+    $lastWeek = periodFilter('last_7_days');
+
+    // KES 3,900 from 4 orders: an average order of KES 975.
+    Livewire::test(SalesKpis::class, ['tableFilters' => $lastWeek])
+        ->assertSee('KES 3,900.00')
+        ->assertSee('KES 975.00');
+    Livewire::test(SalesPerDay::class, ['tableFilters' => $lastWeek])
+        ->assertSee('Wed 21 Oct KES 400; Fri 23 Oct KES 3,500');
+    Livewire::test(BusiestHours::class, ['tableFilters' => $lastWeek])
+        ->assertSee('13:00 KES 3,900');
+});
+
+it('keeps the report widgets to a manager’s own branch too', function () {
+    signInForReports($this->tenant, $this->manager);
+    $westlands = periodFilter('today', branch: $this->westlands->id);
+
+    Livewire::test(SalesKpis::class, ['tableFilters' => $westlands])
+        ->assertSee('KES 1,000.00')
+        ->assertDontSee('KES 2,500.00');
+    Livewire::test(SalesPerDay::class, ['tableFilters' => $westlands])
+        ->assertSee('Fri 23 Oct KES 1,000');
 });

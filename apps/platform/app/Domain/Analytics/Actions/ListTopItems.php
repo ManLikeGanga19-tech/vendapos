@@ -30,6 +30,7 @@ final class ListTopItems
         int $limit = 5,
         string $rankBy = self::BY_REVENUE,
         ?array $itemIds = null,
+        int $offset = 0,
     ): array {
         $order = match ($rankBy) {
             self::BY_REVENUE => 'sum(total_cents) desc, sum(quantity) desc, item_id',
@@ -44,6 +45,7 @@ final class ListTopItems
             ->groupBy('item_id')
             ->havingRaw('sum(quantity) <> 0 or sum(total_cents) <> 0')
             ->orderByRaw($order)
+            ->offset($offset)
             ->limit($limit)
             ->selectRaw('item_id, sum(quantity) as quantity, sum(total_cents) as total_cents')
             ->toBase()

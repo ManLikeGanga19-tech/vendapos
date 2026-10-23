@@ -72,5 +72,12 @@ return [
         'totals' => 'Jumla :total, ikijumuisha VAT ya :vat, kutoka oda :orders',
         'share' => 'Sehemu ya mauzo',
         'no_sales' => 'Hakuna mauzo katika kipindi hiki',
+        'sales_per_day' => 'Mauzo kwa siku',
+        'busiest_hours' => 'Saa zenye shughuli nyingi',
+        'kpi' => [
+            'sales' => 'Mauzo',
+            'average_order' => 'Wastani wa oda',
+            'average_order_help' => 'Mauzo yamegawanywa kwa idadi ya oda',
+        ],
     ],
 ];
