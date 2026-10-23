@@ -11,6 +11,16 @@ return [
         'negative_stock' => 'Negative stock',
     ],
 
+    'tenant_form' => [
+        'name' => 'Business name',
+        'owner' => 'Owner',
+        'owner_help' => 'Who we contact about the account, including suspension notices.',
+        'owner_name' => 'Owner name',
+        'owner_phone' => 'Owner phone',
+        'owner_email' => 'Owner email',
+        'owner_phone_invalid' => 'Enter a valid phone number, for example 0712 345 678.',
+    ],
+
     'branches' => [
         'name' => 'Branch',
         'business_type' => 'Business type',

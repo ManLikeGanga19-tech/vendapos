@@ -12,6 +12,16 @@ return [
         'negative_stock' => 'Hisa hasi',
     ],
 
+    'tenant_form' => [
+        'name' => 'Jina la biashara',
+        'owner' => 'Mmiliki',
+        'owner_help' => 'Tunayewasiliana naye kuhusu akaunti, pamoja na taarifa za kusimamishwa.',
+        'owner_name' => 'Jina la mmiliki',
+        'owner_phone' => 'Simu ya mmiliki',
+        'owner_email' => 'Barua pepe ya mmiliki',
+        'owner_phone_invalid' => 'Weka nambari sahihi ya simu, kwa mfano 0712 345 678.',
+    ],
+
     'branches' => [
         'name' => 'Tawi',
         'business_type' => 'Aina ya biashara',

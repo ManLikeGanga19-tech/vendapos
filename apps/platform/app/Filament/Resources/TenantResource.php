@@ -11,10 +11,12 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use UnitEnum;
+use VendaPOS\Core\Rules\PhoneNumber;
 
 class TenantResource extends Resource
 {
@@ -33,6 +35,28 @@ class TenantResource extends Resource
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
+                TextInput::make('name')
+                    ->label(__('admin.tenant_form.name'))
+                    ->required()
+                    ->maxLength(255),
+                Section::make(__('admin.tenant_form.owner'))
+                    ->description(__('admin.tenant_form.owner_help'))
+                    ->columns(3)
+                    ->schema([
+                        TextInput::make('owner_name')
+                            ->label(__('admin.tenant_form.owner_name'))
+                            ->maxLength(255),
+                        TextInput::make('owner_phone')
+                            ->label(__('admin.tenant_form.owner_phone'))
+                            ->tel()
+                            ->rule(new PhoneNumber(__('admin.tenant_form.owner_phone_invalid')))
+                            // Stored as E.164 so SMS providers can use it as-is.
+                            ->dehydrateStateUsing(fn (?string $state): ?string => blank($state) ? null : PhoneNumber::normalize($state)),
+                        TextInput::make('owner_email')
+                            ->label(__('admin.tenant_form.owner_email'))
+                            ->email()
+                            ->maxLength(255),
+                    ]),
             ]);
     }
 
@@ -44,6 +68,14 @@ class TenantResource extends Resource
                     ->label('Tenant ID')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('name')
+                    ->label(__('admin.tenant_form.name'))
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('owner_name')
+                    ->label(__('admin.tenant_form.owner'))
+                    ->description(fn (Tenant $record): ?string => $record->owner_phone)
+                    ->searchable(['owner_name', 'owner_phone', 'owner_email']),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
