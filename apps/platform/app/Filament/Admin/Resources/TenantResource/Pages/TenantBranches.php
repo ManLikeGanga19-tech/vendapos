@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\TenantResource\Pages;
+namespace App\Filament\Admin\Resources\TenantResource\Pages;
 
 use App\Domain\Etims\Actions\SwitchBranchEtims;
 use App\Domain\Tenancy\Actions\ListBranches;

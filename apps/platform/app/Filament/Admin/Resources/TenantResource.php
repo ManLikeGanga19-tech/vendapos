@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources;
+namespace App\Filament\Admin\Resources;
 
 use App\Domain\Tenancy\Models\Tenant;
-use App\Filament\Resources\TenantResource\Pages;
+use App\Filament\Admin\Resources\TenantResource\Pages;
 use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;

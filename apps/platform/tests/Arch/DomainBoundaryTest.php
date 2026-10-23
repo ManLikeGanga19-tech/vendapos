@@ -32,5 +32,5 @@ arch('no dd or dump in production code')
     ->not->toBeUsedIn('App');
 
 arch('filament resource pages extend Filament page classes')
-    ->expect('App\Filament\Resources\TenantResource\Pages')
+    ->expect('App\Filament\Admin\Resources\TenantResource\Pages')
     ->toBeClasses();

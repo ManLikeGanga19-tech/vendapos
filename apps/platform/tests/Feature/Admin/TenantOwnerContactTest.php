@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Domain\Tenancy\Models\Tenant;
-use App\Filament\Resources\TenantResource\Pages\CreateTenant;
-use App\Filament\Resources\TenantResource\Pages\EditTenant;
+use App\Filament\Admin\Resources\TenantResource\Pages\CreateTenant;
+use App\Filament\Admin\Resources\TenantResource\Pages\EditTenant;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\DatabaseMigrations;

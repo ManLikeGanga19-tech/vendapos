@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\TenantResource\Pages;
+namespace App\Filament\Admin\Resources\TenantResource\Pages;
 
-use App\Filament\Resources\TenantResource;
+use App\Filament\Admin\Resources\TenantResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateTenant extends CreateRecord

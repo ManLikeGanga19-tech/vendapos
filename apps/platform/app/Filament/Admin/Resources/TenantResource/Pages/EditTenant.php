@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\TenantResource\Pages;
+namespace App\Filament\Admin\Resources\TenantResource\Pages;
 
-use App\Filament\Resources\TenantResource;
-use App\Filament\Resources\TenantResource\Widgets\TenantSalesByHour;
-use App\Filament\Resources\TenantResource\Widgets\TenantToday;
+use App\Filament\Admin\Resources\TenantResource;
+use App\Filament\Admin\Resources\TenantResource\Widgets\TenantSalesByHour;
+use App\Filament\Admin\Resources\TenantResource\Widgets\TenantToday;
 use Filament\Resources\Pages\EditRecord;
 
 class EditTenant extends EditRecord

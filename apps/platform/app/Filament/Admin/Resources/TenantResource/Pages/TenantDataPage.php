@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\TenantResource\Pages;
+namespace App\Filament\Admin\Resources\TenantResource\Pages;
 
 use App\Domain\Tenancy\Models\Tenant;
-use App\Filament\Resources\TenantResource;
+use App\Filament\Admin\Resources\TenantResource;
 use App\Models\User;
 use Closure;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;

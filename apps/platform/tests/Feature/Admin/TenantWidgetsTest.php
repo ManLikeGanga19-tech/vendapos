@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Domain\Catalogue\Models\Item;
 use App\Domain\Tenancy\Models\Tenant;
-use App\Filament\Resources\TenantResource\Widgets\TenantSalesByHour;
-use App\Filament\Resources\TenantResource\Widgets\TenantToday;
+use App\Filament\Admin\Resources\TenantResource\Widgets\TenantSalesByHour;
+use App\Filament\Admin\Resources\TenantResource\Widgets\TenantToday;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\DatabaseMigrations;

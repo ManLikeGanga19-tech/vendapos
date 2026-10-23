@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\TenantResource\Widgets;
+namespace App\Filament\Admin\Resources\TenantResource\Widgets;
 
 use App\Domain\Analytics\Actions\SummariseSalesDay;
 use App\Domain\Tenancy\Models\Tenant;
