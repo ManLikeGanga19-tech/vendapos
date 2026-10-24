@@ -66,6 +66,11 @@ jobs:
         working-directory: apps/platform
         run: composer install --no-interaction --prefer-dist
 
+      # Tenant export tests run the real pg_dump / pg_restore, which must be
+      # at least the server's major version (16).
+      - name: Install PostgreSQL 16 client
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client-16
+
       - name: Create test database
         run: PGPASSWORD=vendapos psql -h 127.0.0.1 -U vendapos -c "CREATE DATABASE vendapos_test OWNER vendapos;"
 
@@ -90,6 +95,9 @@ jobs:
 
       - name: Pest (tests)
         working-directory: apps/platform
+        env:
+          VENDAPOS_PG_DUMP: /usr/lib/postgresql/16/bin/pg_dump
+          VENDAPOS_PG_RESTORE: /usr/lib/postgresql/16/bin/pg_restore
         run: ./vendor/bin/pest
 
   core:

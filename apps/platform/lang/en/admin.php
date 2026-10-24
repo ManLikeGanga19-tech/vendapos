@@ -9,6 +9,29 @@ return [
         'devices' => 'Devices',
         'etims' => 'eTIMS',
         'negative_stock' => 'Negative stock',
+        'exports' => 'Data exports',
+    ],
+
+    'exports' => [
+        'taken' => 'Taken',
+        'reason' => 'Why',
+        'reasons' => [
+            'manual' => 'Requested',
+            'purge' => 'Before deletion',
+        ],
+        'status' => 'Status',
+        'statuses' => [
+            'pending' => 'In progress',
+            'verified' => 'Verified',
+            'failed' => 'Failed',
+        ],
+        'size' => 'Size',
+        'rows' => 'Rows',
+        'kept_until' => 'Kept until',
+        'export_now' => 'Export now',
+        'export_confirm' => 'Takes a full, encrypted copy of this tenant’s data. It runs in the background; this list updates when it is done.',
+        'queued' => 'Export started',
+        'download' => 'Download',
     ],
 
     'tenant_form' => [

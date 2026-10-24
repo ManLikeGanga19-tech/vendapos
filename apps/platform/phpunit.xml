@@ -38,6 +38,9 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="VENDAPOS_PAYMENTS_ENFORCE_CALLBACK_IPS" value="true"/>
+        <!-- Test-only key for encrypted tenant exports; never used outside the test suite. -->
+        <env name="VENDAPOS_EXPORT_KEY" value="XQxmEbA9yEshRBJqLJZtGLAKju2xVN2y8NfqMpfbXOg="/>
+        <env name="VENDAPOS_EXPORT_DISK" value="exports"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
     </php>
 </phpunit>

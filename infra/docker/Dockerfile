@@ -15,6 +15,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# pg_dump / pg_restore 16 for tenant exports. Bookworm ships 15, which
+# refuses to dump a 16 server, so use the PostgreSQL project's own repository.
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl \
+    && install -d /usr/share/postgresql-common/pgdg \
+    && curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+    && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update && apt-get install -y --no-install-recommends postgresql-client-16 \
+    && rm -rf /var/lib/apt/lists/*
+
 # PHP extensions
 RUN install-php-extensions \
     pdo_pgsql \

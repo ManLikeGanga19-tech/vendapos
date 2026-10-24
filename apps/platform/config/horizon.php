@@ -219,6 +219,20 @@ return [
             'timeout' => 60,
             'nice' => 0,
         ],
+
+        // One long-running worker for tenant exports (pg_dump + encryption).
+        'supervisor-exports' => [
+            'connection' => 'redis-exports',
+            'queue' => ['exports'],
+            'balance' => false,
+            'maxProcesses' => 1,
+            'maxTime' => 0,
+            'maxJobs' => 0,
+            'memory' => 256,
+            'tries' => 1,
+            'timeout' => 3660,
+            'nice' => 10,
+        ],
     ],
 
     'environments' => [

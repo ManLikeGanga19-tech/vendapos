@@ -38,6 +38,17 @@ return [
             'report' => false,
         ],
 
+        // Encrypted tenant exports. Never served; downloads go through the
+        // Admin panel, which decrypts on the fly. Production may point
+        // VENDAPOS_EXPORT_DISK at an S3-compatible bucket instead.
+        'exports' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/exports'),
+            'serve' => false,
+            'throw' => true,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

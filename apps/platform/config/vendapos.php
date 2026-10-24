@@ -200,6 +200,27 @@ return [
         'purge_after_days' => 14,
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Tenant exports
+    |--------------------------------------------------------------------------
+    |
+    | pg_dump archives of a tenant's schema, encrypted with VENDAPOS_EXPORT_KEY
+    | (base64 of 32 random bytes, kept apart from APP_KEY and backed up: an
+    | export cannot be read without it). Kept for the retention period; tax
+    | records are expected to be kept about five years (to be confirmed).
+    |
+    */
+
+    'exports' => [
+        'key' => env('VENDAPOS_EXPORT_KEY'),
+        'disk' => env('VENDAPOS_EXPORT_DISK', 'exports'),
+        'retention_years' => 5,
+        'pg_dump' => env('VENDAPOS_PG_DUMP', 'pg_dump'),
+        'pg_restore' => env('VENDAPOS_PG_RESTORE', 'pg_restore'),
+        'timeout_seconds' => 3600,
+    ],
+
     'support' => [
         'phone' => env('VENDAPOS_SUPPORT_PHONE'),
         'email' => env('VENDAPOS_SUPPORT_EMAIL'),

@@ -10,6 +10,29 @@ return [
         'devices' => 'Vifaa',
         'etims' => 'eTIMS',
         'negative_stock' => 'Hisa hasi',
+        'exports' => 'Nakala za data',
+    ],
+
+    'exports' => [
+        'taken' => 'Ilichukuliwa',
+        'reason' => 'Sababu',
+        'reasons' => [
+            'manual' => 'Iliombwa',
+            'purge' => 'Kabla ya kufuta',
+        ],
+        'status' => 'Hali',
+        'statuses' => [
+            'pending' => 'Inaendelea',
+            'verified' => 'Imethibitishwa',
+            'failed' => 'Imeshindikana',
+        ],
+        'size' => 'Ukubwa',
+        'rows' => 'Safu',
+        'kept_until' => 'Inahifadhiwa hadi',
+        'export_now' => 'Toa nakala sasa',
+        'export_confirm' => 'Inachukua nakala kamili ya data ya mteja huyu, iliyosimbwa. Inafanyika chinichini; orodha hii inasasishwa ikimalizika.',
+        'queued' => 'Utoaji wa nakala umeanza',
+        'download' => 'Pakua',
     ],
 
     'tenant_form' => [

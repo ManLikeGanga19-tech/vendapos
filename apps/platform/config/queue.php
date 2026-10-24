@@ -73,6 +73,17 @@ return [
             'after_commit' => false,
         ],
 
+        // Tenant exports run for up to an hour; retry_after must outlast that
+        // or a second worker would start the same export while it is running.
+        'redis-exports' => [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => 'exports',
+            'retry_after' => 3900,
+            'block_for' => null,
+            'after_commit' => false,
+        ],
+
         'deferred' => [
             'driver' => 'deferred',
         ],

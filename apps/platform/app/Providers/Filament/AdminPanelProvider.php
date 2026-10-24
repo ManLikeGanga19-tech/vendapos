@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Controllers\Admin\DownloadTenantExport;
 use App\Http\Middleware\EnsureCentralDomain;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
@@ -20,6 +21,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -63,6 +65,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            // Behind the panel's sign-in and platform-admin check. Filament adds the
+            // "authenticator required" check only to its own pages, so add it here.
+            ->authenticatedRoutes(fn () => Route::get('tenant-exports/{export}/download', DownloadTenantExport::class)
+                ->middleware($panel->getMultiFactorAuthenticationRequiredMiddleware())
+                ->name('tenant-exports.download'));
     }
 }
