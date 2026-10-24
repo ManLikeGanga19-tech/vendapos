@@ -24,6 +24,14 @@ class EditTenant extends EditRecord
 
     protected function getHeaderWidgets(): array
     {
+        /** @var Tenant $tenant */
+        $tenant = $this->getRecord();
+
+        // A purged tenant has no schema left to read figures from.
+        if ($tenant->status === Tenant::PURGED) {
+            return [];
+        }
+
         return [
             TenantToday::class,
             TenantSalesByHour::class,

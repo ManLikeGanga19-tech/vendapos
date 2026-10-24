@@ -48,6 +48,11 @@ abstract class TenantEventJob implements ShouldQueue
 
     final public function handle(): void
     {
+        // Purged since this was queued: nothing left to act on.
+        if (! LiveTenants::has($this->tenantId)) {
+            return;
+        }
+
         $previous = tenant();
         tenancy()->initialize($this->tenantId);
 

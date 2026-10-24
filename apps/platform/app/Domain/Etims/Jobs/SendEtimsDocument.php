@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Etims\Jobs;
 
 use App\Domain\Etims\Actions\TransmitEtimsDocument;
+use App\Infrastructure\Queue\LiveTenants;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -31,6 +32,11 @@ final class SendEtimsDocument implements ShouldQueue
 
     public function handle(TransmitEtimsDocument $transmit): void
     {
+        // Purged since this was queued: nothing left to act on.
+        if (! LiveTenants::has($this->tenantId)) {
+            return;
+        }
+
         $previous = tenant();
         tenancy()->initialize($this->tenantId);
 

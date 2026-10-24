@@ -6,6 +6,7 @@ namespace App\Domain\Etims\Jobs;
 
 use App\Domain\Etims\Actions\TransmitEtimsDocument;
 use App\Domain\Etims\Models\EtimsSubmission;
+use App\Infrastructure\Queue\LiveTenants;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -36,6 +37,11 @@ final class RetryFailedEtims implements ShouldBeUnique, ShouldQueue
 
     public function handle(TransmitEtimsDocument $transmit): void
     {
+        // Purged since this was queued: nothing left to act on.
+        if (! LiveTenants::has($this->tenantId)) {
+            return;
+        }
+
         $previous = tenant();
         tenancy()->initialize($this->tenantId);
 

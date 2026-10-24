@@ -20,6 +20,12 @@ class TenantExports extends TenantDataPage
 {
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-archive-box-arrow-down';
 
+    /** Exports outlive the tenant's data: this list reads only the central table. */
+    public static function availableAfterPurge(): bool
+    {
+        return true;
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('admin.tenant.exports');

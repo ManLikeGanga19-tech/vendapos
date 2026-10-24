@@ -22,4 +22,16 @@ return [
         'subject' => ':business: your VendaPOS account is active again',
         'body' => 'The suspension of :business is lifted. Sign-in and M-Pesa requests work as before, and nothing will be deleted.',
     ],
+
+    'tenant_purge_reminder' => [
+        'sms' => '{1} VendaPOS reminder: :business is still suspended. Unless reactivated, its data will be exported and deleted tomorrow, :date.|[2,*] VendaPOS reminder: :business is still suspended. Unless reactivated, its data will be exported and deleted in :days days, on :date.',
+        'subject' => '{1} :business: your data will be deleted tomorrow|[2,*] :business: your data will be deleted in :days days',
+        'body' => '{1} :business is still suspended. Unless the account is reactivated, a copy of its data will be exported and the data then permanently deleted tomorrow, :date.|[2,*] :business is still suspended. Unless the account is reactivated, a copy of its data will be exported and the data then permanently deleted in :days days, on :date.',
+    ],
+
+    'tenant_purged' => [
+        'sms' => 'VendaPOS: as notified, the data of :business has been deleted. An encrypted copy is kept until :date.',
+        'subject' => ':business: your VendaPOS data has been deleted',
+        'body' => 'As we notified you, the data of :business has been permanently deleted from VendaPOS. An encrypted copy is kept until :date; contact us if you need it.',
+    ],
 ];

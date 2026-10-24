@@ -121,6 +121,13 @@ class TenantResource extends Resource
 
     public static function getRecordSubNavigation(Page $page): array
     {
+        $tenant = method_exists($page, 'getRecord') ? $page->getRecord() : null;
+
+        // After a purge only the central pages are left.
+        if ($tenant instanceof Tenant && $tenant->status === Tenant::PURGED) {
+            return $page->generateNavigationItems([Pages\EditTenant::class, Pages\TenantExports::class]);
+        }
+
         return $page->generateNavigationItems([
             Pages\EditTenant::class,
             Pages\TenantBranches::class,

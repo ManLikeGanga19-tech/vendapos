@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Domain\Etims\Jobs\RetryFailedEtims;
 use App\Domain\Etims\Models\EtimsSubmission;
 use App\Domain\Tenancy\Models\Tenant;
+use App\Infrastructure\Queue\LiveTenants;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -20,7 +21,7 @@ final class RetryEtimsCommand extends Command
     {
         $queued = 0;
 
-        tenancy()->runForMultiple(null, function (Tenant $tenant) use (&$queued) {
+        tenancy()->runForMultiple(LiveTenants::all(), function (Tenant $tenant) use (&$queued) {
             $due = EtimsSubmission::query()
                 ->where('status', EtimsStatus::Pending)
                 ->where('next_attempt_at', '<=', now())

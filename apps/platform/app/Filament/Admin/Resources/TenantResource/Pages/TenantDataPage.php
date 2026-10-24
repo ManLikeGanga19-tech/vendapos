@@ -34,6 +34,15 @@ abstract class TenantDataPage extends Page implements HasTable
         $this->record = $this->resolveRecord($record);
 
         abort_unless(static::isStaff(), 403);
+
+        // Pages over the tenant's own schema are gone with it after a purge.
+        abort_if(! static::availableAfterPurge() && $this->tenant()->status === Tenant::PURGED, 404);
+    }
+
+    /** True for pages that read only central tables, such as the exports list. */
+    public static function availableAfterPurge(): bool
+    {
+        return false;
     }
 
     public function content(Schema $schema): Schema

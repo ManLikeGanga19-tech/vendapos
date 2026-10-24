@@ -8,6 +8,7 @@ use App\Domain\Payments\Actions\ApplyPaymentOutcome;
 use App\Domain\Payments\Data\GatewayResult;
 use App\Domain\Payments\Gateways\PaymentGateways;
 use App\Domain\Payments\Models\Payment;
+use App\Infrastructure\Queue\LiveTenants;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -48,6 +49,11 @@ final class QueryPaymentStatus implements ShouldBeUnique, ShouldQueue
 
     public function handle(PaymentGateways $gateways, ApplyPaymentOutcome $applyOutcome): void
     {
+        // Purged since this was queued: nothing left to act on.
+        if (! LiveTenants::has($this->tenantId)) {
+            return;
+        }
+
         $previous = tenant();
         tenancy()->initialize($this->tenantId);
 

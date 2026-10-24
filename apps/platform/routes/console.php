@@ -14,6 +14,20 @@ Schedule::command('payments:reconcile')->everyMinute()->withoutOverlapping()->on
 // Resends eTIMS documents whose retry is due (30 s, 60 s, 120 s, then hourly).
 Schedule::command('etims:retry')->everyMinute()->withoutOverlapping()->onOneServer();
 
+// Suspended tenants: remind owners 7 days and 1 day before deletion, in office hours.
+Schedule::command('tenants:suspension-reminders')
+    ->dailyAt('09:00')
+    ->timezone((string) config('vendapos.business_timezone'))
+    ->onOneServer();
+
+// Exports and deletes suspended tenants whose purge date has passed. At night,
+// and only ever after the date the owner was given.
+Schedule::command('tenants:purge')
+    ->dailyAt('02:00')
+    ->timezone((string) config('vendapos.business_timezone'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
 // Keeps the trusted Cloudflare edge ranges current; a failed fetch keeps the previous list.
 Schedule::command('network:refresh-cloudflare-ips')
     ->dailyAt('04:00')

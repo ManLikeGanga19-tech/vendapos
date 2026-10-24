@@ -32,6 +32,9 @@ class TenantStatusChange extends Model
 
     public const string PURGED = 'purged';
 
+    /** The owner was reminded of the coming deletion; details.days_left says which reminder. */
+    public const string REMINDED = 'reminded';
+
     public const UPDATED_AT = null;
 
     protected $guarded = [];

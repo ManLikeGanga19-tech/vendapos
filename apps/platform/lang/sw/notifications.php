@@ -22,4 +22,16 @@ return [
         'subject' => ':business: akaunti yako ya VendaPOS imefunguliwa tena',
         'body' => 'Usimamishaji wa :business umeondolewa. Kuingia na maombi ya M-Pesa yanafanya kazi kama kawaida, na hakuna kitakachofutwa.',
     ],
+
+    'tenant_purge_reminder' => [
+        'sms' => '{1} Kumbusho la VendaPOS: :business bado imesimamishwa. Isipofunguliwa tena, nakala ya data itatolewa na data kufutwa kesho, tarehe :date.|[2,*] Kumbusho la VendaPOS: :business bado imesimamishwa. Isipofunguliwa tena, nakala ya data itatolewa na data kufutwa baada ya siku :days, tarehe :date.',
+        'subject' => '{1} :business: data yako itafutwa kesho|[2,*] :business: data yako itafutwa baada ya siku :days',
+        'body' => '{1} :business bado imesimamishwa. Akaunti isipofunguliwa tena, nakala ya data itatolewa kisha data kufutwa kabisa kesho, tarehe :date.|[2,*] :business bado imesimamishwa. Akaunti isipofunguliwa tena, nakala ya data itatolewa kisha data kufutwa kabisa baada ya siku :days, tarehe :date.',
+    ],
+
+    'tenant_purged' => [
+        'sms' => 'VendaPOS: kama tulivyokujulisha, data ya :business imefutwa. Nakala iliyosimbwa inahifadhiwa hadi :date.',
+        'subject' => ':business: data yako ya VendaPOS imefutwa',
+        'body' => 'Kama tulivyokujulisha, data ya :business imefutwa kabisa kutoka VendaPOS. Nakala iliyosimbwa inahifadhiwa hadi :date; wasiliana nasi ukiihitaji.',
+    ],
 ];

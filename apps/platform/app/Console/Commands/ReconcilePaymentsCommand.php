@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Domain\Payments\Jobs\QueryPaymentStatus;
 use App\Domain\Payments\Models\Payment;
 use App\Domain\Tenancy\Models\Tenant;
+use App\Infrastructure\Queue\LiveTenants;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -21,7 +22,7 @@ final class ReconcilePaymentsCommand extends Command
     {
         $queued = 0;
 
-        tenancy()->runForMultiple(null, function (Tenant $tenant) use (&$queued) {
+        tenancy()->runForMultiple(LiveTenants::all(), function (Tenant $tenant) use (&$queued) {
             Payment::query()
                 ->where('status', PaymentStatus::Pending)
                 ->where('created_at', '>=', now()->subHours((int) config('vendapos.payments.reconcile.stop_after_hours')))
