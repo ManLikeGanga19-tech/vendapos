@@ -51,6 +51,11 @@ function inOwnerPanel(Tenant $tenant): void
     Filament::setCurrentPanel(Filament::getPanel('owner'));
 }
 
+it('answers 404 on a domain no tenant owns', function () {
+    $this->get('http://nosuchshop.localhost/login')->assertNotFound();
+    $this->get('http://nosuchshop.localhost/')->assertNotFound();
+});
+
 it('serves the owner sign-in on the tenant’s domain and asks for a username', function () {
     $this->get('http://mama.localhost/login')
         ->assertOk()

@@ -111,6 +111,10 @@ class TenancyServiceProvider extends ServiceProvider
         $this->mapRoutes();
 
         $this->makeTenancyMiddlewareHighestPriority();
+
+        // A domain no tenant owns (a typo, or a purged tenant's old domain) is
+        // a plain 404, not the identification exception's 500.
+        Middleware\InitializeTenancyByDomain::$onFail = fn () => abort(404);
     }
 
     /**
