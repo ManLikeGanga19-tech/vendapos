@@ -3,9 +3,11 @@
 use App\Http\Api\V1\Middleware\EnsureDeviceBinding;
 use App\Http\Api\V1\Middleware\LimitRequestBody;
 use App\Http\Api\V1\Middleware\ThrottleTokenRenewal;
+use App\Http\Middleware\TrustCloudflare;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
@@ -27,6 +29,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'throttle.renewal' => ThrottleTokenRenewal::class,
             'ability' => CheckForAnyAbility::class,
         ]);
+
+        // Client IP from Cloudflare only (see TrustCloudflare), never from a caller's own headers.
+        $middleware->replace(TrustProxies::class, TrustCloudflare::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

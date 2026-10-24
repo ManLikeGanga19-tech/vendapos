@@ -327,3 +327,31 @@ it('refuses a transaction type daraja does not accept and keeps the saved keys',
         ->consumer_key->toBe('sandbox-consumer-key')
         ->transaction_type->toBe('CustomerPayBillOnline');
 });
+
+it('accepts Safaricom’s callback when it arrives through Cloudflare', function () {
+    fakeDaraja();
+    $payment = pushedPayment();
+    $token = $this->tenant->run(fn () => Payment::query()->findOrFail($payment->id)->callback_token);
+
+    $this->withServerVariables(['REMOTE_ADDR' => '162.158.20.5']) // a Cloudflare edge
+        ->postJson("/webhooks/payments/mpesa_ke/{$token}", stkCallback($payment->provider_request_id), ['CF-Connecting-IP' => SAFARICOM_IP])
+        ->assertOk();
+
+    expect(paymentIn($this->tenant, $payment->id)->status)->toBe(PaymentStatus::Succeeded);
+});
+
+it('refuses a callback that claims a Safaricom IP in headers on a direct connection', function () {
+    fakeDaraja();
+    $payment = pushedPayment();
+    $token = $this->tenant->run(fn () => Payment::query()->findOrFail($payment->id)->callback_token);
+
+    $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.9'])
+        ->postJson("/webhooks/payments/mpesa_ke/{$token}", stkCallback($payment->provider_request_id), [
+            'CF-Connecting-IP' => SAFARICOM_IP,
+            'X-Forwarded-For' => SAFARICOM_IP,
+        ])
+        ->assertOk();
+
+    expect(paymentIn($this->tenant, $payment->id)->status)->toBe(PaymentStatus::Pending)
+        ->and(WebhookReceipt::query()->sole())->status->toBe(WebhookReceipt::REJECTED)->note->toBe('ip_not_allowed');
+});

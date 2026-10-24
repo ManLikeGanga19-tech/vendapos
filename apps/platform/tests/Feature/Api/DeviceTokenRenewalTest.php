@@ -183,3 +183,13 @@ it('counts every request in Redis, so the limit is exact', function () {
     expect($statuses->filter(fn (int $status) => $status !== 429))->toHaveCount(10)
         ->and($statuses->slice(10)->unique()->all())->toBe([10 => 429]);
 });
+
+it('limits each real client, not the Cloudflare edge they share', function () {
+    config(['vendapos.rate_limits.token_renewal.per_minute' => 2]);
+    $this->withServerVariables(['REMOTE_ADDR' => '172.64.10.20']); // one Cloudflare edge for everyone
+
+    $renew = fn (string $client) => deviceRequest('POST', RENEW, '1|'.Str::random(40), (string) Str::uuid(), ['CF-Connecting-IP' => $client])->status();
+
+    expect([$renew('41.90.64.12'), $renew('41.90.64.12'), $renew('41.90.64.12')])->toBe([401, 401, 429])
+        ->and($renew('105.160.3.7'))->toBe(401); // a different till behind the same edge is unaffected
+});

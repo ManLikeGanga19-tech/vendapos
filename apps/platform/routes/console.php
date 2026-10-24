@@ -14,6 +14,12 @@ Schedule::command('payments:reconcile')->everyMinute()->withoutOverlapping()->on
 // Resends eTIMS documents whose retry is due (30 s, 60 s, 120 s, then hourly).
 Schedule::command('etims:retry')->everyMinute()->withoutOverlapping()->onOneServer();
 
+// Keeps the trusted Cloudflare edge ranges current; a failed fetch keeps the previous list.
+Schedule::command('network:refresh-cloudflare-ips')
+    ->dailyAt('04:00')
+    ->timezone((string) config('vendapos.business_timezone'))
+    ->onOneServer();
+
 // Deletes device tokens a day after their renewal grace window ends; until
 // then an expired token can still be renewed, so it must be kept.
 Schedule::command('sanctum:prune-expired', ['--hours' => ((int) config('vendapos.device_token_grace_days') + 1) * 24])
