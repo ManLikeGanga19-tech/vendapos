@@ -88,3 +88,38 @@ it('converts to whole shillings for mobile money and refuses amounts with cents'
         ->and(Money::fromCents(123_450)->isWholeShillings())->toBeFalse()
         ->and(fn () => Money::fromCents(123_450)->toWholeShillings())->toThrow(InvalidArgumentException::class);
 });
+
+it('reads shillings as typed, without floats', function (string $typed, int $cents) {
+    expect(Money::fromShillings($typed)->cents)->toBe($cents);
+})->with([
+    'whole' => ['1250', 125_000],
+    'one decimal' => ['1250.5', 125_050],
+    'two decimals' => ['1250.05', 125_005],
+    'thousands separators' => ['1,250.50', 125_050],
+    'padded' => [' 0.10 ', 10],
+    'float trap' => ['0.29', 29],
+    'zero' => ['0', 0],
+]);
+
+it('refuses amounts it would have to round or guess', function (string $typed) {
+    Money::fromShillings($typed);
+})->throws(InvalidArgumentException::class)->with([
+    'three decimals' => ['12.345'],
+    'negative' => ['-5'],
+    'plus sign' => ['+5'],
+    'exponent' => ['1e3'],
+    'empty' => [''],
+    'dot only' => ['.'],
+    'trailing dot' => ['12.'],
+    'letters' => ['KES 12'],
+    'too long' => ['12345678901234'],
+]);
+
+it('writes shillings for a form field and reads them back', function (int $cents, string $shillings) {
+    expect(Money::fromCents($cents)->toShillings())->toBe($shillings)
+        ->and(Money::fromShillings($shillings)->cents)->toBe($cents);
+})->with([
+    [125_050, '1250.50'],
+    [5, '0.05'],
+    [0, '0.00'],
+]);
