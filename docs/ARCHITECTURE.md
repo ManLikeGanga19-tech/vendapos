@@ -422,13 +422,15 @@ The six defence layers from v1.0 stay; each is re-implemented with Laravel and F
 Anomaly rules carry over unchanged: void rate above 10%, orders between 23:00 and 06:00, and more than 50 orders per minute from one device each raise an alert and an Admin-panel flag.
 
 ```php
-// app/Domain/Tenancy/Models/Device.php — tokens are issued per device, never per user
+// app/Domain/Tenancy/Actions/IssueDeviceToken.php — tokens are issued per device, never per user
 $token = $device->createToken(
-    name: "terminal:{$device->serial}",
-    abilities: $staff->getAllPermissions()->pluck('name')->all(),
+    name: "terminal:{$device->id}",
+    abilities: config('vendapos.device_abilities'), // orders:sync, payments:initiate, staff:read
     expiresAt: now()->addHours(12),
 );
 ```
+
+The token belongs to the till, not to whoever is using it, because staff switch by PIN while the till may be offline and cannot wait for a new token. The till pulls its branch's staff list (`GET /api/v1/staff`: names, roles, permissions and PIN hashes, never PINs) and checks PINs and permissions locally. Each order records who made it and who approved any void or discount, so the server can check after sync.
 
 ---
 
