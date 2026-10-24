@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Api\V1\Controllers\RefreshDeviceToken;
+use App\Http\Api\V1\Controllers\RenewDeviceToken;
 use App\Http\Api\V1\Controllers\RequestPayment;
 use App\Http\Api\V1\Controllers\ShowCatalogue;
 use App\Http\Api\V1\Controllers\ShowDevice;
@@ -32,3 +33,12 @@ Route::prefix('v1')
             ->whereUuid('uuid')
             ->name('api.v1.payments.show');
     });
+
+/*
+| Renewal of a device token that expired within the grace window. The token
+| no longer authenticates, so this route is outside auth:sanctum; it checks
+| the token and X-Device-ID itself and has its own strict limiter.
+*/
+Route::post('v1/device/token/renew', RenewDeviceToken::class)
+    ->middleware('throttle.renewal')
+    ->name('api.v1.device.token.renew');

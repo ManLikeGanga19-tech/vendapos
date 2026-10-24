@@ -14,9 +14,9 @@ Schedule::command('payments:reconcile')->everyMinute()->withoutOverlapping()->on
 // Resends eTIMS documents whose retry is due (30 s, 60 s, 120 s, then hourly).
 Schedule::command('etims:retry')->everyMinute()->withoutOverlapping()->onOneServer();
 
-// Deletes device tokens a day after they expire. An expired token can no
-// longer be used or refreshed, so this is only housekeeping.
-Schedule::command('sanctum:prune-expired', ['--hours' => 24])
+// Deletes device tokens a day after their renewal grace window ends; until
+// then an expired token can still be renewed, so it must be kept.
+Schedule::command('sanctum:prune-expired', ['--hours' => ((int) config('vendapos.device_token_grace_days') + 1) * 24])
     ->dailyAt('03:30')
     ->timezone((string) config('vendapos.business_timezone'))
     ->onOneServer();

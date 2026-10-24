@@ -2,6 +2,7 @@
 
 use App\Http\Api\V1\Middleware\EnsureDeviceBinding;
 use App\Http\Api\V1\Middleware\LimitRequestBody;
+use App\Http\Api\V1\Middleware\ThrottleTokenRenewal;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'device.bound' => EnsureDeviceBinding::class,
             'body.limit' => LimitRequestBody::class,
+            'throttle.renewal' => ThrottleTokenRenewal::class,
             'ability' => CheckForAnyAbility::class,
         ]);
     })
