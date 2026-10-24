@@ -79,11 +79,12 @@ return [
             'transport' => 'array',
         ],
 
+        // Production mailer (MAIL_MAILER=failover): Amazon SES, and Resend whenever SES refuses or is unreachable.
         'failover' => [
             'transport' => 'failover',
             'mailers' => [
-                'smtp',
-                'log',
+                'ses',
+                'resend',
             ],
             'retry_after' => 60,
         ],
@@ -111,8 +112,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
+        'address' => env('MAIL_FROM_ADDRESS', 'no-reply@mail.vendapos.com'),
+        'name' => env('MAIL_FROM_NAME', 'VendaPOS'),
     ],
 
 ];
