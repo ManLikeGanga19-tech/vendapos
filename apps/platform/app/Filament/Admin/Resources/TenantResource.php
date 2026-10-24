@@ -8,6 +8,7 @@ use App\Domain\Tenancy\Models\Tenant;
 use App\Filament\Admin\Resources\TenantResource\Pages;
 use BackedEnum;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
@@ -58,6 +59,13 @@ class TenantResource extends Resource
                             ->label(__('admin.tenant_form.owner_email'))
                             ->email()
                             ->maxLength(255),
+                        Select::make('locale')
+                            ->label(__('admin.tenant_form.locale'))
+                            ->helperText(__('admin.tenant_form.locale_help'))
+                            ->options(array_combine(Tenant::LOCALES, array_map(fn (string $locale) => __("admin.tenant_form.locales.{$locale}"), Tenant::LOCALES)))
+                            ->default('en')
+                            ->required()
+                            ->selectablePlaceholder(false),
                     ]),
             ]);
     }

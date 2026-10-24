@@ -19,6 +19,12 @@ return [
         'owner_phone' => 'Owner phone',
         'owner_email' => 'Owner email',
         'owner_phone_invalid' => 'Enter a valid phone number, for example 0712 345 678.',
+        'locale' => 'Owner’s language',
+        'locale_help' => 'SMS and emails to the owner are written in this language.',
+        'locales' => [
+            'en' => 'English',
+            'sw' => 'Kiswahili',
+        ],
     ],
 
     'owner_login' => [

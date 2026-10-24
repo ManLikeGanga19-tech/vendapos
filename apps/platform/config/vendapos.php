@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Domain\Etims\Clients\FakeEtimsClient;
 use App\Domain\Etims\Clients\NullEtimsClient;
 use App\Domain\Payments\Gateways\DarajaGateway;
+use App\Infrastructure\Sms\AfricasTalkingSmsClient;
+use App\Infrastructure\Sms\FakeSmsClient;
 
 return [
 
@@ -156,6 +158,31 @@ return [
         'max_attempts' => 75,
         // Documents one RetryFailedEtims job sends per tenant per run.
         'retry_batch_size' => 200,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | SMS
+    |--------------------------------------------------------------------------
+    |
+    | Owner notices go by SMS through Africa's Talking (platform account).
+    | Outside production the fake client only logs, unless set otherwise; the
+    | username "sandbox" sends to AT's simulator.
+    |
+    */
+
+    'sms' => [
+        'client' => env('VENDAPOS_SMS_CLIENT', env('APP_ENV') === 'production' ? 'africastalking' : 'fake'),
+        'clients' => [
+            'africastalking' => AfricasTalkingSmsClient::class,
+            'fake' => FakeSmsClient::class,
+        ],
+        'africastalking' => [
+            'username' => env('AFRICASTALKING_USERNAME'),
+            'api_key' => env('AFRICASTALKING_API_KEY'),
+            // Empty until a sender ID is registered with the networks.
+            'sender_id' => env('AFRICASTALKING_SENDER_ID'),
+        ],
     ],
 
     // Business days are counted here; storage stays UTC (CLAUDE.md §4).

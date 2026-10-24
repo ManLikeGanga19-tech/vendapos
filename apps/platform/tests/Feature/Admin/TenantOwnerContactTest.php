@@ -82,3 +82,29 @@ it('lets an admin add an owner to a tenant created before contacts existed', fun
 
     expect($tenant->fresh()?->owner_phone)->toBe('+255712345678');
 });
+
+it('stores the owner’s language, English unless chosen', function (?string $locale, string $stored) {
+    Livewire::test(CreateTenant::class)
+        ->fillForm(array_filter([
+            'id' => 'tlugha',
+            'name' => 'Lugha Shop',
+            'owner_name' => 'Juma Hamisi',
+            'owner_phone' => '0722 000 111',
+            'locale' => $locale,
+        ]))
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Tenant::findOrFail('tlugha')->locale)->toBe($stored)
+        ->and(Tenant::findOrFail('tlugha')->preferredLocale())->toBe($stored);
+})->with([
+    'not chosen' => [null, 'en'],
+    'Kiswahili' => ['sw', 'sw'],
+]);
+
+it('refuses a language we do not write in', function () {
+    Livewire::test(CreateTenant::class)
+        ->fillForm(['id' => 'tfr', 'name' => 'French', 'owner_name' => 'X', 'owner_phone' => '0722 000 112', 'locale' => 'fr'])
+        ->call('create')
+        ->assertHasFormErrors(['locale']);
+});

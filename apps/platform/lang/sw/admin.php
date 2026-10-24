@@ -20,6 +20,12 @@ return [
         'owner_phone' => 'Simu ya mmiliki',
         'owner_email' => 'Barua pepe ya mmiliki',
         'owner_phone_invalid' => 'Weka nambari sahihi ya simu, kwa mfano 0712 345 678.',
+        'locale' => 'Lugha ya mmiliki',
+        'locale_help' => 'SMS na barua pepe kwa mmiliki huandikwa kwa lugha hii.',
+        'locales' => [
+            'en' => 'Kiingereza',
+            'sw' => 'Kiswahili',
+        ],
     ],
 
     'owner_login' => [

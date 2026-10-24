@@ -15,10 +15,13 @@ use App\Domain\Payments\Jobs\FlagPaymentsForCancelledOrder;
 use App\Domain\Payments\Jobs\InitiatePayment;
 use App\Domain\Tenancy\Models\Device;
 use App\Domain\Tenancy\Models\Staff;
+use App\Infrastructure\Notifications\RecordNotificationDelivery;
+use App\Infrastructure\Sms\SmsClient;
 use Filament\Support\Facades\FilamentTimezone;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -36,6 +39,14 @@ class AppServiceProvider extends ServiceProvider
             $clients = config('vendapos.etims.clients');
 
             return $this->app->make($clients[(string) config('vendapos.etims.client')]);
+        });
+
+        // A singleton, so the fake client keeps what it sent for the whole request or job.
+        $this->app->singleton(SmsClient::class, function () {
+            /** @var array<string, class-string<SmsClient>> $clients */
+            $clients = config('vendapos.sms.clients');
+
+            return $this->app->make($clients[(string) config('vendapos.sms.client')]);
         });
     }
 
@@ -75,6 +86,8 @@ class AppServiceProvider extends ServiceProvider
             UpdateSalesSummaries::dispatch($event->tenantId, $event->eventId);
             SubmitCreditNoteToEtims::dispatch($event->tenantId, $event->eventId);
         });
+
+        Event::listen(NotificationSent::class, RecordNotificationDelivery::class);
 
         Event::listen(PaymentRequested::class, fn (PaymentRequested $event) => InitiatePayment::dispatch($event->tenantId, $event->eventId));
 
