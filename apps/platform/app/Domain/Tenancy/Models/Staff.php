@@ -25,6 +25,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $username
  * @property string|null $password
  * @property bool $is_active
+ * @property string|null $locale Owner panel language; null follows the business (Tenant::LOCALES)
  * @property Carbon|null $last_login_at
  * @property string|null $app_authentication_secret
  * @property array<string>|null $app_authentication_recovery_codes

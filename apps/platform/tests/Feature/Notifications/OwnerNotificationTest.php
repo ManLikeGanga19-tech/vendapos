@@ -29,12 +29,12 @@ final class TestOwnerNotice extends OwnerNotification
 
     public function toSms(Tenant $tenant): string
     {
-        return 'VendaPOS: '.__('admin.tenant_form.locales.en');
+        return 'VendaPOS: '.__('owner.dashboard.branch');
     }
 
     public function toMail(Tenant $tenant): MailMessage
     {
-        return (new MailMessage)->subject(__('admin.tenant_form.locales.en'))->line('Test');
+        return (new MailMessage)->subject(__('owner.dashboard.branch'))->line('Test');
     }
 }
 
@@ -66,7 +66,7 @@ it('texts and emails the owner and records both deliveries', function () {
     $tenant->notify(new TestOwnerNotice);
 
     expect($this->sms)->toBeInstanceOf(FakeSmsClient::class)
-        ->and($this->sms->sent())->toBe([['to' => '+254712345678', 'message' => 'VendaPOS: English']]);
+        ->and($this->sms->sent())->toBe([['to' => '+254712345678', 'message' => 'VendaPOS: Branch']]);
     expect(Mail::mailer('array')->getSymfonyTransport()->messages())->toHaveCount(1);
 
     $rows = NotificationDelivery::query()->orderBy('channel')->get();
@@ -82,7 +82,7 @@ it('texts and emails the owner and records both deliveries', function () {
 it('writes in the owner’s language', function () {
     ownerTenant(['locale' => 'sw'])->notify(new TestOwnerNotice);
 
-    expect($this->sms->sent()[0]['message'])->toBe('VendaPOS: Kiingereza')
+    expect($this->sms->sent()[0]['message'])->toBe('VendaPOS: Tawi')
         ->and(app()->getLocale())->toBe('en'); // the app's own locale is left alone
 });
 

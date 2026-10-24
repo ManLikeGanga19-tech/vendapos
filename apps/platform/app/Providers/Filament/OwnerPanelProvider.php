@@ -6,8 +6,11 @@ namespace App\Providers\Filament;
 
 use App\Filament\Owner\Auth\Login;
 use App\Filament\Owner\Auth\SetUpAccount;
+use App\Http\Controllers\Owner\SwitchLanguage;
 use App\Http\Middleware\BlockSuspendedTenant;
 use App\Http\Middleware\EnsureSessionBelongsToTenant;
+use App\Http\Middleware\SetOwnerPanelLocale;
+use Filament\Actions\Action;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -34,6 +37,9 @@ use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
  */
 class OwnerPanelProvider extends PanelProvider
 {
+    /** Tenant::LOCALES, each named in its own language. */
+    private const LANGUAGES = ['en' => 'English', 'sw' => 'Kiswahili'];
+
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -52,6 +58,19 @@ class OwnerPanelProvider extends PanelProvider
             ])
             ->renderHook(PanelsRenderHook::STYLES_AFTER, fn () => view('filament.square-corners'))
             ->routes(fn () => Route::get('setup/{token}', SetUpAccount::class)->name('auth.setup'))
+            ->authenticatedRoutes(fn () => Route::post('language/{locale}', SwitchLanguage::class)
+                ->middleware($panel->getMultiFactorAuthenticationRequiredMiddleware())
+                ->name('language'))
+            // One switch to the other language, each named in its own language.
+            ->userMenuItems(array_map(
+                fn (string $locale) => Action::make("language-{$locale}")
+                    ->label(self::LANGUAGES[$locale])
+                    ->icon('heroicon-o-language')
+                    ->url(fn () => route('filament.owner.language', ['locale' => $locale]))
+                    ->postToUrl()
+                    ->visible(fn () => app()->getLocale() !== $locale),
+                array_keys(self::LANGUAGES),
+            ))
             ->discoverResources(in: app_path('Filament/Owner/Resources'), for: 'App\Filament\Owner\Resources')
             ->discoverPages(in: app_path('Filament/Owner/Pages'), for: 'App\Filament\Owner\Pages')
             ->discoverWidgets(in: app_path('Filament/Owner/Widgets'), for: 'App\Filament\Owner\Widgets')
@@ -74,6 +93,7 @@ class OwnerPanelProvider extends PanelProvider
                 PreventAccessFromCentralDomains::class,
                 BlockSuspendedTenant::class,
                 EnsureSessionBelongsToTenant::class,
+                SetOwnerPanelLocale::class,
             ], isPersistent: true)
             ->authMiddleware([
                 Authenticate::class,

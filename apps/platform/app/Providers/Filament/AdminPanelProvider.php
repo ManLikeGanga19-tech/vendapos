@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Http\Controllers\Admin\DownloadTenantExport;
 use App\Http\Middleware\EnsureCentralDomain;
+use App\Http\Middleware\UseEnglish;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -63,6 +64,8 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            // Persistent, so Livewire's own update requests are English too.
+            ->middleware([UseEnglish::class], isPersistent: true)
             ->authMiddleware([
                 Authenticate::class,
             ])
