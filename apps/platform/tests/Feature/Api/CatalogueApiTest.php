@@ -66,6 +66,8 @@ it('returns only changes since the last sync, including deactivated items', func
     $repriced = addItem($tenant, ['name' => 'Mandazi']);
     $dropped = addItem($tenant, ['name' => 'Samosa']);
 
+    // Past the overlap the next sync reaches back over.
+    $this->travel(1)->minutes();
     $syncedAt = deviceRequest('GET', '/api/v1/catalogue', $enrolment->plainTextToken, $enrolment->device->id)->json('synced_at');
 
     $this->travel(5)->minutes();
@@ -81,6 +83,24 @@ it('returns only changes since the last sync, including deactivated items', func
     expect($response->json('items.*.name'))->toBe(['Mandazi', 'Samosa'])
         ->and($response->json('items.1.is_active'))->toBeFalse()
         ->and($response->json('items.*.id'))->not->toContain($unchanged->id);
+});
+
+it('does not miss a change saved in the same second as the last sync', function () {
+    [$tenant, $branch] = tenantWithBranch();
+    $enrolment = enrolFor($tenant, $branch);
+    $item = addItem($tenant, ['name' => 'Chapati']);
+
+    // updated_at keeps whole seconds: a change later in the same second carries the sync's own timestamp.
+    $this->travelTo(now()->setTime(12, 0, 0, 200_000));
+    $syncedAt = deviceRequest('GET', '/api/v1/catalogue', $enrolment->plainTextToken, $enrolment->device->id)->json('synced_at');
+
+    $this->travelTo(now()->setTime(12, 0, 0, 900_000));
+    $tenant->run(fn () => $item->update(['price_cents' => 4_000]));
+
+    $response = deviceRequest('GET', '/api/v1/catalogue?updated_since='.urlencode($syncedAt), $enrolment->plainTextToken, $enrolment->device->id)
+        ->assertOk();
+
+    expect($response->json('items.*.price_cents'))->toBe([4_000]);
 });
 
 it('rejects unknown and invalid query parameters', function () {

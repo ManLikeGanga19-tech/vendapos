@@ -16,14 +16,22 @@ use Illuminate\Http\JsonResponse;
  */
 final class ShowCatalogue
 {
+    /**
+     * How far `synced_at` reaches back. updated_at keeps whole seconds, and a
+     * save still committing while this request reads is invisible to it; both
+     * would otherwise carry a time at or before `synced_at` and never be sent.
+     * The terminal receives those few items twice and simply overwrites them.
+     */
+    private const OVERLAP_SECONDS = 5;
+
     public function __invoke(ShowCatalogueRequest $request): JsonResponse
     {
         // Taken before reading, so a change made during this request is picked up next time.
-        $syncedAt = now();
+        $syncedAt = now()->subSeconds(self::OVERLAP_SECONDS);
         $since = $request->date('updated_since');
 
         $items = Item::query()
-            ->when($since, fn ($query) => $query->where('updated_at', '>', $since), fn ($query) => $query->active())
+            ->when($since, fn ($query) => $query->where('updated_at', '>=', $since), fn ($query) => $query->active())
             ->orderBy('name')
             ->get()
             ->map(fn (Item $item) => [
