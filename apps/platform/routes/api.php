@@ -8,6 +8,7 @@ use App\Http\Api\V1\Controllers\RequestPayment;
 use App\Http\Api\V1\Controllers\ShowCatalogue;
 use App\Http\Api\V1\Controllers\ShowDevice;
 use App\Http\Api\V1\Controllers\ShowPayment;
+use App\Http\Api\V1\Controllers\ShowTillStaff;
 use App\Http\Api\V1\Controllers\SyncOrders;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,9 @@ Route::prefix('v1')
         Route::get('device', ShowDevice::class)->name('api.v1.device');
         Route::post('device/token', RefreshDeviceToken::class)->name('api.v1.device.token');
         Route::get('catalogue', ShowCatalogue::class)->name('api.v1.catalogue');
+        Route::get('staff', ShowTillStaff::class)
+            ->middleware('ability:staff:read')
+            ->name('api.v1.staff');
         Route::post('orders/sync', SyncOrders::class)
             ->middleware(['ability:orders:sync', 'body.limit'])
             ->name('api.v1.orders.sync');

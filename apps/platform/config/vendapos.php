@@ -28,7 +28,7 @@ return [
     'device_token_grace_days' => (int) env('VENDAPOS_DEVICE_TOKEN_GRACE_DAYS', 7),
 
     // Abilities granted to a terminal's token.
-    'device_abilities' => ['orders:sync', 'payments:initiate'],
+    'device_abilities' => ['orders:sync', 'payments:initiate', 'staff:read'],
 
     /*
     |--------------------------------------------------------------------------
