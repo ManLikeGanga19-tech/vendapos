@@ -18,7 +18,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 /**
  * Someone who works for a tenant's business, stored in the tenant's own
- * schema. Signs in with a username on the tenant's domain (guard `tenant`).
+ * schema. Owners and managers sign in to the Owner panel with a username on
+ * the tenant's domain (guard `tenant`); everyone may have a till PIN.
  *
  * @property string $id
  * @property string $name
@@ -29,11 +30,41 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon|null $last_login_at
  * @property string|null $app_authentication_secret
  * @property array<string>|null $app_authentication_recovery_codes
+ * @property string|null $pin_hash
+ * @property Carbon|null $pin_set_at
+ * @property Carbon $updated_at
  */
 class Staff extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery
 {
     use HasRoles;
     use HasUuids;
+
+    /** Each person has exactly one of these, most senior first. */
+    public const ROLES = ['owner', 'manager', 'cashier', 'waiter'];
+
+    /** Roles a manager may add and look after, in their own branches only. */
+    public const TILL_ROLES = ['cashier', 'waiter'];
+
+    /** PIN digits per role: longer where the PIN approves voids and discounts. */
+    public const PIN_LENGTHS = ['owner' => 6, 'manager' => 6, 'cashier' => 4, 'waiter' => 4];
+
+    public function roleName(): ?string
+    {
+        $names = $this->getRoleNames();
+
+        foreach (self::ROLES as $role) {
+            if ($names->contains($role)) {
+                return $role;
+            }
+        }
+
+        return null;
+    }
+
+    public static function pinLengthFor(string $role): int
+    {
+        return self::PIN_LENGTHS[$role] ?? 6;
+    }
 
     /** Owners and managers who finished setting up may use the Owner panel. */
     public function canAccessPanel(Panel $panel): bool
@@ -80,7 +111,7 @@ class Staff extends Authenticatable implements FilamentUser, HasAppAuthenticatio
     /** Mirrors the column default so a freshly created model is active too. */
     protected $attributes = ['is_active' => true];
 
-    protected $hidden = ['password', 'remember_token', 'app_authentication_secret', 'app_authentication_recovery_codes'];
+    protected $hidden = ['password', 'remember_token', 'app_authentication_secret', 'app_authentication_recovery_codes', 'pin_hash'];
 
     /**
      * The branches whose data this person may see in the Owner panel: every
@@ -119,6 +150,7 @@ class Staff extends Authenticatable implements FilamentUser, HasAppAuthenticatio
             'password' => 'hashed',
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
+            'pin_set_at' => 'datetime',
             'app_authentication_secret' => 'encrypted',
             'app_authentication_recovery_codes' => 'encrypted:array',
         ];
