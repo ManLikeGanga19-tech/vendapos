@@ -6,6 +6,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Owner\Auth\Login;
 use App\Filament\Owner\Auth\SetUpAccount;
+use App\Http\Middleware\BlockSuspendedTenant;
 use App\Http\Middleware\EnsureSessionBelongsToTenant;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
@@ -71,6 +72,7 @@ class OwnerPanelProvider extends PanelProvider
             ->middleware([
                 InitializeTenancyByDomain::class,
                 PreventAccessFromCentralDomains::class,
+                BlockSuspendedTenant::class,
                 EnsureSessionBelongsToTenant::class,
             ], isPersistent: true)
             ->authMiddleware([

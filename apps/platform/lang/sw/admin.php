@@ -28,6 +28,26 @@ return [
         ],
     ],
 
+    'suspension' => [
+        'status' => 'Hali',
+        'statuses' => [
+            'active' => 'Inatumika',
+            'suspended' => 'Imesimamishwa',
+            'purged' => 'Imefutwa',
+        ],
+        'suspend' => 'Simamisha',
+        'suspend_heading' => 'Simamisha :name?',
+        'suspend_description' => 'Kuingia kwa mmiliki na meneja, maombi mapya ya M-Pesa na mashine mpya za mauzo vinazuiwa mara moja; mashine zilizopo zinaendelea kutuma mauzo. Mmiliki anajulishwa kwa SMS na barua pepe. Isipofunguliwa tena, nakala ya data inatolewa na data kufutwa kabisa baada ya siku :days.',
+        'reason' => 'Sababu',
+        'reason_help' => 'Inaonyeshwa kwa mmiliki kwenye barua pepe na kuhifadhiwa kwenye kumbukumbu za ukaguzi.',
+        'suspended' => 'Mpangaji amesimamishwa; mmiliki anajulishwa',
+        'reactivate' => 'Fungua tena',
+        'reactivate_description' => 'Kila kitu kinafanya kazi tena mara moja, ufutaji unaghairiwa na mmiliki anajulishwa.',
+        'reactivated' => 'Mpangaji amefunguliwa tena; mmiliki anajulishwa',
+        'conflict' => 'Hali ya mpangaji huyu imebadilishwa na mtu mwingine; inaonyeshwa ilivyo sasa.',
+        'subheading' => 'Amesimamishwa tangu :since. Data itatolewa nakala na kufutwa tarehe :purge. Sababu: :reason',
+    ],
+
     'owner_login' => [
         'action' => 'Kiungo cha kuingia cha mmiliki',
         'confirm' => 'Hii inaunda kiungo cha mara moja kwa :name kuchagua jina la mtumiaji na nenosiri. Kiungo chochote cha awali kitaacha kufanya kazi.',

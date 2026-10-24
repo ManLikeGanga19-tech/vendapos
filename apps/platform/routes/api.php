@@ -26,7 +26,7 @@ Route::prefix('v1')
             ->middleware(['ability:orders:sync', 'body.limit'])
             ->name('api.v1.orders.sync');
         Route::post('payments', RequestPayment::class)
-            ->middleware(['ability:payments:initiate', 'body.limit'])
+            ->middleware(['ability:payments:initiate', 'tenant.active', 'body.limit'])
             ->name('api.v1.payments.store');
         Route::get('payments/{uuid}', ShowPayment::class)
             ->middleware('ability:payments:initiate')

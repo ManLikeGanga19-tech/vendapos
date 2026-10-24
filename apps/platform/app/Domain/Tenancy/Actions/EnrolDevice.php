@@ -16,6 +16,11 @@ final class EnrolDevice
 
     public function handle(Tenant $tenant, string $branchId, string $name): DeviceEnrolment
     {
+        // Existing tills keep working while suspended; no new ones join.
+        if (! $tenant->isActive()) {
+            throw new InvalidArgumentException("Tenant [{$tenant->getTenantKey()}] is {$tenant->status}; no new devices can be enrolled.");
+        }
+
         // The branch lives in the tenant's schema: look it up there, never across tenants.
         $branchExists = $tenant->run(fn () => Branch::query()->whereKey($branchId)->exists());
 

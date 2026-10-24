@@ -82,6 +82,16 @@ class TenantResource extends Resource
                     ->label(__('admin.tenant_form.name'))
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('status')
+                    ->label(__('admin.suspension.status'))
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => __("admin.suspension.statuses.{$state}"))
+                    ->color(fn (string $state): string => match ($state) {
+                        Tenant::ACTIVE => 'success',
+                        Tenant::SUSPENDED => 'warning',
+                        default => 'gray',
+                    })
+                    ->sortable(),
                 TextColumn::make('owner_name')
                     ->label(__('admin.tenant_form.owner'))
                     ->description(fn (Tenant $record): ?string => $record->owner_phone)

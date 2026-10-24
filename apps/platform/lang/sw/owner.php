@@ -80,4 +80,13 @@ return [
             'average_order_help' => 'Mauzo yamegawanywa kwa idadi ya oda',
         ],
     ],
+
+    'suspended' => [
+        'title' => 'Akaunti hii imesimamishwa',
+        'still_works' => 'Mashine zako za mauzo zinaendelea kurekodi na kutuma mauzo, na malipo ya M-Pesa yaliyokwisha anzishwa yatakamilika.',
+        'blocked' => 'Kuingia hapa na kuanzisha malipo mapya ya M-Pesa kumezuiwa hadi akaunti ifunguliwe tena.',
+        'purge' => 'Isipofunguliwa tena, nakala ya data itatolewa kisha data kufutwa kabisa tarehe :date.',
+        'contact' => 'Ili kuifungua tena, wasiliana na huduma kwa wateja ya VendaPOS.',
+        'contact_phone' => 'Ili kuifungua tena, piga huduma kwa wateja ya VendaPOS kwa :phone.',
+    ],
 ];

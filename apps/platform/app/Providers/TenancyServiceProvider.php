@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Http\Middleware\BlockSuspendedTenant;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
@@ -156,6 +157,10 @@ class TenancyServiceProvider extends ServiceProvider
             Middleware\InitializeTenancyByDomainOrSubdomain::class,
             Middleware\InitializeTenancyByPath::class,
             Middleware\InitializeTenancyByRequestData::class,
+
+            // Right after the tenant is known and before sessions and Authenticate,
+            // so a suspended tenant's pages show the notice, not a sign-in redirect.
+            BlockSuspendedTenant::class,
         ];
 
         /** @var \Illuminate\Foundation\Http\Kernel $kernel */

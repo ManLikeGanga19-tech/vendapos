@@ -27,6 +27,26 @@ return [
         ],
     ],
 
+    'suspension' => [
+        'status' => 'Status',
+        'statuses' => [
+            'active' => 'Active',
+            'suspended' => 'Suspended',
+            'purged' => 'Purged',
+        ],
+        'suspend' => 'Suspend',
+        'suspend_heading' => 'Suspend :name?',
+        'suspend_description' => 'Owner and manager sign-in, new M-Pesa requests and new tills are blocked at once; existing tills keep syncing sales. The owner is told by SMS and email. Unless reactivated, the data is exported and permanently deleted after :days days.',
+        'reason' => 'Reason',
+        'reason_help' => 'Shown to the owner in the email and kept in the audit trail.',
+        'suspended' => 'Tenant suspended; the owner is being notified',
+        'reactivate' => 'Reactivate',
+        'reactivate_description' => 'Everything works again at once, the deletion is cancelled and the owner is notified.',
+        'reactivated' => 'Tenant reactivated; the owner is being notified',
+        'conflict' => 'This tenant’s status was changed by someone else; showing it as it is now.',
+        'subheading' => 'Suspended since :since. Data will be exported and deleted on :purge. Reason: :reason',
+    ],
+
     'owner_login' => [
         'action' => 'Owner login link',
         'confirm' => 'This creates a one-time link for :name to choose a username and password. Any earlier link stops working.',

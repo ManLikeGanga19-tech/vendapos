@@ -27,6 +27,8 @@ final class ShowDevice
                 'terminal_mode' => $branch->business_type->terminalMode()->value,
             ],
             'token_expires_at' => $device->currentAccessToken()->expires_at?->toIso8601String(),
+            // "suspended": keep selling and syncing, but new M-Pesa requests are refused, so offer cash.
+            'account_status' => tenant('status'),
         ]);
     }
 }

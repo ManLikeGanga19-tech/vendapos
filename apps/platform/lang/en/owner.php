@@ -80,4 +80,13 @@ return [
             'average_order_help' => 'Sales divided by orders',
         ],
     ],
+
+    'suspended' => [
+        'title' => 'This account is suspended',
+        'still_works' => 'Your tills keep recording and syncing sales, and M-Pesa payments already started still complete.',
+        'blocked' => 'Signing in here and starting new M-Pesa payments are blocked until the account is reactivated.',
+        'purge' => 'Unless it is reactivated, a copy of the data will be exported and the data then permanently deleted on :date.',
+        'contact' => 'To reactivate, contact VendaPOS support.',
+        'contact_phone' => 'To reactivate, call VendaPOS support on :phone.',
+    ],
 ];

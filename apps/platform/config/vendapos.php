@@ -185,6 +185,26 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Suspension and support
+    |--------------------------------------------------------------------------
+    |
+    | A suspended tenant's data is exported and deleted this many days after
+    | suspension unless it is reactivated first. The support line is quoted
+    | in owner notices and on the suspended page when set.
+    |
+    */
+
+    'suspension' => [
+        'purge_after_days' => 14,
+    ],
+
+    'support' => [
+        'phone' => env('VENDAPOS_SUPPORT_PHONE'),
+        'email' => env('VENDAPOS_SUPPORT_EMAIL'),
+    ],
+
     // Business days are counted here; storage stays UTC (CLAUDE.md §4).
     'business_timezone' => 'Africa/Nairobi',
 

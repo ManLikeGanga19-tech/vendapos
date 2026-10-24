@@ -2,6 +2,7 @@
 
 use App\Http\Api\V1\Middleware\EnsureDeviceBinding;
 use App\Http\Api\V1\Middleware\LimitRequestBody;
+use App\Http\Api\V1\Middleware\RefuseSuspendedTenant;
 use App\Http\Api\V1\Middleware\ThrottleTokenRenewal;
 use App\Http\Middleware\TrustCloudflare;
 use Illuminate\Foundation\Application;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'device.bound' => EnsureDeviceBinding::class,
             'body.limit' => LimitRequestBody::class,
             'throttle.renewal' => ThrottleTokenRenewal::class,
+            'tenant.active' => RefuseSuspendedTenant::class,
             'ability' => CheckForAnyAbility::class,
         ]);
 
