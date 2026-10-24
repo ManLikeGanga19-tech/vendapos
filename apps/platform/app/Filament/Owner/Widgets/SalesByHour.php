@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Filament\Owner\Widgets;
 
 use App\Domain\Analytics\Actions\SummariseSalesDay;
-use App\Filament\Owner\Charts\ShillingsBarChart;
+use App\Filament\Owner\Charts\ShillingsChart;
 use App\Filament\Owner\Concerns\ScopesToStaffBranches;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Illuminate\Contracts\Support\Htmlable;
 
 /** Today's sales per Africa/Nairobi hour. */
-class SalesByHour extends ShillingsBarChart
+class SalesByHour extends ShillingsChart
 {
     use InteractsWithPageFilters;
     use ScopesToStaffBranches;
@@ -25,7 +25,7 @@ class SalesByHour extends ShillingsBarChart
         return __('owner.dashboard.sales_by_hour');
     }
 
-    protected function barsInCents(): array
+    protected function pointsInCents(): array
     {
         $cents = app(SummariseSalesDay::class)->handle($this->businessToday(), $this->selectedBranchIds())['hourly_total_cents'];
 
