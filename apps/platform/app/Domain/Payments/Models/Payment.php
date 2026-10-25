@@ -63,6 +63,6 @@ class Payment extends Model
     public function callbackUrl(): string
     {
         return rtrim((string) config('vendapos.payments.callback_base_url'), '/')
-            ."/webhooks/payments/{$this->provider->value}/{$this->callback_token}";
+            ."/webhooks/payments/{$this->callback_token}";
     }
 }

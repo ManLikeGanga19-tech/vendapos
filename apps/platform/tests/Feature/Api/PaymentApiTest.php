@@ -87,7 +87,7 @@ it('records a pending payment, its callback route and its outbox event, then que
         ->and($payment->order_id)->toBe($request['order_uuid'])
         ->and($route->tenant_id)->toBe($this->tenant->id)
         ->and($route->token_hash)->toBe(hash('sha256', $payment->callback_token))
-        ->and($payment->callbackUrl())->toEndWith("/webhooks/payments/mpesa_ke/{$payment->callback_token}")
+        ->and($payment->callbackUrl())->toEndWith("/webhooks/payments/{$payment->callback_token}")
         ->and($event->event_type)->toBe('payment.requested')
         ->and($event->payload)->not->toHaveKey('phone');
 

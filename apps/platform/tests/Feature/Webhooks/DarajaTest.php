@@ -94,7 +94,7 @@ function postCallback(Payment $payment, array $body, string $ip = SAFARICOM_IP, 
 {
     $token ??= test()->tenant->run(fn () => Payment::query()->findOrFail($payment->id)->callback_token);
 
-    return test()->withServerVariables(['REMOTE_ADDR' => $ip])->postJson("/webhooks/payments/mpesa_ke/{$token}", $body);
+    return test()->withServerVariables(['REMOTE_ADDR' => $ip])->postJson("/webhooks/payments/{$token}", $body);
 }
 
 /** A payment pushed through Daraja, with its CheckoutRequestID stored. */
@@ -130,7 +130,7 @@ it('sends the STK push with Daraja’s fields and keeps the CheckoutRequestID', 
             && $request['PhoneNumber'] === '254712345678'
             && $request['PartyB'] === SANDBOX_SHORTCODE
             && strlen($request['AccountReference']) <= 12
-            && str_ends_with($request['CallBackURL'], '/webhooks/payments/mpesa_ke/'.test()->tenant->run(fn () => Payment::query()->findOrFail($payment->id)->callback_token));
+            && str_ends_with($request['CallBackURL'], '/webhooks/payments/'.test()->tenant->run(fn () => Payment::query()->findOrFail($payment->id)->callback_token));
     });
 });
 
@@ -220,7 +220,25 @@ it('gives an unknown token the same reply and changes nothing', function () {
         ->assertOk()->assertExactJson(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);
 
     expect(paymentIn($this->tenant, $payment->id)->status)->toBe(PaymentStatus::Pending)
-        ->and(WebhookReceipt::query()->sole())->note->toBe('unknown_token')->tenant_id->toBeNull();
+        ->and(WebhookReceipt::query()->sole())->note->toBe('unknown_token')->tenant_id->toBeNull()->provider->toBe('unknown');
+});
+
+it('sends Safaricom a callback URL free of the words it refuses', function () {
+    fakeDaraja();
+    $payment = pushedPayment();
+
+    expect(paymentIn($this->tenant, $payment->id)->callbackUrl())
+        ->not->toMatch('/m-?pesa|safaricom|exe|cmd|sql|query/i');
+});
+
+it('no longer answers on the old provider-named path', function () {
+    fakeDaraja();
+    $payment = pushedPayment();
+    $token = $this->tenant->run(fn () => Payment::query()->findOrFail($payment->id)->callback_token);
+
+    $this->postJson("/webhooks/payments/mpesa_ke/{$token}", stkCallback($payment->provider_request_id))->assertNotFound();
+
+    expect(WebhookReceipt::query()->count())->toBe(0);
 });
 
 it('rejects a callback whose CheckoutRequestID is not this payment’s', function () {
@@ -334,7 +352,7 @@ it('accepts Safaricom’s callback when it arrives through Cloudflare', function
     $token = $this->tenant->run(fn () => Payment::query()->findOrFail($payment->id)->callback_token);
 
     $this->withServerVariables(['REMOTE_ADDR' => '162.158.20.5']) // a Cloudflare edge
-        ->postJson("/webhooks/payments/mpesa_ke/{$token}", stkCallback($payment->provider_request_id), ['CF-Connecting-IP' => SAFARICOM_IP])
+        ->postJson("/webhooks/payments/{$token}", stkCallback($payment->provider_request_id), ['CF-Connecting-IP' => SAFARICOM_IP])
         ->assertOk();
 
     expect(paymentIn($this->tenant, $payment->id)->status)->toBe(PaymentStatus::Succeeded);
@@ -346,7 +364,7 @@ it('refuses a callback that claims a Safaricom IP in headers on a direct connect
     $token = $this->tenant->run(fn () => Payment::query()->findOrFail($payment->id)->callback_token);
 
     $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.9'])
-        ->postJson("/webhooks/payments/mpesa_ke/{$token}", stkCallback($payment->provider_request_id), [
+        ->postJson("/webhooks/payments/{$token}", stkCallback($payment->provider_request_id), [
             'CF-Connecting-IP' => SAFARICOM_IP,
             'X-Forwarded-For' => SAFARICOM_IP,
         ])

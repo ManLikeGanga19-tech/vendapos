@@ -126,7 +126,8 @@ return [
     |
     | Each provider maps to a gateway class. With `fake` on, every provider
     | uses FakeGateway (tests, demos, local work without sandbox keys).
-    | Callbacks reach {callback_base_url}/webhooks/payments/{provider}/{token}.
+    | Callbacks reach {callback_base_url}/webhooks/payments/{token}; Safaricom
+    | refuses URLs containing words such as "mpesa", so keep the base URL free of them.
     |
     */
 
