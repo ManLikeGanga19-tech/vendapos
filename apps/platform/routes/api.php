@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Api\V1\Controllers\PairDevice;
 use App\Http\Api\V1\Controllers\RefreshDeviceToken;
 use App\Http\Api\V1\Controllers\RenewDeviceToken;
 use App\Http\Api\V1\Controllers\RequestPayment;
@@ -44,5 +45,13 @@ Route::prefix('v1')
 | the token and X-Device-ID itself and has its own strict limiter.
 */
 Route::post('v1/device/token/renew', RenewDeviceToken::class)
-    ->middleware('throttle.renewal')
+    ->middleware('throttle.strict:token_renewal')
     ->name('api.v1.device.token.renew');
+
+/*
+| Pairing a new till with a one-time code from the Owner panel. The till has
+| no token yet, so this is outside auth:sanctum, with its own strict limiter.
+*/
+Route::post('v1/device/pair', PairDevice::class)
+    ->middleware(['throttle.strict:device_pairing', 'body.limit'])
+    ->name('api.v1.device.pair');

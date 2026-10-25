@@ -27,6 +27,9 @@ return [
 
     'device_token_grace_days' => (int) env('VENDAPOS_DEVICE_TOKEN_GRACE_DAYS', 7),
 
+    // How long a one-time till pairing code works after it is shown.
+    'pairing_code_minutes' => 15,
+
     // Abilities granted to a terminal's token.
     'device_abilities' => ['orders:sync', 'payments:initiate', 'staff:read'],
 
@@ -45,8 +48,21 @@ return [
         'token_renewal' => [
             'per_minute' => (int) env('VENDAPOS_RATE_LIMIT_TOKEN_RENEWAL_MINUTE', 10),
             'per_hour' => (int) env('VENDAPOS_RATE_LIMIT_TOKEN_RENEWAL_HOUR', 30),
+            'subjects' => ['ip', 'device'],
             'redis_connection' => 'cache',
             'key_prefix' => 'rate:token-renewal:',
+        ],
+
+        // Pairing a till with a one-time code: per client IP, plus a ceiling
+        // across all callers so many addresses together can't guess codes.
+        'device_pairing' => [
+            'per_minute' => (int) env('VENDAPOS_RATE_LIMIT_PAIRING_MINUTE', 5),
+            'per_hour' => (int) env('VENDAPOS_RATE_LIMIT_PAIRING_HOUR', 20),
+            'all_per_minute' => (int) env('VENDAPOS_RATE_LIMIT_PAIRING_ALL_MINUTE', 300),
+            'all_per_hour' => (int) env('VENDAPOS_RATE_LIMIT_PAIRING_ALL_HOUR', 3000),
+            'subjects' => ['ip', 'all'],
+            'redis_connection' => 'cache',
+            'key_prefix' => 'rate:device-pairing:',
         ],
     ],
 

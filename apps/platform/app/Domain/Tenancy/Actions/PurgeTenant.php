@@ -57,7 +57,7 @@ final class PurgeTenant
                 ->delete();
             Device::query()->where('tenant_id', $tenantId)->delete();
 
-            foreach (['payment_callback_routes', 'webhook_receipts', 'domain_events'] as $table) {
+            foreach (['payment_callback_routes', 'webhook_receipts', 'domain_events', 'device_pairing_codes'] as $table) {
                 $central->table($table)->where('tenant_id', $tenantId)->delete();
             }
 

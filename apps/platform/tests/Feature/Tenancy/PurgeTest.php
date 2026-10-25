@@ -27,6 +27,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Laravel\Pennant\Feature;
 use Livewire\Livewire;
 use VendaPOS\Core\Enums\ItemType;
@@ -77,6 +78,7 @@ function seedCentralRows(Tenant $tenant, string $branchId): void
 
     DB::table('payment_callback_routes')->insert(['token_hash' => hash('sha256', $tenant->id), 'tenant_id' => $tenant->id, 'payment_id' => (string) Str::uuid(), 'provider' => 'mpesa_ke', 'created_at' => now()]);
     DB::table('webhook_receipts')->insert(['provider' => 'mpesa_ke', 'tenant_id' => $tenant->id, 'ip' => '196.201.214.200', 'body' => '{"phone":"254712345678"}', 'status' => 'processed', 'received_at' => now()]);
+    DB::table('device_pairing_codes')->insert(['id' => (string) Str::uuid(), 'tenant_id' => $tenant->id, 'branch_id' => $branchId, 'device_name' => 'Spare till', 'code_hash' => hash('sha256', $tenant->id), 'issued_by' => (string) Str::uuid(), 'expires_at' => now()->addMinutes(15), 'created_at' => now()]);
     Feature::for(EtimsEnabled::scope($branchId))->activate(EtimsEnabled::class);
 }
 
@@ -102,6 +104,7 @@ function centralRowsOf(Tenant $tenant): array
         'domain_events' => DB::table('domain_events')->where('tenant_id', $tenant->id)->count(),
         'payment_callback_routes' => DB::table('payment_callback_routes')->where('tenant_id', $tenant->id)->count(),
         'webhook_receipts' => DB::table('webhook_receipts')->where('tenant_id', $tenant->id)->count(),
+        'device_pairing_codes' => DB::table('device_pairing_codes')->where('tenant_id', $tenant->id)->count(),
     ];
 }
 
@@ -180,7 +183,7 @@ it('exports, then deletes the schema and every central row of that tenant only',
     Storage::disk('exports')->assertExists((string) $export->path);
 
     expect(schemaExists($tenant))->toBeFalse()
-        ->and(centralRowsOf($tenant))->toBe(['devices' => 0, 'domains' => 0, 'domain_events' => 0, 'payment_callback_routes' => 0, 'webhook_receipts' => 0])
+        ->and(centralRowsOf($tenant))->toBe(['devices' => 0, 'domains' => 0, 'domain_events' => 0, 'payment_callback_routes' => 0, 'webhook_receipts' => 0, 'device_pairing_codes' => 0])
         ->and(DB::table('personal_access_tokens')->where('tokenable_id', $this->enrolment->device->id)->count())->toBe(0)
         ->and(DB::table('features')->where('scope', EtimsEnabled::scope($this->branch->id))->count())->toBe(0);
 
