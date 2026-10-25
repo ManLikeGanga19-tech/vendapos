@@ -18,13 +18,14 @@ class NativeAppServiceProvider implements ProvidesPhpIni
             ->height(800)
             ->minWidth(1024)
             ->minHeight(700)
-            ->hideMenu()
             ->preventLeaveDomain()
             ->suppressNewWindows();
 
         if (config('terminal.kiosk')) {
             // A counter machine: full screen, nothing to close, no developer tools.
+            // Development keeps the menu, whose Ctrl+R reloads the window after a change.
             $window->kiosk()
+                ->hideMenu()
                 ->closable(false)
                 ->minimizable(false)
                 ->hideDevTools();
