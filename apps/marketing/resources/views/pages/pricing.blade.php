@@ -36,7 +36,7 @@
 
             <ul class="mt-12 grid gap-6 lg:grid-cols-3">
                 @foreach ($plans as $key => $plan)
-                    <x-plan-card :key="$key" :plan="$plan" :cta-url="$demoUrl" annual />
+                    <x-plan-card :key="$key" :plan="$plan" :cta-url="route('demo', ['plan' => $key])" annual />
                 @endforeach
             </ul>
         </div>

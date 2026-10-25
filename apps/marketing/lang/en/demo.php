@@ -30,6 +30,7 @@ return [
         'submit' => 'Request demo',
         'consent' => 'I agree that VendaPOS may store these details and contact me about this demo, as described below.',
         'honeypot' => 'Leave this field empty',
+        'plan_interest' => 'You’re asking about the :plan plan. We’ll confirm the right plan and price for your business on the call.',
     ],
 
     'hints' => [
@@ -49,6 +50,7 @@ return [
         'outlets' => 'Number of outlets',
         'contact_window' => 'Best time to call',
         'message' => 'Anything we should know?',
+        'plan_interest' => 'Plan of interest',
         'consent' => 'Consent',
     ],
 

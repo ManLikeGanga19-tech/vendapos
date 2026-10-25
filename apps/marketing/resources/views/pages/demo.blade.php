@@ -51,6 +51,14 @@
                     <input type="hidden" name="request_id" value="{{ $requestId }}">
                     <input type="hidden" name="form_token" value="{{ $formToken }}">
 
+                    @if ($planInterest)
+                        <input type="hidden" name="plan_interest" value="{{ $planInterest }}">
+                        <p class="flex items-start gap-3 border border-line bg-surface p-4 text-sm text-muted">
+                            <x-icon name="badge-check" class="mt-0.5 size-4 shrink-0 text-coral" />
+                            <span>{{ __('demo.form.plan_interest', ['plan' => __("plans.{$planInterest}.name")]) }}</span>
+                        </p>
+                    @endif
+
                     {{-- Honeypot: off-screen and skipped by keyboards and screen readers. --}}
                     <div class="absolute -left-[9999px]" aria-hidden="true">
                         <label for="{{ \App\Http\Requests\StoreDemoRequest::HONEYPOT }}">{{ __('demo.form.honeypot') }}</label>
@@ -83,7 +91,7 @@
                                     aria-invalid="{{ $errors->has('business_type') ? 'true' : 'false' }}" aria-describedby="{{ $describe('business_type') }}">
                                 <option value="">{{ __('demo.form.choose') }}</option>
                                 @foreach (BusinessType::cases() as $type)
-                                    <option value="{{ $type->value }}" @selected(old('business_type') === $type->value)>{{ __("demo.business_types.{$type->value}") }}</option>
+                                    <option value="{{ $type->value }}" @selected($businessType === $type->value)>{{ __("demo.business_types.{$type->value}") }}</option>
                                 @endforeach
                             </select>
                         </x-field>

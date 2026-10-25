@@ -151,3 +151,44 @@ it('rate limits submissions per IP', function () {
 it('links the header and home page calls to action to the demo form', function () {
     $this->get('/sw')->assertSee('href="'.url('/sw/demo').'"', false);
 });
+
+it('pre-selects the business type when coming from a solution page', function () {
+    $this->get('/en/demo?type=salon')
+        ->assertOk()
+        ->assertSee('<option value="salon" selected', false);
+});
+
+it('ignores an unknown business type or plan in the link', function () {
+    $response = $this->get('/en/demo?type=casino&plan=platinum')->assertOk();
+
+    expect($response->getContent())->not->toContain(' selected')
+        ->not->toContain('name="plan_interest"');
+});
+
+it('shows the plan the visitor picked and stores it with the lead', function (string $locale, string $note) {
+    $this->get("/{$locale}/demo?plan=business")
+        ->assertOk()
+        ->assertSee($note)
+        ->assertSee('name="plan_interest" value="business"', false);
+
+    $this->post("/{$locale}/demo", demoPayload(['plan_interest' => 'business']))->assertRedirect();
+
+    expect(DemoRequest::sole()->plan_interest)->toBe('business');
+    Notification::assertSentTo(new AnonymousNotifiable, NewDemoRequest::class,
+        fn (NewDemoRequest $n) => collect($n->toMail(new AnonymousNotifiable)->introLines)->contains(fn ($line) => str_contains($line, __('plans.business.name'))));
+})->with([
+    ['en', 'You’re asking about the'],
+    ['sw', 'Unauliza kuhusu mpango wa'],
+]);
+
+it('rejects a plan that does not exist', function () {
+    $this->post('/en/demo', demoPayload(['plan_interest' => 'platinum']))->assertSessionHasErrors('plan_interest');
+
+    expect(DemoRequest::count())->toBe(0);
+});
+
+it('links solution pages and pricing cards to a pre-filled demo form', function () {
+    $this->get('/en/solutions/salons')->assertSee('href="'.url('/en/demo?type=salon').'"', false);
+    $this->get('/en/solutions/restaurants')->assertSee('href="'.url('/en/demo?type=restaurant').'"', false);
+    $this->get('/sw/pricing')->assertSee('href="'.url('/sw/demo?plan=business').'"', false);
+});

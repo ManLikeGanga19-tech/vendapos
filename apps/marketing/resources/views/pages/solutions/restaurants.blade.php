@@ -41,7 +41,7 @@
                 <h1 class="text-display font-bold text-balance lg:text-display-lg">{{ __('restaurants.hero.title') }}</h1>
                 <p class="mt-6 max-w-xl text-lg text-muted text-pretty">{{ __('restaurants.hero.lead') }}</p>
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                    <x-button :href="route('demo')" size="lg" icon="arrow-right">{{ __('restaurants.hero.primary_cta') }}</x-button>
+                    <x-button :href="route('demo', ['type' => 'restaurant'])" size="lg" icon="arrow-right">{{ __('restaurants.hero.primary_cta') }}</x-button>
                     <x-button :href="route('pricing')" variant="secondary" size="lg">{{ __('restaurants.hero.secondary_cta') }}</x-button>
                 </div>
             </div>
@@ -147,6 +147,7 @@
     </section>
 
     <x-closing-cta :title="__('restaurants.cta.title')" :lead="__('restaurants.cta.lead')" :button="__('restaurants.cta.button')"
+                   :demo-url="route('demo', ['type' => 'restaurant'])"
                    photo="verticals/bars" :photo-alt="__('restaurants.cta.photo_alt')" photo-icon="beer" />
 
     <x-solutions-nav current="restaurants" />
