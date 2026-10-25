@@ -23,7 +23,7 @@ final class NativeSecretBox implements SecretBox
 
     public function encrypt(string $plainText): string
     {
-        $this->ensureKeyring();
+        $this->ensureAvailable();
 
         // The facade's docblock says string; System::encrypt() really returns ?string.
         /** @var string|null $cipherText */
@@ -40,7 +40,7 @@ final class NativeSecretBox implements SecretBox
         return $plainText ?? throw new KeyringUnavailable('The keyring could not decrypt the token.');
     }
 
-    private function ensureKeyring(): void
+    public function ensureAvailable(): void
     {
         if (! System::canEncrypt()) {
             throw new KeyringUnavailable('No keyring is available to protect the token.');

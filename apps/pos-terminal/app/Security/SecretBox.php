@@ -10,9 +10,15 @@ namespace App\Security;
  */
 interface SecretBox
 {
-    /** @throws KeyringUnavailable */
+    /**
+     * Throws KeyringUnavailable if secrets cannot be stored safely. Checked
+     * before pairing, since the server uses up the code as soon as it answers.
+     */
+    public function ensureAvailable(): void;
+
+    /** Throws KeyringUnavailable. */
     public function encrypt(string $plainText): string;
 
-    /** @throws KeyringUnavailable */
+    /** Throws KeyringUnavailable. */
     public function decrypt(string $cipherText): string;
 }

@@ -1,9 +1,45 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/*
+ * Terminal palette (docs/ARCHITECTURE.md 3.1): dark surfaces, orange primary
+ * actions, white text. Flat: square corners, no gradients or glows.
+ * System fonts only, so nothing is fetched from the internet.
+ */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: ui-sans-serif, system-ui, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+    --font-mono: ui-monospace, 'DejaVu Sans Mono', 'Cascadia Mono', monospace;
+
+    --color-surface: #0f0a1e;
+    --color-panel: #1a1430;
+    --color-line: #2e2648;
+    --color-muted: #a39db5;
+    --color-primary: #f4622a;
+    --color-primary-hover: #d9531f;
+    --color-danger: #f87171;
+    --color-ok: #4ade80;
+
+    --radius-*: initial;
+}
+
+@layer base {
+    *,
+    ::before,
+    ::after {
+        border-radius: 0;
+    }
+
+    body {
+        @apply bg-surface font-sans text-white antialiased select-none;
+    }
+}
+
+/* One hover for every button. Tap targets are at least 48x48. */
+@utility key {
+    @apply flex min-h-12 min-w-12 items-center justify-center border border-line bg-panel text-xl font-semibold text-white transition-colors hover:bg-line active:bg-line disabled:opacity-40;
+}
+
+@utility key-primary {
+    @apply flex min-h-12 items-center justify-center bg-primary px-6 text-xl font-semibold text-white transition-colors hover:bg-primary-hover active:bg-primary-hover disabled:opacity-40;
 }

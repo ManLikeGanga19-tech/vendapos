@@ -14,6 +14,7 @@ pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->beforeEach(function () {
         config(['terminal.api_url' => TEST_API_URL]);
+        FakeSecretBox::$available = true;
         $this->app->bind(SecretBox::class, FakeSecretBox::class);
     })
     ->in('Feature');

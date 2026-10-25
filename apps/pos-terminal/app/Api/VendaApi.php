@@ -165,7 +165,7 @@ final class VendaApi
             401, 403 => new TillNotAuthorised('The server refused this till.'),
             409 => new TokenStillValid('The token has not expired yet.'),
             422 => new ApiRejected(is_string($response->json('message')) ? $response->json('message') : 'The server refused the request.'),
-            default => new ApiUnavailable("The server answered {$response->status()}."),
+            default => new ApiUnavailable("The server answered {$response->status()}.", $response->status()),
         };
     }
 
