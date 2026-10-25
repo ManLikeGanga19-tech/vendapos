@@ -132,6 +132,75 @@ it('rolls a token over and revokes the old one', function () {
     expect(Device::findOrFail($deviceId)->tokens()->count())->toBe(1);
 });
 
+it('keeps the old token working for the overlap while the new one is unused', function () {
+    [$tenant, $branch] = tenantWithBranch();
+    $enrolment = enrolFor($tenant, $branch);
+    $deviceId = $enrolment->device->id;
+    $overlap = (int) config('vendapos.device_token_overlap_minutes');
+
+    // The reply with the new token is lost: the till only has the old one.
+    deviceRequest('POST', '/api/v1/device/token', $enrolment->plainTextToken, $deviceId)->assertCreated();
+
+    $this->travel($overlap - 1)->minutes();
+    deviceRequest('GET', '/api/v1/device', $enrolment->plainTextToken, $deviceId)->assertOk();
+
+    $this->travel(2)->minutes();
+    deviceRequest('GET', '/api/v1/device', $enrolment->plainTextToken, $deviceId)->assertUnauthorized();
+});
+
+it('never lengthens the old token past its own expiry', function () {
+    [$tenant, $branch] = tenantWithBranch();
+    $enrolment = enrolFor($tenant, $branch);
+    $deviceId = $enrolment->device->id;
+
+    // Two minutes left: the overlap must not stretch that to the full overlap.
+    $this->travel((int) config('vendapos.device_token_ttl_hours') * 60 - 2)->minutes();
+    deviceRequest('POST', '/api/v1/device/token', $enrolment->plainTextToken, $deviceId)->assertCreated();
+
+    $this->travel(3)->minutes();
+    deviceRequest('GET', '/api/v1/device', $enrolment->plainTextToken, $deviceId)->assertUnauthorized();
+});
+
+it('lets the old token refresh again and drops the token that never arrived', function () {
+    [$tenant, $branch] = tenantWithBranch();
+    $enrolment = enrolFor($tenant, $branch);
+    $deviceId = $enrolment->device->id;
+
+    $lost = deviceRequest('POST', '/api/v1/device/token', $enrolment->plainTextToken, $deviceId)->assertCreated()->json('token');
+    $received = deviceRequest('POST', '/api/v1/device/token', $enrolment->plainTextToken, $deviceId)->assertCreated()->json('token');
+
+    expect(Device::findOrFail($deviceId)->tokens()->count())->toBe(2);
+    deviceRequest('GET', '/api/v1/device', $lost, $deviceId)->assertUnauthorized();
+    deviceRequest('GET', '/api/v1/device', $received, $deviceId)->assertOk();
+    expect(Device::findOrFail($deviceId)->tokens()->count())->toBe(1);
+});
+
+it('retires only the device’s own older tokens on first use', function () {
+    [$tenant, $branch] = tenantWithBranch();
+    $other = enrolFor($tenant, $branch);
+    $enrolment = enrolFor($tenant, $branch);
+    $deviceId = $enrolment->device->id;
+
+    $newToken = deviceRequest('POST', '/api/v1/device/token', $enrolment->plainTextToken, $deviceId)->assertCreated()->json('token');
+    deviceRequest('GET', '/api/v1/device', $newToken, $deviceId)->assertOk();
+
+    deviceRequest('GET', '/api/v1/device', $other->plainTextToken, $other->device->id)->assertOk();
+});
+
+it('keeps a device’s overlap tokens apart from other tenants’ devices', function () {
+    [$tenantA, $branchA] = tenantWithBranch();
+    [$tenantB, $branchB] = tenantWithBranch();
+    $a = enrolFor($tenantA, $branchA);
+    $b = enrolFor($tenantB, $branchB);
+
+    deviceRequest('POST', '/api/v1/device/token', $a->plainTextToken, $a->device->id)->assertCreated();
+
+    // A's old token, still in its overlap, is A's alone.
+    deviceRequest('GET', '/api/v1/device', $a->plainTextToken, $b->device->id)->assertUnauthorized();
+    deviceRequest('GET', '/api/v1/device', $b->plainTextToken, $b->device->id)->assertOk();
+    expect(Device::findOrFail($b->device->id)->tokens()->count())->toBe(1);
+});
+
 it('rate limits each device', function () {
     config(['vendapos.rate_limits.device' => 2]);
     [$tenant, $branch] = tenantWithBranch();

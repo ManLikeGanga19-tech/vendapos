@@ -17,8 +17,9 @@ use Laravel\Sanctum\Sanctum;
  * Swaps a device token that expired within the grace window for a fresh
  * one, so a till that was closed or offline past its token's lifetime can
  * sync again without re-enrolment. The old token's row is locked while it
- * is checked and deleted, so two renewals racing with one token yield one
- * new token: the loser finds the row gone.
+ * is checked, so renewals racing with one token run one at a time; each
+ * replaces the new token issued before it (IssueDeviceToken), so a lost
+ * reply can be retried and the device still ends with one usable new token.
  */
 final class RenewExpiredDeviceToken
 {

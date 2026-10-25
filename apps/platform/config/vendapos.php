@@ -27,6 +27,10 @@ return [
 
     'device_token_grace_days' => (int) env('VENDAPOS_DEVICE_TOKEN_GRACE_DAYS', 7),
 
+    // After a refresh, the old token keeps working this long (or until the
+    // new one is first used), so a lost reply cannot lock the till out.
+    'device_token_overlap_minutes' => (int) env('VENDAPOS_DEVICE_TOKEN_OVERLAP_MINUTES', 10),
+
     // How long a one-time till pairing code works after it is shown.
     'pairing_code_minutes' => 15,
 

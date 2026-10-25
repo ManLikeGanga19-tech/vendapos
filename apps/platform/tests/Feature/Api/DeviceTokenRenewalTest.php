@@ -30,7 +30,7 @@ function pastExpiry(int $minutes): void
     test()->travel((int) config('vendapos.device_token_ttl_hours') * 60 + $minutes)->minutes();
 }
 
-it('renews a token that expired within the grace window, once', function () {
+it('renews a token that expired within the grace window', function () {
     [$tenant, $branch] = tenantWithBranch();
     $enrolment = enrolFor($tenant, $branch);
     $deviceId = $enrolment->device->id;
@@ -44,9 +44,27 @@ it('renews a token that expired within the grace window, once', function () {
     deviceRequest('GET', '/api/v1/device', $response->json('token'), $deviceId)->assertOk();
     expect(Device::findOrFail($deviceId)->tokens()->count())->toBe(1);
 
-    // The old token is gone: a second renewal with it (a retry, or a racing request) gets nothing.
+    // The new token has been used, so the old one is gone: renewing with it again gets nothing.
     deviceRequest('POST', RENEW, $enrolment->plainTextToken, $deviceId)->assertUnauthorized();
     expect(Device::findOrFail($deviceId)->tokens()->count())->toBe(1);
+});
+
+it('lets a till retry a renewal whose reply it never received', function () {
+    [$tenant, $branch] = tenantWithBranch();
+    $enrolment = enrolFor($tenant, $branch);
+    $deviceId = $enrolment->device->id;
+    pastExpiry(60);
+
+    $lost = deviceRequest('POST', RENEW, $enrolment->plainTextToken, $deviceId)->assertCreated()->json('token');
+    $retried = deviceRequest('POST', RENEW, $enrolment->plainTextToken, $deviceId)->assertCreated()->json('token');
+
+    // The retry replaced the token that never arrived; the old expired one stays only until the new one is used.
+    deviceRequest('GET', '/api/v1/device', $lost, $deviceId)->assertUnauthorized();
+    expect(Device::findOrFail($deviceId)->tokens()->count())->toBe(2);
+
+    deviceRequest('GET', '/api/v1/device', $retried, $deviceId)->assertOk();
+    expect(Device::findOrFail($deviceId)->tokens()->count())->toBe(1);
+    deviceRequest('POST', RENEW, $enrolment->plainTextToken, $deviceId)->assertUnauthorized();
 });
 
 it('renews up to the end of the grace window and not after', function (int $minutesPastGrace, int $status) {

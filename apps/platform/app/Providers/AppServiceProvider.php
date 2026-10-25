@@ -16,6 +16,7 @@ use App\Domain\Orders\Events\OrderVoided;
 use App\Domain\Payments\Events\PaymentRequested;
 use App\Domain\Payments\Jobs\FlagPaymentsForCancelledOrder;
 use App\Domain\Payments\Jobs\InitiatePayment;
+use App\Domain\Tenancy\Listeners\RetireReplacedDeviceTokens;
 use App\Domain\Tenancy\Models\Branch;
 use App\Domain\Tenancy\Models\Device;
 use App\Domain\Tenancy\Models\Staff;
@@ -32,6 +33,7 @@ use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\Events\TokenAuthenticated;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
 class AppServiceProvider extends ServiceProvider
@@ -95,6 +97,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Event::listen(NotificationSent::class, RecordNotificationDelivery::class);
+
+        Event::listen(TokenAuthenticated::class, RetireReplacedDeviceTokens::class);
 
         // Real-time: what tills hold changed, so they sync now instead of at their next minute.
         Item::observe(TellTillsMenuChanged::class);
