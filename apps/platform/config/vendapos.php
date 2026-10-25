@@ -35,6 +35,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Real-time
+    |--------------------------------------------------------------------------
+    |
+    | Where tills open their Reverb connection. This is the public address,
+    | which in production differs from the one the app uses to publish
+    | (REVERB_HOST). The key is Reverb's public app key, never the secret.
+    |
+    */
+
+    'realtime' => [
+        'host' => env('VENDAPOS_REALTIME_HOST', env('REVERB_HOST')),
+        'port' => (int) env('VENDAPOS_REALTIME_PORT', env('REVERB_PORT', 443)),
+        'scheme' => env('VENDAPOS_REALTIME_SCHEME', env('REVERB_SCHEME', 'https')),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | API rate limits (requests per minute)
     |--------------------------------------------------------------------------
     */

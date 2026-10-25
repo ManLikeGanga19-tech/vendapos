@@ -23,6 +23,11 @@ return Application::configure(basePath: dirname(__DIR__))
             Route::middleware('api')->group(base_path('routes/webhooks.php'));
         },
     )
+    // POST /api/broadcasting/auth: tills sign their private-channel subscriptions with their device token.
+    ->withBroadcasting(
+        __DIR__.'/../routes/channels.php',
+        ['prefix' => 'api', 'middleware' => ['api', 'auth:sanctum', 'device.bound', 'throttle:device']],
+    )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'device.bound' => EnsureDeviceBinding::class,

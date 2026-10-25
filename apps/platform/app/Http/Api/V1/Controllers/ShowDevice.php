@@ -29,6 +29,32 @@ final class ShowDevice
             'token_expires_at' => $device->currentAccessToken()->expires_at?->toIso8601String(),
             // "suspended": keep selling and syncing, but new M-Pesa requests are refused, so offer cash.
             'account_status' => tenant('status'),
+            'realtime' => $this->realtime($device),
         ]);
+    }
+
+    /**
+     * Where to listen for "sync now", or null while broadcasting is off.
+     * Subscriptions are signed at POST /api/broadcasting/auth.
+     *
+     * @return array{key: string, host: string, port: int, scheme: string, channel: string, event: string}|null
+     */
+    private function realtime(Device $device): ?array
+    {
+        $key = config('broadcasting.connections.reverb.key');
+        $host = config('vendapos.realtime.host');
+
+        if (config('broadcasting.default') !== 'reverb' || ! is_string($key) || ! is_string($host)) {
+            return null;
+        }
+
+        return [
+            'key' => $key,
+            'host' => $host,
+            'port' => (int) config('vendapos.realtime.port'),
+            'scheme' => (string) config('vendapos.realtime.scheme'),
+            'channel' => "till.{$device->id}",
+            'event' => 'till.sync',
+        ];
     }
 }

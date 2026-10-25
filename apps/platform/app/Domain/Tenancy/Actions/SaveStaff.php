@@ -8,6 +8,7 @@ use App\Domain\Tenancy\Exceptions\StaffChangeRefused;
 use App\Domain\Tenancy\Models\Staff;
 use App\Domain\Tenancy\Models\StaffChange;
 use App\Domain\Tenancy\Support\StaffRules;
+use App\Infrastructure\Realtime\TillsShouldSync;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -20,7 +21,7 @@ use Illuminate\Support\Facades\DB;
  */
 final class SaveStaff
 {
-    public function __construct(private readonly StaffRules $rules) {}
+    public function __construct(private readonly StaffRules $rules, private readonly NotifyTills $notifyTills) {}
 
     /**
      * @param  list<string>  $branchIds
@@ -67,6 +68,8 @@ final class SaveStaff
             $staff->save();
             $staff->syncRoles([$role]);
             $staff->branches()->sync($branchIds);
+            // Roles and branches are pivot rows the staff observer never sees; tills hear after commit.
+            $this->notifyTills->ofTenant((string) tenant('id'), TillsShouldSync::STAFF);
 
             sort($branchIds);
             StaffChange::create([

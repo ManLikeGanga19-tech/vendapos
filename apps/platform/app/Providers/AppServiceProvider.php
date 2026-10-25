@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Domain\Analytics\Jobs\UpdateSalesSummaries;
+use App\Domain\Catalogue\Models\Category;
+use App\Domain\Catalogue\Models\Item;
+use App\Domain\Catalogue\Observers\TellTillsMenuChanged;
 use App\Domain\Etims\Contracts\EtimsClient;
 use App\Domain\Etims\Jobs\SubmitCreditNoteToEtims;
 use App\Domain\Etims\Jobs\SubmitSaleToEtims;
@@ -13,8 +16,12 @@ use App\Domain\Orders\Events\OrderVoided;
 use App\Domain\Payments\Events\PaymentRequested;
 use App\Domain\Payments\Jobs\FlagPaymentsForCancelledOrder;
 use App\Domain\Payments\Jobs\InitiatePayment;
+use App\Domain\Tenancy\Models\Branch;
 use App\Domain\Tenancy\Models\Device;
 use App\Domain\Tenancy\Models\Staff;
+use App\Domain\Tenancy\Models\Tenant;
+use App\Domain\Tenancy\Observers\TellTillsSetupChanged;
+use App\Domain\Tenancy\Observers\TellTillsStaffChanged;
 use App\Infrastructure\Notifications\RecordNotificationDelivery;
 use App\Infrastructure\Sms\SmsClient;
 use Filament\Support\Facades\FilamentTimezone;
@@ -88,6 +95,14 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Event::listen(NotificationSent::class, RecordNotificationDelivery::class);
+
+        // Real-time: what tills hold changed, so they sync now instead of at their next minute.
+        Item::observe(TellTillsMenuChanged::class);
+        Category::observe(TellTillsMenuChanged::class);
+        Staff::observe(TellTillsStaffChanged::class);
+        Device::observe(TellTillsSetupChanged::class);
+        Branch::observe(TellTillsSetupChanged::class);
+        Tenant::observe(TellTillsSetupChanged::class);
 
         Event::listen(PaymentRequested::class, fn (PaymentRequested $event) => InitiatePayment::dispatch($event->tenantId, $event->eventId));
 
