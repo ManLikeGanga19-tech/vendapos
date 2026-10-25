@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\HelloTerminal;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', App\Livewire\HelloTerminal::class);
+Route::get('/', HelloTerminal::class);

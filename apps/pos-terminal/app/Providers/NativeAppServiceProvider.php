@@ -19,6 +19,9 @@ class NativeAppServiceProvider implements ProvidesPhpIni
             ->minHeight(600);
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function phpIni(): array
     {
         return [];

@@ -196,6 +196,14 @@ jobs:
           php artisan key:generate
           touch database/database.sqlite
 
-      - name: Tests
+      - name: Pint (code style)
         working-directory: apps/pos-terminal
-        run: php artisan test
+        run: ./vendor/bin/pint --test
+
+      - name: Larastan (static analysis)
+        working-directory: apps/pos-terminal
+        run: ./vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+
+      - name: Pest (tests)
+        working-directory: apps/pos-terminal
+        run: ./vendor/bin/pest
