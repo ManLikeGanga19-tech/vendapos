@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Api\Exceptions\ApiUnavailable;
 use App\Livewire\PairTill;
 use App\Livewire\StatusBar;
+use App\Models\Preference;
 use App\Models\SyncState;
 use App\Sync\SyncStatus;
 use App\Sync\SyncTill;
@@ -62,6 +63,16 @@ it('shows nothing on a till that is not paired', function () {
     app(Till::class)->markRemoved();
 
     Livewire::test(StatusBar::class)->assertDontSee('Till 1');
+});
+
+it('redraws in the language picked after the page loaded', function () {
+    pairTill();
+    SyncState::write(SyncTill::LAST_SUCCESS, now()->toIso8601String());
+    $bar = Livewire::test(StatusBar::class)->assertSee('Online');
+
+    Preference::write(Preference::LOCALE, 'sw');
+
+    $bar->call('refreshLanguage')->assertSee('Mtandaoni')->assertDontSee('Online');
 });
 
 it('is told when the language changes', function () {

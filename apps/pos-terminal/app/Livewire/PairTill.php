@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\FollowsTillLanguage;
 use App\Livewire\Concerns\PicksLanguage;
 use App\Till\PairingFailed;
 use App\Till\PairThisTill;
@@ -13,6 +14,7 @@ use Livewire\Component;
 
 final class PairTill extends Component
 {
+    use FollowsTillLanguage;
     use PicksLanguage;
 
     /** Normalised: upper case, no dash, at most 8 allowed characters. */

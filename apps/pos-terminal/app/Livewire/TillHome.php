@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\FollowsTillLanguage;
 use App\Livewire\Concerns\NeedsSignedInStaff;
 use App\Livewire\Concerns\PicksLanguage;
 use App\Models\Item;
@@ -16,6 +17,7 @@ use Livewire\Component;
 /** Stand-in home screen after sign-in until the sale screen (T3) replaces it. */
 final class TillHome extends Component
 {
+    use FollowsTillLanguage;
     use NeedsSignedInStaff;
     use PicksLanguage;
 

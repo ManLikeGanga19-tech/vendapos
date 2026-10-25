@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\FollowsTillLanguage;
 use App\Livewire\Concerns\NeedsSignedInStaff;
 use App\Livewire\Concerns\PicksLanguage;
 use App\Models\StaffMember;
@@ -20,6 +21,7 @@ use Livewire\Component;
  */
 final class ChangePin extends Component
 {
+    use FollowsTillLanguage;
     use NeedsSignedInStaff;
     use PicksLanguage;
 

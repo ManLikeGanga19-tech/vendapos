@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\FollowsTillLanguage;
 use App\Livewire\Concerns\PicksLanguage;
 use App\Models\Item;
 use App\Models\StaffMember;
@@ -19,6 +20,7 @@ use Livewire\Component;
 /** Tap your name, then type your PIN. Checked on the till, so it works offline. */
 final class SignIn extends Component
 {
+    use FollowsTillLanguage;
     use PicksLanguage;
 
     #[Locked]

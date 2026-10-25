@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\FollowsTillLanguage;
 use App\Sync\SyncStatus;
 use App\Till\Till;
 use Illuminate\Contracts\View\View;
@@ -13,6 +14,8 @@ use Livewire\Component;
 /** Connection, last sync and which till this is; refreshed every few seconds. */
 final class StatusBar extends Component
 {
+    use FollowsTillLanguage;
+
     public const string TIMEZONE = 'Africa/Nairobi';
 
     /** Re-render straight away in the new language instead of at the next poll. */

@@ -16,12 +16,17 @@ final class UseTillLocale
 
     public function handle(Request $request, Closure $next): Response
     {
+        self::apply();
+
+        return $next($request);
+    }
+
+    public static function apply(): void
+    {
         $locale = Preference::read(Preference::LOCALE);
 
         if (in_array($locale, self::LOCALES, true)) {
             app()->setLocale($locale);
         }
-
-        return $next($request);
     }
 }
