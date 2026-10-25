@@ -21,7 +21,7 @@ use VendaPOS\Core\ValueObjects\Money;
  * @property int $sequence_number
  * @property OrderStatus $status
  * @property Carbon $placed_at
- * @property PaymentType $payment_type
+ * @property PaymentType|null $payment_type
  * @property int $subtotal_cents
  * @property int $vat_cents
  * @property int $total_cents
@@ -55,6 +55,12 @@ class Order extends Model
     public function lines(): HasMany
     {
         return $this->hasMany(OrderLine::class)->orderBy('position');
+    }
+
+    /** @return HasMany<OrderTender, $this> */
+    public function tenders(): HasMany
+    {
+        return $this->hasMany(OrderTender::class)->orderBy('position');
     }
 
     public function total(): Money

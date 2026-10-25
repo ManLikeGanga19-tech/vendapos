@@ -62,17 +62,32 @@ function saleOf(array $lines, int $sequence = 1, array $overrides = []): array
 
     $totals = OrderTotals::fromLines(array_map(fn (array $l) => OrderLineData::from($l), $lineData));
 
+    // Paid in exact cash, unless cancelled (never paid) or the test brings its own tenders.
+    $cancelled = ($overrides['status'] ?? 'completed') === 'cancelled';
+
     return array_merge([
         'uuid' => (string) Str::uuid(),
         'sequence_number' => $sequence,
         'placed_at' => '2026-10-21T19:15:00+03:00',
         'status' => 'completed',
         'lines' => $lineData,
-        'payment_type' => 'cash',
+        'tenders' => $cancelled ? [] : [cashTender($totals->total->cents)],
         'subtotal_cents' => $totals->subtotal->cents,
         'vat_cents' => $totals->vat->cents,
         'total_cents' => $totals->total->cents,
     ], $overrides);
+}
+
+/**
+ * A cash tender payload: $tendered handed over (exact by default), change given back.
+ *
+ * @return array<string, mixed>
+ */
+function cashTender(int $amount, ?int $tendered = null): array
+{
+    $tendered ??= $amount;
+
+    return ['method' => 'cash', 'amount_cents' => $amount, 'tendered_cents' => $tendered, 'change_cents' => $tendered - $amount];
 }
 
 /** POST a batch as the test's enrolled device. */

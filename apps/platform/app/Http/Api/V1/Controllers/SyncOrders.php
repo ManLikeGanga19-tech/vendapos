@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use VendaPOS\Core\Data\OrderData;
 use VendaPOS\Core\Data\OrderLineData;
+use VendaPOS\Core\Data\TenderData;
 
 /**
  * POST /api/v1/orders/sync — a batch of up to 50 terminal orders. The reply
@@ -50,6 +51,12 @@ final class SyncOrders
         foreach (is_array($raw['lines'] ?? null) ? $raw['lines'] : [] as $index => $line) {
             foreach (array_diff(array_keys(is_array($line) ? $line : []), array_keys(OrderLineData::rules())) as $key) {
                 $errors["lines.{$index}.{$key}"] = ['Unknown field.'];
+            }
+        }
+
+        foreach (is_array($raw['tenders'] ?? null) ? $raw['tenders'] : [] as $index => $tender) {
+            foreach (array_diff(array_keys(is_array($tender) ? $tender : []), array_keys(TenderData::rules())) as $key) {
+                $errors["tenders.{$index}.{$key}"] = ['Unknown field.'];
             }
         }
 

@@ -26,7 +26,9 @@ function orderPayload(array $overrides = []): array
                 'line_total_cents' => 160_000,
             ],
         ],
-        'payment_type' => 'mpesa',
+        'tenders' => [
+            ['method' => 'mpesa_push', 'amount_cents' => 160_000, 'payment_uuid' => fake()->uuid()],
+        ],
         'subtotal_cents' => 137_931,
         'vat_cents' => 22_069,
         'total_cents' => 160_000,
@@ -37,7 +39,8 @@ it('creates from a valid payload', function () {
     $order = OrderData::from(orderPayload());
 
     expect($order->status)->toBe(OrderStatus::Completed)
-        ->and($order->payment_type)->toBe(PaymentType::Mpesa)
+        ->and($order->paymentType())->toBe(PaymentType::Mpesa)
+        ->and($order->tenders)->toHaveCount(1)
         ->and($order->sequence_number)->toBe(42)
         ->and($order->total())->toBeInstanceOf(Money::class)
         ->and($order->total()->cents)->toBe(160_000)
@@ -68,4 +71,22 @@ it('validates orders and their lines together', function () {
 
     expect($valid->passes())->toBeTrue()
         ->and($invalid->errors()->keys())->toContain('status', 'lines.0.item_id', 'lines.0.quantity', 'lines.0.vat_category', 'lines.0.name');
+});
+
+it('validates tenders with the order', function () {
+    $invalid = Validator::make(orderPayload([
+        'tenders' => [['method' => 'card', 'amount_cents' => 0, 'payment_uuid' => 'nope', 'mpesa_reference' => 'sj12abc3de']],
+    ]), OrderData::validationRules());
+
+    expect($invalid->errors()->keys())->toContain('tenders.0.method', 'tenders.0.amount_cents', 'tenders.0.payment_uuid', 'tenders.0.mpesa_reference');
+});
+
+it('requires the tenders key, even when empty, and caps how many', function () {
+    $missing = orderPayload();
+    unset($missing['tenders']);
+    $tooMany = orderPayload(['tenders' => array_fill(0, 11, ['method' => 'cash', 'amount_cents' => 100, 'tendered_cents' => 100, 'change_cents' => 0])]);
+
+    expect(Validator::make($missing, OrderData::validationRules())->errors()->keys())->toContain('tenders')
+        ->and(Validator::make(orderPayload(['status' => 'cancelled', 'tenders' => []]), OrderData::validationRules())->passes())->toBeTrue()
+        ->and(Validator::make($tooMany, OrderData::validationRules())->errors()->keys())->toContain('tenders');
 });

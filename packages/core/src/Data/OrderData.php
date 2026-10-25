@@ -10,6 +10,7 @@ use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use VendaPOS\Core\Enums\OrderStatus;
 use VendaPOS\Core\Enums\PaymentType;
+use VendaPOS\Core\Payments\Tenders;
 use VendaPOS\Core\ValueObjects\Money;
 
 /**
@@ -21,6 +22,7 @@ final class OrderData extends Data
 {
     /**
      * @param  DataCollection<int, OrderLineData>  $lines
+     * @param  DataCollection<int, TenderData>  $tenders
      */
     public function __construct(
         // Client-generated; the idempotency key for sync.
@@ -32,11 +34,25 @@ final class OrderData extends Data
         public OrderStatus $status,
         #[DataCollectionOf(OrderLineData::class)]
         public DataCollection $lines,
-        public PaymentType $payment_type,
+        // How it was paid; the order's payment type is derived from these, never sent.
+        #[DataCollectionOf(TenderData::class)]
+        public DataCollection $tenders,
         public int $subtotal_cents,
         public int $vat_cents,
         public int $total_cents,
     ) {}
+
+    /** @return list<TenderData> */
+    public function tenderList(): array
+    {
+        return array_values($this->tenders->all());
+    }
+
+    /** Cash, M-Pesa or split; null for a cancelled sale, which has no tenders. */
+    public function paymentType(): ?PaymentType
+    {
+        return Tenders::paymentType($this->tenderList());
+    }
 
     public function subtotal(): Money
     {
@@ -62,7 +78,7 @@ final class OrderData extends Data
             'placed_at' => ['required', 'date'],
             'status' => ['required', Rule::enum(OrderStatus::class)],
             'lines' => ['required', 'array', 'min:1', 'max:500'],
-            'payment_type' => ['required', Rule::enum(PaymentType::class)],
+            'tenders' => ['present', 'array', 'max:'.Tenders::MAX_TENDERS],
             'subtotal_cents' => ['required', 'integer', 'min:0'],
             'vat_cents' => ['required', 'integer', 'min:0'],
             'total_cents' => ['required', 'integer', 'min:0'],
@@ -80,6 +96,10 @@ final class OrderData extends Data
 
         foreach (OrderLineData::rules() as $field => $lineRules) {
             $rules["lines.*.{$field}"] = $lineRules;
+        }
+
+        foreach (TenderData::rules() as $field => $tenderRules) {
+            $rules["tenders.*.{$field}"] = $tenderRules;
         }
 
         return $rules;
