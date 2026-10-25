@@ -1,0 +1,22 @@
+<?php
+
+return [
+    'tagline' => 'Point of sale, payments and KRA eTIMS for businesses across Kenya and East Africa — built to keep selling when the internet drops.',
+    'solutions' => 'Solutions',
+    'platform' => 'Platform',
+    'verticals' => [
+        'restaurants' => 'Restaurants & cafés',
+        'bars' => 'Bars & clubs',
+        'salons' => 'Salons, spas & kinyozi',
+        'shops' => 'Shops & dukas',
+        'supermarkets' => 'Supermarkets & minimarts',
+        'hardware' => 'Hardware stores',
+        'pharmacy' => 'Chemists & pharmacies',
+        'liquor' => 'Liquor stores',
+    ],
+    'contact' => 'Contact',
+    'location' => 'Mombasa, Kenya',
+    'rights' => 'All rights reserved.',
+    'built_by' => 'VendaPOS is built by Danamo Tech Limited, Mombasa, Kenya.',
+    'billing' => 'Built in Kenya for East Africa.',
+];

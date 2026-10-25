@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-high": "#2c273c", "surface-variant": "#373147", "error-container": "#93000a", "on-secondary-fixed": "#002108", "on-secondary-fixed-variant": "#00531f", "inverse-on-surface": "#332d43", "secondary-fixed-dim": "#5cdf78", "primary-container": "#f4622a", "on-error": "#690005", "on-secondary": "#003913", "on-tertiary-container": "#2a273b", "on-primary-fixed": "#390c00", "surface-dim": "#151024", "background": "#151024", "on-error-container": "#ffdad6", "on-tertiary-fixed-variant": "#48445a", "primary": "#ffb59c", "secondary-fixed": "#7afd91", "on-tertiary": "#312e42", "outline-variant": "#594139", "on-secondary-container": "#00320f", "on-tertiary-fixed": "#1c192c", "primary-fixed": "#ffdbcf", "on-primary-fixed-variant": "#822700", "tertiary-container": "#938da6", "primary-fixed-dim": "#ffb59c", "surface": "#151024", "outline": "#a98a80", "error": "#ffb4ab", "surface-tint": "#ffb59c", "on-background": "#e8defb", "secondary": "#5cdf78", "inverse-surface": "#e8defb", "secondary-container": "#0ea747", "on-primary": "#5c1900", "on-surface-variant": "#e2bfb4", "on-primary-container": "#511500", "tertiary": "#c9c3dd", "surface-container": "#221c31", "surface-container-highest": "#373147", "tertiary-fixed-dim": "#c9c3dd", "on-surface": "#e8defb", "surface-bright": "#3c364c", "inverse-primary": "#ab3600", "tertiary-fixed": "#e6dffa", "surface-container-lowest": "#100b1f", "surface-container-low": "#1d182d" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xl": "2rem", "space-md": "1rem", "gutter": "1.5rem", "margin": "2rem", "space-sm": "0.75rem", "space-xs": "0.5rem", "space-lg": "1.5rem", "margin-mobile": "1rem", "gutter-mobile": "1rem" }, "fontFamily": { "headline-lg": [ "Inter" ], "display-lg": [ "Inter" ], "label-md": [ "Inter" ], "display-lg-mobile": [ "Inter" ], "headline-lg-mobile": [ "Inter" ], "headline-sm": [ "Inter" ], "body-lg-medium": [ "Inter" ], "headline-md": [ "Inter" ], "body-md-medium": [ "Inter" ], "body-lg": [ "Inter" ], "body-md": [ "Inter" ], "label-sm": [ "Inter" ] }, "fontSize": { "headline-lg": [ "40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "display-lg": [ "64px", { "lineHeight": "72px", "letterSpacing": "-0.025em", "fontWeight": "700" } ], "label-md": [ "14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" } ], "display-lg-mobile": [ "36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "headline-lg-mobile": [ "28px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "700" } ], "headline-sm": [ "20px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "600" } ], "body-lg-medium": [ "18px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "500" } ], "headline-md": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "body-md-medium": [ "16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "500" } ], "body-lg": [ "18px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400" } ], "body-md": [ "16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" } ], "label-sm": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-surface-container-lowest text-on-surface font-body-md text-body-md antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen"><header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-surface-variant/40"><div class="h-20 max-w-[1200px] mx-auto px-margin-mobile lg:px-margin flex items-center justify-between"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-xs" data-path="product" href="#"><img alt="VendaPOS Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XEytxPPtEqFweBOw2okAKawiwfgJXKpc5lEOEDjnF21_OeHfcxa7R8vjxIOmMOedjeNAcmJKCXXTW779Rmb280ULKzD56Js_6nSIeC8REqxJ0f5JFplJ-P1g3IIxMSuYf6_Llh6y1LLBmEP7RTd91gX0Z0tLKJvD2t-Tv-FMpK5gpIu_RQuHHrCUSijnj7LlynPCEG2jGZwfm3R5g3aTloNX-tpYKD91Yvi2ZrNKRYxG-_xbLKV4e90i8"/><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight font-bold">Venda<span class="text-primary-container">POS</span></span></a><nav class="hidden lg:flex items-center gap-space-lg ml-space-md" data-active-classes="text-on-surface font-body-md-medium border-b-2 border-primary-container"><a class="flex items-center font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="product" href="#">Product</a><a class="flex items-center font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="solutions" href="#">Solutions</a><a class="flex items-center font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="pricing" href="#">Pricing</a><a aria-current="page" class="flex items-center gap-1.5 transition-colors py-space-xs text-on-surface font-body-md-medium border-b-2 border-primary-container" data-path="compliance" href="#">Compliance &amp; Security<span class="px-1.5 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/30 font-label-sm text-label-sm uppercase tracking-wider">KRA eTIMS</span></a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-space-xs" data-path="resources" href="#">Resources</a></nav></div><div class="flex items-center gap-space-md"><a class="hidden sm:inline-flex font-body-md-medium text-body-md-medium text-on-surface-variant hover:text-on-surface transition-colors px-space-xs py-space-xs" data-path="login" href="#">Log in</a><a class="inline-flex items-center justify-center bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary font-body-md-medium text-body-md-medium px-space-md py-2.5 rounded-lg transition-all shadow-[0_0_24px_rgba(244,98,42,0.25)] hover:shadow-[0_0_30px_rgba(244,98,42,0.4)] active:scale-95" data-path="book-a-demo" href="#">Book a demo</a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 ml-space-xs"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-surface-container-lowest"><div class="flex flex-col w-full">
+<!-- SECTION 1: HERO SECTION -->
+<section class="relative w-full overflow-hidden pb-space-xl pt-space-lg">
+<!-- Atmospheric depth backdrops -->
+<div class="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-primary-container/10 blur-[130px]"></div>
+<div class="pointer-events-none absolute top-1/3 -right-24 h-96 w-96 rounded-full bg-secondary-container/10 blur-[100px]"></div>
+<div class="relative mx-auto max-w-[1200px] px-margin-mobile lg:px-margin">
+<!-- Breadcrumb / Overline Pill -->
+<div class="flex items-center gap-2">
+<div class="inline-flex items-center gap-2 rounded-full bg-surface-container px-3 py-1 shadow-sm">
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span class="font-label-sm text-label-sm tracking-wider uppercase text-on-surface">Financial Integrity &amp; Enterprise Architecture</span>
+<span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
+</div>
+</div>
+<!-- Main Headline & Narrative -->
+<div class="mt-space-md grid grid-cols-1 gap-space-lg lg:grid-cols-12 lg:items-end">
+<div class="lg:col-span-8">
+<h1 class="font-headline-lg lg:font-display-lg text-headline-lg lg:text-display-lg text-on-surface tracking-tight">
+            Institutional trust, statutory compliance, and zero data leakage.
+          </h1>
+</div>
+<div class="lg:col-span-4 lg:pb-2">
+<p class="font-body-lg text-body-lg text-tertiary">
+            Built to satisfy the stringent fiscal mandates of the Kenya Revenue Authority (KRA) and the operational risk controls required by multi-branch enterprises, banks, and franchised retail.
+          </p>
+</div>
+</div>
+<!-- CTAs & Action Deck -->
+<div class="mt-space-lg flex flex-wrap items-center gap-space-md">
+<a class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-container px-space-lg py-3.5 font-body-md-medium text-body-md-medium text-on-primary-container shadow-[0_0_24px_rgba(244,98,42,0.28)] transition-all hover:bg-primary hover:text-on-primary active:scale-[0.98]" href="#artifacts">
+<span class="material-symbols-outlined text-[20px]">download</span>
+          Download Security Overview (PDF)
+        </a>
+<a class="inline-flex items-center justify-center gap-2 rounded-lg bg-surface-container px-space-lg py-3.5 font-body-md-medium text-body-md-medium text-on-surface hover:bg-surface-container-high transition-colors" href="#contact-team">
+<span class="material-symbols-outlined text-[20px]">support_agent</span>
+          Speak to our Security &amp; Compliance Team
+        </a>
+</div>
+<!-- Institutional Metrics Trust Strip -->
+<div class="mt-space-xl grid grid-cols-2 gap-space-xs sm:grid-cols-4 sm:gap-space-sm">
+<div class="rounded-xl bg-surface-container p-space-md shadow-sm">
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[20px]">account_balance</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wide">Kenya Tax Mandate</span>
+</div>
+<div class="mt-2 font-headline-sm text-headline-sm font-bold text-on-surface">KRA eTIMS</div>
+<p class="mt-1 font-label-md text-label-md text-tertiary">Native cryptographic protocol stack</p>
+</div>
+<div class="rounded-xl bg-surface-container p-space-md shadow-sm">
+<div class="flex items-center gap-2 text-primary-container">
+<span class="material-symbols-outlined text-[20px]">credit_card_off</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wide">PCI Scoping</span>
+</div>
+<div class="mt-2 font-headline-sm text-headline-sm font-bold text-on-surface">Zero Data Held</div>
+<p class="mt-1 font-label-md text-label-md text-tertiary">Zero cardholder information retained</p>
+</div>
+<div class="rounded-xl bg-surface-container p-space-md shadow-sm">
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[20px]">enhanced_encryption</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wide">Cryptographic Standard</span>
+</div>
+<div class="mt-2 font-headline-sm text-headline-sm font-bold text-on-surface">AES-256 / TLS 1.3</div>
+<p class="mt-1 font-label-md text-label-md text-tertiary">Hardware key rotation enabled</p>
+</div>
+<div class="rounded-xl bg-surface-container p-space-md shadow-sm">
+<div class="flex items-center gap-2 text-tertiary-fixed">
+<span class="material-symbols-outlined text-[20px]">gavel</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wide">Statutory Privacy</span>
+</div>
+<div class="mt-2 font-headline-sm text-headline-sm font-bold text-on-surface">Kenya DPA 2019</div>
+<p class="mt-1 font-label-md text-label-md text-tertiary">ODPC-audited tenant isolation</p>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 2: STATUTORY COMPLIANCE: KRA eTIMS (THE FISCAL ENGINE) -->
+<section class="w-full py-space-xl bg-surface-container-low">
+<div class="mx-auto max-w-[1200px] px-margin-mobile lg:px-margin">
+<!-- Section Header -->
+<div class="max-w-2xl">
+<div class="inline-flex items-center gap-2 rounded-full bg-secondary-container/20 px-3 py-1">
+<span class="h-2 w-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm uppercase font-semibold text-secondary">The Fiscal Engine</span>
+</div>
+<h2 class="mt-space-xs font-headline-lg text-headline-lg text-on-surface tracking-tight">
+          Every transaction signed, verified, and reconciled with KRA in milliseconds.
+        </h2>
+<p class="mt-space-xs font-body-md text-body-md text-tertiary">
+          VendaPOS delivers real-time fiscalisation via direct eTIMS API microservices. Eliminate manual fiscal devices, prevent heavy tax penalties, and automate audit reconciliations across all your branch registers.
+        </p>
+</div>
+<!-- Split Layout: Explanation vs Thermal Receipt Engine Preview -->
+<div class="mt-space-xl grid grid-cols-1 items-start gap-space-lg lg:grid-cols-12">
+<!-- Left: 4 Architectural Pillars -->
+<div class="space-y-space-md lg:col-span-7">
+<div class="rounded-xl bg-surface-container p-space-lg shadow-sm">
+<div class="flex items-start gap-space-sm">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-variant text-primary-container">
+<span class="material-symbols-outlined text-[24px]">vpn_key</span>
+</div>
+<div class="min-w-0 flex-1">
+<h3 class="font-headline-sm text-headline-sm font-semibold text-on-surface">
+                  Real-time FDN Generation &amp; Cryptographic Hash
+                </h3>
+<p class="mt-1 font-body-md text-body-md text-tertiary">
+                  The instant a sale completes, our microservice generates an authentic Fiscal Data Number (FDN) and signs an HMAC-SHA256 payload with your company’s certified KRA key pair. No batch delay, zero reconciliation gaps.
+                </p>
+</div>
+</div>
+</div>
+<div class="rounded-xl bg-surface-container p-space-lg shadow-sm">
+<div class="flex items-start gap-space-sm">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-variant text-secondary">
+<span class="material-symbols-outlined text-[24px]">qr_code_scanner</span>
+</div>
+<div class="min-w-0 flex-1">
+<h3 class="font-headline-sm text-headline-sm font-semibold text-on-surface">
+                  Official KRA Verification QR Encoding
+                </h3>
+<p class="mt-1 font-body-md text-body-md text-tertiary">
+                  Every printed and digital customer receipt renders an official KRA public verification QR code. Customers or tax enforcement officers can scan using any smartphone camera to inspect the ledger entry directly on the KRA portal.
+                </p>
+</div>
+</div>
+</div>
+<div class="rounded-xl bg-surface-container p-space-lg shadow-sm">
+<div class="flex items-start gap-space-sm">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-variant text-primary-container">
+<span class="material-symbols-outlined text-[24px]">signal_disconnected</span>
+</div>
+<div class="min-w-0 flex-1">
+<h3 class="font-headline-sm text-headline-sm font-semibold text-on-surface">
+                  Deterministic Offline Fiscal Spooling
+                </h3>
+<p class="mt-1 font-body-md text-body-md text-tertiary">
+                  Internet dropouts do not halt transactions. When connectivity fails, the register signs transactions locally within a tamper-proof hardware buffer. Sequential timestamps are maintained and cryptographically submitted immediately when uplink restores.
+                </p>
+</div>
+</div>
+</div>
+<div class="rounded-xl bg-surface-container p-space-lg shadow-sm">
+<div class="flex items-start gap-space-sm">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-variant text-tertiary">
+<span class="material-symbols-outlined text-[24px]">receipt_long</span>
+</div>
+<div class="min-w-0 flex-1">
+<h3 class="font-headline-sm text-headline-sm font-semibold text-on-surface">
+                  Automated Midnight Z-Report Reconciliation
+                </h3>
+<p class="mt-1 font-body-md text-body-md text-tertiary">
+                  End-of-day register balancing runs autonomously. The cloud controller computes physical cash, M-Pesa STK settlements, and card drafts, auto-matching each register's totals against the KRA fiscal registry to produce discrepancy-free daily audit packs.
+                </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Real-life Thermal Receipt Mockup -->
+<div class="relative lg:col-span-5">
+<div class="relative mx-auto max-w-[380px] rounded-2xl bg-[#f5f3ed] p-6 text-[#151024] shadow-[0_20px_50px_rgba(0,0,0,0.45)]">
+<!-- Jagged Receipt Edge simulation at top -->
+<div class="mb-4 flex items-center justify-between text-xs text-[#594139]">
+<span class="font-mono">#REG-04 // TILL-02</span>
+<span class="font-mono">ORIGINAL FISCAL</span>
+</div>
+<!-- Receipt Header -->
+<div class="text-center">
+<h4 class="font-bold tracking-tight text-base uppercase text-[#100b1f]">URBAN BISTRO &amp; GRILL LTD</h4>
+<p class="text-[12px] text-[#332d43]">Westlands Mall, 2nd Floor, Nairobi</p>
+<p class="font-mono text-[12px] font-semibold text-[#100b1f] mt-1">KRA PIN: P051234567X</p>
+<p class="text-[11px] text-[#594139]">VAT REG NO: 029381749-B</p>
+</div>
+<div class="my-3 border-b-2 border-dashed border-[#a98a80]/40"></div>
+<!-- Line Items Table -->
+<div class="space-y-1.5 font-mono text-[12px]">
+<div class="flex justify-between items-start">
+<div class="max-w-[70%]">
+<span class="font-bold">2x Nyama Choma Platter</span>
+<div class="text-[10px] text-[#594139]">16% VAT Inclusive</div>
+</div>
+<span class="font-semibold text-right">KES 3,700.00</span>
+</div>
+<div class="flex justify-between items-start">
+<div class="max-w-[70%]">
+<span class="font-bold">2x Tusker Cold 500ml</span>
+<div class="text-[10px] text-[#594139]">16% VAT Inclusive</div>
+</div>
+<span class="font-semibold text-right">KES 700.00</span>
+</div>
+<div class="flex justify-between items-start">
+<div class="max-w-[70%]">
+<span class="font-bold">1x Mukimo Plate (Side)</span>
+<div class="text-[10px] text-[#594139]">16% VAT Inclusive</div>
+</div>
+<span class="font-semibold text-right">KES 350.00</span>
+</div>
+</div>
+<div class="my-3 border-b-2 border-dashed border-[#a98a80]/40"></div>
+<!-- Totals & Taxes -->
+<div class="space-y-1 font-mono text-[12px]">
+<div class="flex justify-between text-[#594139]">
+<span>SUBTOTAL (EXCL. VAT)</span>
+<span>KES 3,990.00</span>
+</div>
+<div class="flex justify-between text-[#594139]">
+<span>16% VAT COLLECTED</span>
+<span>KES 760.00</span>
+</div>
+<div class="flex justify-between text-sm font-extrabold text-[#100b1f] pt-1">
+<span>TOTAL DUE</span>
+<span>KES 4,750.00</span>
+</div>
+</div>
+<!-- Payment details -->
+<div class="mt-3 rounded-lg bg-[#e8defb]/30 p-2 font-mono text-[11px] text-[#1c192c]">
+<div class="flex justify-between">
+<span class="font-bold">TENDER: M-PESA STK</span>
+<span class="font-bold text-[#00531f]">CONFIRMED</span>
+</div>
+<div class="flex justify-between text-[10px] text-[#48445a] mt-0.5">
+<span>RECEIPT REF: QK9182XZ77</span>
+<span>PHONE: 254712***891</span>
+</div>
+</div>
+<div class="my-3 border-b-2 border-dashed border-[#a98a80]/40"></div>
+<!-- Official KRA eTIMS Section -->
+<div class="rounded-xl bg-white p-3 shadow-inner">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[#f4622a] text-[18px]" style="font-variation-settings: 'FILL' 1;">shield_with_heart</span>
+<span class="font-bold text-[11px] text-[#100b1f] tracking-wide">KRA eTIMS FISCAL SEAL</span>
+</div>
+<span class="rounded bg-[#0ea747]/15 px-1.5 py-0.5 text-[9px] font-bold text-[#00531f]">VALIDATED</span>
+</div>
+<div class="mt-2 grid grid-cols-1 gap-1 font-mono text-[10px] text-[#332d43]">
+<div><span class="text-[#594139]">FDN:</span> <strong class="text-[#100b1f]">01-ETIMS-2025-00492817</strong></div>
+<div><span class="text-[#594139]">INV NO:</span> <strong class="text-[#100b1f]">INV-2025-884920</strong></div>
+<div><span class="text-[#594139]">HASH:</span> <span class="text-[#100b1f]">8F2A-99B1-4C0E-77D2</span></div>
+<div><span class="text-[#594139]">TIME:</span> <span>24/10/2025 20:14:02 EAT</span></div>
+</div>
+<!-- Verification QR representation -->
+<div class="mt-3 flex items-center gap-3 rounded-lg bg-[#f5f3ed] p-2">
+<div class="h-16 w-16 shrink-0 rounded bg-white p-1 shadow-sm flex items-center justify-center">
+<!-- SVG representation of clean high-density QR code -->
+<svg class="h-full w-full text-[#100b1f]" fill="currentColor" viewbox="0 0 100 100">
+<!-- Corner markers -->
+<rect fill="none" height="28" rx="2" stroke="currentColor" stroke-width="6" width="28" x="5" y="5"></rect>
+<rect fill="currentColor" height="12" width="12" x="13" y="13"></rect>
+<rect fill="none" height="28" rx="2" stroke="currentColor" stroke-width="6" width="28" x="67" y="5"></rect>
+<rect fill="currentColor" height="12" width="12" x="75" y="13"></rect>
+<rect fill="none" height="28" rx="2" stroke="currentColor" stroke-width="6" width="28" x="5" y="67"></rect>
+<rect fill="currentColor" height="12" width="12" x="13" y="75"></rect>
+<!-- Data points pattern -->
+<rect height="8" width="8" x="42" y="8"></rect>
+<rect height="8" width="8" x="54" y="16"></rect>
+<rect height="8" width="8" x="42" y="24"></rect>
+<rect height="8" width="8" x="8" y="42"></rect>
+<rect height="8" width="8" x="24" y="42"></rect>
+<rect height="8" width="8" x="16" y="54"></rect>
+<rect height="16" width="16" x="42" y="42"></rect>
+<rect height="8" width="8" x="62" y="42"></rect>
+<rect height="8" width="14" x="78" y="42"></rect>
+<rect height="8" width="10" x="62" y="58"></rect>
+<rect height="8" width="10" x="82" y="58"></rect>
+<rect height="14" width="8" x="42" y="66"></rect>
+<rect height="8" width="16" x="58" y="74"></rect>
+<rect height="18" width="14" x="78" y="74"></rect>
+<rect height="6" width="16" x="42" y="86"></rect>
+</svg>
+</div>
+<div class="text-[10px] leading-tight text-[#332d43]">
+<p class="font-bold text-[#100b1f]">Official KRA eTIMS Verification URL</p>
+<p class="text-[#594139] mt-0.5">Scan with standard smartphone to authenticate record on Kenya Revenue Authority gateway.</p>
+</div>
+</div>
+</div>
+<!-- Receipt Footer Note -->
+<div class="mt-3 text-center text-[10px] text-[#594139]">
+              Served by: Operator Dennis (OP-09) · VendaPOS Core v4.12
+            </div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 3: PAYMENTS SECURITY (ZERO SURFACE AREA ARCHITECTURE) -->
+<section class="w-full py-space-xl">
+<div class="mx-auto max-w-[1200px] px-margin-mobile lg:px-margin">
+<!-- Section Header -->
+<div class="max-w-2xl">
+<div class="inline-flex items-center gap-2 rounded-full bg-primary-container/15 px-3 py-1">
+<span class="material-symbols-outlined text-[16px] text-primary-container">shield</span>
+<span class="font-label-sm text-label-sm uppercase font-semibold text-primary">Zero Surface Area</span>
+</div>
+<h2 class="mt-space-xs font-headline-lg text-headline-lg text-on-surface tracking-tight">
+          Payments security with zero merchant exposure.
+        </h2>
+<p class="mt-space-xs font-body-md text-body-md text-tertiary">
+          We decouple payment collection from merchant data liabilities. Neither cardholder primary account numbers (PAN) nor unverified mobile money tokens ever exist inside your business network.
+        </p>
+</div>
+<!-- Two Large Architectural Cards -->
+<div class="mt-space-xl grid grid-cols-1 gap-space-lg lg:grid-cols-2">
+<!-- Card 1: Card Payments -->
+<div class="relative flex flex-col justify-between rounded-2xl bg-surface-container p-space-xl shadow-md transition-all hover:shadow-lg">
+<div>
+<div class="flex items-center justify-between">
+<span class="rounded-lg bg-surface-variant p-2 text-primary-container">
+<span class="material-symbols-outlined text-[28px]">contactless</span>
+</span>
+<span class="font-label-sm text-label-sm rounded-full bg-primary-container/20 px-3 py-1 text-primary font-medium">PCI-DSS Scoping Shield</span>
+</div>
+<h3 class="mt-space-md font-headline-md text-headline-md font-semibold text-on-surface">
+              Card Payments (Zero Touch Architecture)
+            </h3>
+<p class="mt-space-xs font-body-md text-body-md text-primary font-medium">
+              Card data never touches, transits, or resides on VendaPOS servers or your local store terminals.
+            </p>
+<p class="mt-space-xs font-body-md text-body-md text-tertiary">
+              Direct tokenization is executed directly on hardware PIN pads certified by Level 1 PCI-DSS partner gateways (including Pesapal, DPO Group, and Stanbic Bank). The cashier terminal receives only a cryptographically blind authorization token.
+            </p>
+<ul class="mt-space-md space-y-2.5 font-body-md text-body-md text-on-surface">
+<li class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+<span><strong>P2PE Hardware Encryption:</strong> PIN and magnetic/EMV data encrypted at physical reader head.</span>
+</li>
+<li class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+<span><strong>Tokenized Vault Routing:</strong> Card credentials never written to RAM or local disk storage.</span>
+</li>
+<li class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+<span><strong>Automated Chargeback Audit Logs:</strong> Immutable bank settlement traces mapped to till operator PINs.</span>
+</li>
+</ul>
+</div>
+<div class="mt-space-lg rounded-xl bg-surface-container-high p-space-md">
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-tertiary">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified</span>
+<span>Finance Outcome: Eliminates 95% of SAQ-D PCI audit requirements for multi-store chains.</span>
+</div>
+</div>
+</div>
+<!-- Card 2: M-Pesa STK Push Security -->
+<div class="relative flex flex-col justify-between rounded-2xl bg-surface-container p-space-xl shadow-md transition-all hover:shadow-lg">
+<div>
+<div class="flex items-center justify-between">
+<span class="rounded-lg bg-surface-variant p-2 text-secondary">
+<span class="material-symbols-outlined text-[28px]">phonelink_lock</span>
+</span>
+<span class="font-label-sm text-label-sm rounded-full bg-secondary-container/20 px-3 py-1 text-secondary font-medium">Anti-Fraud Native</span>
+</div>
+<h3 class="mt-space-md font-headline-md text-headline-md font-semibold text-on-surface">
+              M-Pesa STK Push (Server-Side Verification)
+            </h3>
+<p class="mt-space-xs font-body-md text-body-md text-secondary font-medium">
+              Direct C2B and B2B Safaricom Daraja API integration with cryptographically validated webhooks.
+            </p>
+<p class="mt-space-xs font-body-md text-body-md text-tertiary">
+              Eliminates the #1 retail fraud vector in East Africa: fabricated SMS confirmations and photoshopped customer confirmation screenshots. The cashier never inspects the patron's smartphone.
+            </p>
+<ul class="mt-space-md space-y-2.5 font-body-md text-body-md text-on-surface">
+<li class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+<span><strong>Zero Cashier Trust Loop:</strong> Till drawer opens only after Safaricom returns an HTTP 200 payload.</span>
+</li>
+<li class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+<span><strong>Mutual-TLS (mTLS) Webhooks:</strong> Webhook payload signed via asymmetric certificates to prevent replay attacks.</span>
+</li>
+<li class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+<span><strong>Exact Amount Match Enforcement:</strong> Register locks until the inbound push matches the bill down to the cent.</span>
+</li>
+</ul>
+</div>
+<div class="mt-space-lg rounded-xl bg-surface-container-high p-space-md">
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-tertiary">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified</span>
+<span>Finance Outcome: Zero shrinkage from forged M-Pesa codes or unreflected merchant reversions.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: DATA PROTECTION & PRIVACY (TECHNICAL COMMITMENTS) -->
+<section class="w-full py-space-xl bg-surface-container-low">
+<div class="mx-auto max-w-[1200px] px-margin-mobile lg:px-margin">
+<!-- Header -->
+<div class="max-w-3xl">
+<div class="inline-flex items-center gap-2 rounded-full bg-surface-container px-3 py-1">
+<span class="material-symbols-outlined text-[16px] text-tertiary">policy</span>
+<span class="font-label-sm text-label-sm uppercase font-semibold text-tertiary-fixed">Kenya Data Protection Act 2019</span>
+</div>
+<h2 class="mt-space-xs font-headline-lg text-headline-lg text-on-surface tracking-tight">
+          Technical commitments, not empty policy badges.
+        </h2>
+<p class="mt-space-xs font-body-md text-body-md text-tertiary">
+          The Office of the Data Protection Commissioner (ODPC) mandates strict safeguards on personal and transactional telemetry. VendaPOS integrates privacy by design at the schema level.
+        </p>
+</div>
+<!-- 4-Card Bento Grid -->
+<div class="mt-space-xl grid grid-cols-1 gap-space-md md:grid-cols-2 lg:grid-cols-4">
+<!-- Pillar 1 -->
+<div class="flex flex-col justify-between rounded-xl bg-surface-container p-space-md shadow-sm">
+<div>
+<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-variant text-primary-container">
+<span class="material-symbols-outlined text-[28px]">domain_verification</span>
+</div>
+<h3 class="mt-space-sm font-headline-sm text-headline-sm font-semibold text-on-surface">Strict Multi-Tenant Isolation</h3>
+<p class="mt-2 font-body-md text-body-md text-tertiary">
+              Row-level security policies (RLS) and logically separated database shards ensure cross-tenant queries are mathematically impossible.
+            </p>
+</div>
+<div class="mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">lock</span> Zero Tenant Bleed
+            </span>
+</div>
+</div>
+<!-- Pillar 2 -->
+<div class="flex flex-col justify-between rounded-xl bg-surface-container p-space-md shadow-sm">
+<div>
+<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-variant text-secondary">
+<span class="material-symbols-outlined text-[28px]">lock_reset</span>
+</div>
+<h3 class="mt-space-sm font-headline-sm text-headline-sm font-semibold text-on-surface">End-to-End Cryptography</h3>
+<p class="mt-2 font-body-md text-body-md text-tertiary">
+              TLS 1.3 with Strict Transport Security (HSTS) in transit; AES-256 with automated annual KMS envelope key rotation at rest.
+            </p>
+</div>
+<div class="mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">key</span> KMS Key Rotation
+            </span>
+</div>
+</div>
+<!-- Pillar 3 -->
+<div class="flex flex-col justify-between rounded-xl bg-surface-container p-space-md shadow-sm">
+<div>
+<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-variant text-primary-container">
+<span class="material-symbols-outlined text-[28px]">history_edu</span>
+</div>
+<h3 class="mt-space-sm font-headline-sm text-headline-sm font-semibold text-on-surface">Tamper-Evident Audit Trails</h3>
+<p class="mt-2 font-body-md text-body-md text-tertiary">
+              Every discount, void, price adjustment, and drawer pop triggers an immutable append-only log tied to staff biometrics or supervisor PIN.
+            </p>
+</div>
+<div class="mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">fingerprint</span> Microsecond Timestamps
+            </span>
+</div>
+</div>
+<!-- Pillar 4 -->
+<div class="flex flex-col justify-between rounded-xl bg-surface-container p-space-md shadow-sm">
+<div>
+<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-variant text-secondary">
+<span class="material-symbols-outlined text-[28px]">person_shield</span>
+</div>
+<h3 class="mt-space-sm font-headline-sm text-headline-sm font-semibold text-on-surface">Kenya DPA Privacy Guard</h3>
+<p class="mt-2 font-body-md text-body-md text-tertiary">
+              Customer phone numbers parsed from mobile payments are one-way hashed (SHA-256), with automated GDPR/DPA right-to-erasure workflows.
+            </p>
+</div>
+<div class="mt-space-md pt-space-xs">
+<span class="font-label-sm text-label-sm text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check</span> ODPC Registered
+            </span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 5: UPTIME & OFFLINE RESILIENCE ARCHITECTURE DIAGRAM -->
+<section class="w-full py-space-xl">
+<div class="mx-auto max-w-[1200px] px-margin-mobile lg:px-margin">
+<!-- Header -->
+<div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-space-md">
+<div class="max-w-2xl">
+<div class="inline-flex items-center gap-2 rounded-full bg-secondary-container/20 px-3 py-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">wifi_off</span>
+<span class="font-label-sm text-label-sm uppercase font-semibold text-secondary">High Availability Architecture</span>
+</div>
+<h2 class="mt-space-xs font-headline-lg text-headline-lg text-on-surface tracking-tight">
+            Keep selling when fiber, cellular, or power cuts hit.
+          </h2>
+<p class="mt-space-xs font-body-md text-body-md text-tertiary">
+            Retail cannot stop when internet infrastructure fluctuates. Our local edge runtime runs autonomously on device hardware, preserving transactions and syncing state smoothly once connections resume.
+          </p>
+</div>
+<!-- Operational Status Indicators -->
+<div class="flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-3 py-1.5 font-label-sm text-label-sm text-secondary font-medium">
+<span class="h-2 w-2 rounded-full bg-secondary animate-pulse"></span>
+            99.99% Cloud Core SLA
+          </span>
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-3 py-1.5 font-label-sm text-label-sm text-on-surface">
+<span class="material-symbols-outlined text-[14px] text-primary-container">sync_saved_locally</span>
+            CRDT Conflict-Free Replicas
+          </span>
+</div>
+</div>
+<!-- Flow Architecture Diagram Card -->
+<div class="mt-space-xl rounded-2xl bg-surface-container p-space-lg lg:p-space-xl shadow-lg">
+<div class="grid grid-cols-1 items-stretch gap-space-lg lg:grid-cols-3">
+<!-- Stage 1 -->
+<div class="relative flex flex-col justify-between rounded-xl bg-surface-variant/40 p-space-md">
+<div>
+<div class="flex items-center justify-between">
+<span class="rounded bg-surface-variant px-2.5 py-1 font-mono text-[11px] font-bold text-on-surface">STAGE 01</span>
+<span class="flex items-center gap-1 font-label-sm text-label-sm text-secondary">
+<span class="h-1.5 w-1.5 rounded-full bg-secondary"></span> 100% Autonomous
+                </span>
+</div>
+<div class="mt-space-md flex items-center gap-3">
+<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-container text-primary">
+<span class="material-symbols-outlined text-[28px]">point_of_sale</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm font-semibold text-on-surface">POS Terminal Edge</h4>
+<p class="font-label-sm text-label-sm text-tertiary">Local Embedded SQLite DB</p>
+</div>
+</div>
+<p class="mt-space-sm font-body-md text-body-md text-tertiary">
+                Orders punch through immediately. Kitchen order tokens print over local LAN, receipts generate, and cash drawers trigger without external web requests.
+              </p>
+</div>
+<div class="mt-space-md rounded-lg bg-surface-container p-space-xs font-mono text-[11px] text-tertiary">
+<code>latency: &lt; 4ms (local flash memory)</code>
+</div>
+</div>
+<!-- Stage 2 -->
+<div class="relative flex flex-col justify-between rounded-xl bg-surface-variant/40 p-space-md">
+<div>
+<div class="flex items-center justify-between">
+<span class="rounded bg-surface-variant px-2.5 py-1 font-mono text-[11px] font-bold text-on-surface">STAGE 02</span>
+<span class="flex items-center gap-1 font-label-sm text-label-sm text-primary">
+<span class="h-1.5 w-1.5 rounded-full bg-primary-container"></span> HMAC Spooling
+                </span>
+</div>
+<div class="mt-space-md flex items-center gap-3">
+<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-container text-primary-container">
+<span class="material-symbols-outlined text-[28px]">layers</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Cryptographic Buffer</h4>
+<p class="font-label-sm text-label-sm text-tertiary">Encrypted Local Queue</p>
+</div>
+</div>
+<p class="mt-space-sm font-body-md text-body-md text-tertiary">
+                Transactions are hashed in monotonic sequence with hardware-level HMAC verification, preventing replay attacks or tampered registers during outages.
+              </p>
+</div>
+<div class="mt-space-md rounded-lg bg-surface-container p-space-xs font-mono text-[11px] text-tertiary">
+<code>runway: infinite offline endurance</code>
+</div>
+</div>
+<!-- Stage 3 -->
+<div class="relative flex flex-col justify-between rounded-xl bg-surface-variant/40 p-space-md">
+<div>
+<div class="flex items-center justify-between">
+<span class="rounded bg-surface-variant px-2.5 py-1 font-mono text-[11px] font-bold text-on-surface">STAGE 03</span>
+<span class="flex items-center gap-1 font-label-sm text-label-sm text-secondary">
+<span class="h-1.5 w-1.5 rounded-full bg-secondary"></span> Auto Reconciliation
+                </span>
+</div>
+<div class="mt-space-md flex items-center gap-3">
+<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-container text-secondary">
+<span class="material-symbols-outlined text-[28px]">cloud_sync</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm font-semibold text-on-surface">KRA &amp; Cloud Uplink</h4>
+<p class="font-label-sm text-label-sm text-tertiary">Dual-SIM / Fiber Resync</p>
+</div>
+</div>
+<p class="mt-space-sm font-body-md text-body-md text-tertiary">
+                Once uplink detects ping stability, buffered batches flush to Venda Cloud HQ and KRA eTIMS endpoints with zero dropped sales or duplicate receipts.
+              </p>
+</div>
+<div class="mt-space-md rounded-lg bg-surface-container p-space-xs font-mono text-[11px] text-tertiary">
+<code>consistency: deterministic CRDT merge</code>
+</div>
+</div>
+</div>
+<!-- Visual Path Indicator Bar -->
+<div class="mt-space-lg flex items-center justify-between rounded-xl bg-surface-variant/20 p-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-[24px]">verified</span>
+<div class="text-on-surface font-body-md text-body-md">
+<strong>Fail-Safe Redundancy:</strong> Tested in remote and high-density environments across Kenya—from Mombasa port depots to rural upcountry outlets.
+            </div>
+</div>
+<span class="hidden md:inline-flex items-center gap-1 text-primary-container font-label-sm text-label-sm font-semibold">
+            Zero Operational Halt
+            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</span>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 6: DOWNLOADABLE SECURITY WHITE PAPER & AUDIT ARTIFACTS -->
+<section class="w-full py-space-xl bg-surface-container-low" id="artifacts">
+<div class="mx-auto max-w-[1200px] px-margin-mobile lg:px-margin">
+<!-- Section Header -->
+<div class="max-w-2xl">
+<div class="inline-flex items-center gap-2 rounded-full bg-surface-container px-3 py-1">
+<span class="material-symbols-outlined text-[16px] text-primary">description</span>
+<span class="font-label-sm text-label-sm uppercase font-semibold text-on-surface">Vetting Documentation</span>
+</div>
+<h2 class="mt-space-xs font-headline-lg text-headline-lg text-on-surface tracking-tight">
+          Enterprise security artifacts and audit packages.
+        </h2>
+<p class="mt-space-xs font-body-md text-body-md text-tertiary">
+          Expedite your IT committee, internal audit, and procurement due diligence with our unredacted technical whitepapers and architecture documentation.
+        </p>
+</div>
+<!-- Artifacts List -->
+<div class="mt-space-xl grid grid-cols-1 gap-space-md md:grid-cols-3">
+<!-- Artifact 1 -->
+<div class="group flex flex-col justify-between rounded-xl bg-surface-container p-space-lg shadow-sm transition-all hover:bg-surface-container-high">
+<div>
+<div class="flex items-center justify-between">
+<span class="rounded bg-primary-container/20 px-2 py-0.5 font-mono text-[10px] font-bold text-primary">PDF // 2025 EDITION</span>
+<span class="font-label-sm text-label-sm text-tertiary">24 Pages</span>
+</div>
+<h3 class="mt-space-md font-headline-sm text-headline-sm font-semibold text-on-surface">
+              VendaPOS Enterprise Security &amp; Compliance Whitepaper
+            </h3>
+<p class="mt-2 font-body-md text-body-md text-tertiary">
+              Complete technical specification covering cloud cryptography, tenant boundary isolation, KMS key management, and zero-knowledge telemetry.
+            </p>
+</div>
+<div class="mt-space-lg flex items-center justify-between pt-space-xs">
+<span class="font-mono text-[11px] text-tertiary">3.8 MB</span>
+<button class="inline-flex items-center gap-1.5 rounded-lg bg-surface-variant px-3 py-2 font-label-md text-label-md font-medium text-on-surface group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined text-[16px]">download</span>
+              Download
+            </button>
+</div>
+</div>
+<!-- Artifact 2 -->
+<div class="group flex flex-col justify-between rounded-xl bg-surface-container p-space-lg shadow-sm transition-all hover:bg-surface-container-high">
+<div>
+<div class="flex items-center justify-between">
+<span class="rounded bg-secondary-container/20 px-2 py-0.5 font-mono text-[10px] font-bold text-secondary">PDF // TECH SPEC</span>
+<span class="font-label-sm text-label-sm text-tertiary">14 Pages</span>
+</div>
+<h3 class="mt-space-md font-headline-sm text-headline-sm font-semibold text-on-surface">
+              KRA eTIMS Technical Integration Architecture Brief
+            </h3>
+<p class="mt-2 font-body-md text-body-md text-tertiary">
+              API schemas, offline HMAC queue logic, FDN hashing algorithms, and automated daily Z-report tax balancing mechanisms for enterprise CFOs.
+            </p>
+</div>
+<div class="mt-space-lg flex items-center justify-between pt-space-xs">
+<span class="font-mono text-[11px] text-tertiary">2.1 MB</span>
+<button class="inline-flex items-center gap-1.5 rounded-lg bg-surface-variant px-3 py-2 font-label-md text-label-md font-medium text-on-surface group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined text-[16px]">download</span>
+              Download
+            </button>
+</div>
+</div>
+<!-- Artifact 3 -->
+<div class="group flex flex-col justify-between rounded-xl bg-surface-container p-space-lg shadow-sm transition-all hover:bg-surface-container-high">
+<div>
+<div class="flex items-center justify-between">
+<span class="rounded bg-surface-variant px-2 py-0.5 font-mono text-[10px] font-bold text-tertiary">PDF // BCP GUIDE</span>
+<span class="font-label-sm text-label-sm text-tertiary">18 Pages</span>
+</div>
+<h3 class="mt-space-md font-headline-sm text-headline-sm font-semibold text-on-surface">
+              Disaster Recovery, RPO/RTO &amp; Business Continuity Guide
+            </h3>
+<p class="mt-2 font-body-md text-body-md text-tertiary">
+              Formal service recovery targets: Recovery Point Objective (RPO &lt; 0.5s) and Recovery Time Objective (RTO &lt; 2m) with dual-carrier failover models.
+            </p>
+</div>
+<div class="mt-space-lg flex items-center justify-between pt-space-xs">
+<span class="font-mono text-[11px] text-tertiary">1.9 MB</span>
+<button class="inline-flex items-center gap-1.5 rounded-lg bg-surface-variant px-3 py-2 font-label-md text-label-md font-medium text-on-surface group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined text-[16px]">download</span>
+              Download
+            </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 7: CONTACT SECURITY TEAM / SCHEDULE AUDIT -->
+<section class="w-full py-space-xl" id="contact-team">
+<div class="mx-auto max-w-[1200px] px-margin-mobile lg:px-margin">
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-surface-container via-surface-container-high to-surface-container p-space-lg lg:p-space-xl shadow-xl">
+<!-- Subtle Coral/Violet atmospheric accent -->
+<div class="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-primary-container/15 blur-3xl"></div>
+<div class="pointer-events-none absolute -left-20 -bottom-20 h-80 w-80 rounded-full bg-secondary-container/15 blur-3xl"></div>
+<div class="relative z-10 grid grid-cols-1 items-center gap-space-lg lg:grid-cols-12">
+<div class="lg:col-span-8">
+<div class="inline-flex items-center gap-2 rounded-full bg-surface-variant px-3 py-1 text-on-surface">
+<span class="material-symbols-outlined text-secondary text-[16px]">engineering</span>
+<span class="font-label-sm text-label-sm font-semibold uppercase">Direct Engineering Access</span>
+</div>
+<h3 class="mt-space-sm font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">
+              Undergoing IT risk assessment or statutory audit?
+            </h3>
+<p class="mt-space-xs max-w-2xl font-body-lg text-body-lg text-tertiary">
+              Our technical compliance and security engineering team based in Westlands, Nairobi is available to review your enterprise architecture, furnish penetration test executive summaries, and answer your internal IT security questionnaires.
+            </p>
+</div>
+<div class="flex flex-col gap-space-sm sm:flex-row lg:col-span-4 lg:flex-col lg:items-end">
+<a class="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-primary-container px-space-lg py-3.5 font-body-md-medium text-body-md-medium text-on-primary-container shadow-[0_0_24px_rgba(244,98,42,0.3)] transition-all hover:bg-primary hover:text-on-primary active:scale-[0.98]" href="mailto:security@vendapos.co.ke?subject=Enterprise%20Architecture%20Review%20Request">
+<span class="material-symbols-outlined text-[20px]">calendar_today</span>
+              Book an Architecture Review
+            </a>
+<a class="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-surface-variant px-space-lg py-3.5 font-body-md-medium text-body-md-medium text-on-surface hover:bg-surface-bright transition-colors" href="mailto:security@vendapos.co.ke">
+<span class="material-symbols-outlined text-[20px]">alternate_email</span>
+              security@vendapos.co.ke
+            </a>
+</div>
+</div>
+<!-- Trust verification micro-bar -->
+<div class="relative z-10 mt-space-lg flex flex-wrap items-center gap-x-6 gap-y-2 pt-space-md text-tertiary font-label-md text-label-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[16px]">pin_drop</span>
+<span>Security Operations: Mirage Tower 2, Chiromo Rd, Westlands</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[16px]">schedule</span>
+<span>Response Time SLA: Under 2 business hours for security questionnaires</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div></main><footer class="w-full bg-surface-container-low border-t border-surface-variant/40 mt-space-xl"><div class="max-w-[1200px] mx-auto px-margin-mobile lg:px-margin pt-space-xl pb-space-lg"><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-space-lg mb-space-xl"><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Product</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">Touch Terminal</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">Kitchen Display</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">Multi-Branch Cloud</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">Offline Engine</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="product" href="#">M-Pesa Integration</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="compliance" href="#">KRA eTIMS Engine</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Solutions</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Restaurants &amp; Cafes</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Bars &amp; Nightclubs</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Salons &amp; Barbershops</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Supermarkets &amp; Retail</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Hardware Stores</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Pharmacies</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="solutions" href="#">Liquor Stores</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Company</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="company" href="#">About VendaPOS</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="customers" href="#">Customers</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="careers" href="#">Careers</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="press" href="#">Press</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="partner-program" href="#">Partner Program</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="contact" href="#">Contact</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Resources</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="resources" href="#">Help Center</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="developer-api" href="#">API &amp; Webhooks</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="hardware-guide" href="#">Hardware Guide</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="compliance" href="#">eTIMS Compliance Hub</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="migration-guide" href="#">POS Migration Guide</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-md font-semibold">Legal &amp; Trust</h4><ul class="space-y-space-sm font-body-md text-body-md"><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="privacy-policy" href="#">Privacy Policy</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="terms-of-service" href="#">Terms of Service</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="security-architecture" href="#">Security Architecture</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="data-processing" href="#">Data Processing Agreement</a></li><li class="text-on-surface-variant hover:text-on-surface transition-colors"><a data-path="system-status" href="#">System Status</a></li></ul></div></div><div class="border-t border-surface-variant/40 pt-space-lg flex flex-col lg:flex-row items-center justify-between gap-space-md"><div class="flex flex-wrap items-center gap-space-md"><div class="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md"><span class="material-symbols-outlined text-[16px]">language</span><button class="hover:text-on-surface transition-colors text-on-surface font-semibold">English (KE)</button><span class="opacity-40">|</span><button class="hover:text-on-surface transition-colors">Kiswahili</button></div><div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container border border-surface-variant font-label-sm text-label-sm text-on-surface-variant"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Billing in KES &amp; USD</div></div><div class="flex items-center gap-space-md"><a class="w-9 h-9 rounded-full bg-surface-container border border-surface-variant/60 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="https://x.com" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[18px]">alternate_email</span></a><a class="w-9 h-9 rounded-full bg-surface-container border border-surface-variant/60 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="https://linkedin.com" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[18px]">business_center</span></a><a class="w-9 h-9 rounded-full bg-surface-container border border-surface-variant/60 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="https://github.com" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[18px]">code</span></a></div><div class="text-on-surface-variant font-label-md text-label-md text-center lg:text-right">© 2025 Venda Technologies Ltd. All rights reserved. Fast. Local. Built for Africa.</div></div></div></footer></body></html>

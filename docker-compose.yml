@@ -1,0 +1,71 @@
+services:
+  app:
+    build:
+      context: ./infra/docker
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - platform_vendor:/app/apps/platform/vendor
+      - terminal_vendor:/app/apps/pos-terminal/vendor
+      - core_vendor:/app/packages/core/vendor
+      - marketing_vendor:/app/apps/marketing/vendor
+      - marketing_node_modules:/app/apps/marketing/node_modules
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - COMPOSER_MEMORY_LIMIT=-1
+    working_dir: /app
+    command: sleep infinity
+    networks:
+      - vendapos
+
+  postgres:
+    image: postgres:16-bookworm
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: vendapos
+      POSTGRES_USER: vendapos
+      POSTGRES_PASSWORD: vendapos
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vendapos"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - vendapos
+
+  redis:
+    image: redis:7-bookworm
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - vendapos
+
+volumes:
+  pgdata:
+  redisdata:
+  platform_vendor:
+  terminal_vendor:
+  core_vendor:
+  marketing_vendor:
+  marketing_node_modules:
+
+networks:
+  vendapos:
+    driver: bridge

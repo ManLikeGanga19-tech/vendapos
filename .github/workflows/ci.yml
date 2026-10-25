@@ -1,0 +1,201 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'feat/**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  platform:
+    name: Platform (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.4']
+
+    services:
+      postgres:
+        image: postgres:16-bookworm
+        env:
+          POSTGRES_USER: vendapos
+          POSTGRES_PASSWORD: vendapos
+          POSTGRES_DB: vendapos
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U vendapos"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7-bookworm
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: vendapos_test
+      DB_USERNAME: vendapos
+      DB_PASSWORD: vendapos
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo_pgsql, pgsql, redis, intl, bcmath, pdo_sqlite, pcntl, zip, gd, opcache
+          coverage: none
+
+      - name: Install Composer dependencies
+        working-directory: apps/platform
+        run: composer install --no-interaction --prefer-dist
+
+      # Tenant export tests run the real pg_dump / pg_restore, which must be
+      # at least the server's major version (16).
+      - name: Install PostgreSQL 16 client
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client-16
+
+      - name: Create test database
+        run: PGPASSWORD=vendapos psql -h 127.0.0.1 -U vendapos -c "CREATE DATABASE vendapos_test OWNER vendapos;"
+
+      - name: Prepare environment
+        working-directory: apps/platform
+        run: |
+          cp .env.example .env
+          sed -i 's/DB_HOST=postgres/DB_HOST=127.0.0.1/' .env
+          php artisan key:generate
+
+      - name: Pint (formatting)
+        working-directory: apps/platform
+        run: ./vendor/bin/pint --test
+
+      - name: Larastan (static analysis)
+        working-directory: apps/platform
+        run: ./vendor/bin/phpstan analyse --memory-limit=512M
+
+      - name: Run migrations
+        working-directory: apps/platform
+        run: php artisan migrate --force
+
+      - name: Pest (tests)
+        working-directory: apps/platform
+        env:
+          VENDAPOS_PG_DUMP: /usr/lib/postgresql/16/bin/pg_dump
+          VENDAPOS_PG_RESTORE: /usr/lib/postgresql/16/bin/pg_restore
+        run: ./vendor/bin/pest
+
+  core:
+    name: Core Package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: bcmath
+          coverage: none
+
+      - name: Install Composer dependencies
+        working-directory: packages/core
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Pest (tests)
+        working-directory: packages/core
+        run: ./vendor/bin/pest
+
+  marketing:
+    name: Marketing Site
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_sqlite, intl, gd
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/marketing/package-lock.json
+
+      - name: Install Composer dependencies
+        working-directory: apps/marketing
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Install and build front-end assets
+        working-directory: apps/marketing
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare environment
+        working-directory: apps/marketing
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Pint (formatting)
+        working-directory: apps/marketing
+        run: ./vendor/bin/pint --test
+
+      - name: Larastan (static analysis)
+        working-directory: apps/marketing
+        run: ./vendor/bin/phpstan analyse --memory-limit=512M
+
+      - name: Pest (tests)
+        working-directory: apps/marketing
+        run: ./vendor/bin/pest
+
+  terminal:
+    name: POS Terminal
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_sqlite
+          coverage: none
+
+      - name: Install Composer dependencies
+        working-directory: apps/pos-terminal
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Prepare environment
+        working-directory: apps/pos-terminal
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          touch database/database.sqlite
+
+      - name: Tests
+        working-directory: apps/pos-terminal
+        run: php artisan test
