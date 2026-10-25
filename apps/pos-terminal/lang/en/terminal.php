@@ -35,4 +35,12 @@ return [
         'sync_now' => 'Sync now',
     ],
 
+    'status' => [
+        'online' => 'Online',
+        'offline' => 'Offline: will sync when back online',
+        'never' => 'Not synced yet',
+        'last_sync' => 'synced :time',
+        'suspended' => 'Account suspended: M-Pesa is paused, take cash.',
+    ],
+
 ];

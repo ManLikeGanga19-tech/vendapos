@@ -1,4 +1,4 @@
-<div class="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 px-6 py-8">
+<div class="mx-auto flex max-w-4xl flex-col gap-6 px-6 py-8">
     <header class="flex items-start justify-between gap-4">
         <div>
             <p class="text-sm font-semibold tracking-widest text-primary uppercase">{{ $identity?->business_name }}</p>

@@ -36,4 +36,12 @@ return [
         'sync_now' => 'Sawazisha sasa',
     ],
 
+    'status' => [
+        'online' => 'Mtandaoni',
+        'offline' => 'Nje ya mtandao: itasawazisha mtandao ukirudi',
+        'never' => 'Bado haijasawazishwa',
+        'last_sync' => 'imesawazishwa :time',
+        'suspended' => 'Akaunti imesimamishwa: M-Pesa imesitishwa, pokea pesa taslimu.',
+    ],
+
 ];

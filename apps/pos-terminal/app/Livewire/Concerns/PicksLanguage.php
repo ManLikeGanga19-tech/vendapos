@@ -17,5 +17,6 @@ trait PicksLanguage
 
         Preference::write(Preference::LOCALE, $locale);
         app()->setLocale($locale);
+        $this->dispatch('language-changed');
     }
 }

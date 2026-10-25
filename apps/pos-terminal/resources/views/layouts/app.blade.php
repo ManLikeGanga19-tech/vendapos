@@ -8,6 +8,7 @@
     @livewireStyles
 </head>
 <body class="min-h-screen">
+    <livewire:status-bar />
     {{ $slot }}
     @livewireScripts
 </body>
