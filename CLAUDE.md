@@ -80,9 +80,14 @@ build tool.
 - Never use `--no-verify` / `-n` or otherwise skip hooks. `.githooks/commit-msg` strips
   attribution as a backstop; CI rejects PRs that still contain it.
 - Conventional Commits: `feat(orders): …`, `fix(etims): …`, `test(tenancy): …`, `chore(ci): …`.
-- Feature branches only (`feat/…`, `fix/…`). Never push to `main`. Never force-push.
+- Three long-lived branches, never deleted: `development` (default) → `staging` → `production`.
+  Never push directly to any of them. Never force-push.
+- Work happens on short branches (`feat/…`, `fix/…`, `chore/…`, `docs/…`) cut from
+  `development`, merged back into `development` by PR (merge commits only).
+- Promotion is always a PR: `development` → `staging` when a milestone is done, then
+  `staging` → `production` after it is checked on staging.
 - Before every push, confirm this prints nothing:
-  `git log origin/main..HEAD --format='%B' | grep -iE 'co-authored-by|claude|anthropic|generated with'`
+  `git log origin/development..HEAD --format='%B' | grep -iE 'co-authored-by|claude|anthropic|generated with'`
 - PR body sections: Summary, Changes, How to test, Risks.
 
 ## 7. Security

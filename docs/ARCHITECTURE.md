@@ -523,8 +523,9 @@ Laravel's first-party tools cover most of what v1.0 built by hand; Prometheus, G
 | Tests | Pest + architecture tests, coverage > 80% | Postgres 16 + Redis as GitHub Actions services |
 | Build | Docker buildx | linux/amd64 for K8s, linux/arm64 for Pi terminals |
 | Push | GitHub Container Registry | Git SHA + semver tags |
-| Deploy dev | `helm upgrade --install` | Auto on merge to main; runs central + tenant migrations |
-| Deploy prod | Manual approval | GitHub Environment protection |
+| Deploy dev | `helm upgrade --install` | Auto on merge to `development`; runs central + tenant migrations |
+| Deploy staging | `helm upgrade --install` | Auto on merge to `staging` (PR from `development`) |
+| Deploy prod | Manual approval | On merge to `production` (PR from `staging`); GitHub Environment protection |
 | Terminal release | `php artisan native:build linux` | Signed .deb, auto-update channel |
 | Mobile release | NativePHP Mobile build | Store release on approval |
 
