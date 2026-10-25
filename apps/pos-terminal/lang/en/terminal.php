@@ -27,13 +27,33 @@ return [
         'removed' => 'This till was removed from the business. Ask a manager to pair it again.',
     ],
 
-    'ready' => [
-        'title' => 'Till ready',
-        'next' => 'Staff sign-in comes in the next update.',
+    'roles' => [
+        'owner' => 'Owner',
+        'manager' => 'Manager',
+        'cashier' => 'Cashier',
+        'waiter' => 'Waiter',
+    ],
+
+    'sign_in' => [
+        'title' => 'Who’s working?',
+        'choose' => 'Tap your name.',
+        'enter_pin' => 'Enter your PIN',
+        'back' => 'Back',
+        'wrong' => 'Wrong PIN. :count try left.|Wrong PIN. :count tries left.',
+        'locked' => 'Too many wrong PINs. Try again at :time.',
+        'no_staff' => 'No one can sign in yet',
+        'no_staff_help' => 'In the Owner panel, open Staff and give people a PIN. The till picks them up within a minute.',
+        'download_pending' => 'The menu and staff will download as soon as the till is online.',
+        'sync_now' => 'Sync now',
+    ],
+
+    'home' => [
+        'signed_in_as' => 'Signed in as :name',
+        'next' => 'Selling comes in the next update.',
         'items' => 'Menu items',
         'staff' => 'Staff',
-        'download_pending' => 'The menu will download as soon as the till is online.',
-        'sync_now' => 'Sync now',
+        'switch' => 'Switch user',
+        'sign_out' => 'Sign out',
     ],
 
     'status' => [

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Jobs\SyncTillJob;
 use App\Livewire\PairTill;
-use App\Livewire\TillReady;
 use App\Models\Item;
 use App\Models\Preference;
 use App\Models\StaffMember;
@@ -115,14 +114,16 @@ describe('pairing', function () {
 describe('screens', function () {
     it('sends an unpaired till to the pairing screen', function () {
         $this->get('/')->assertRedirect(route('pair'));
-        $this->get(route('ready'))->assertRedirect(route('pair'));
+        $this->get(route('sign-in'))->assertRedirect(route('pair'));
+        $this->get(route('home'))->assertRedirect(route('pair'));
     });
 
-    it('sends a paired till to the ready screen', function () {
+    it('sends a paired till to staff sign-in', function () {
         pairTill();
 
-        $this->get('/')->assertRedirect(route('ready'));
-        $this->get(route('pair'))->assertRedirect(route('ready'));
+        $this->get('/')->assertRedirect(route('home'));
+        $this->get(route('home'))->assertRedirect(route('sign-in'));
+        $this->get(route('pair'))->assertRedirect(route('sign-in'));
     });
 
     it('builds the code from allowed keys only, up to 8', function () {
@@ -160,13 +161,13 @@ describe('screens', function () {
             ->assertSet('error', null);
     });
 
-    it('pairs and moves on to the ready screen', function () {
+    it('pairs and moves on to staff sign-in', function () {
         fakePairingServer();
 
         Livewire::test(PairTill::class)
             ->set('code', 'ABCD2345')
             ->call('pair')
-            ->assertRedirect(route('ready'));
+            ->assertRedirect(route('sign-in'));
     });
 
     it('shows why pairing failed', function () {
@@ -195,7 +196,7 @@ describe('screens', function () {
         pairTill();
 
         expect(Preference::read(Preference::LOCALE))->toBe('sw');
-        $this->get(route('ready'))->assertSee('Mashine iko tayari');
+        $this->get(route('sign-in'))->assertSee('Nani yuko kazini?');
     });
 
     it('ignores a language the till does not have', function () {
@@ -204,22 +205,11 @@ describe('screens', function () {
         expect(Preference::read(Preference::LOCALE))->toBeNull();
     });
 
-    it('shows the till, branch and what was downloaded', function () {
-        pairTill();
-        Item::query()->create(['id' => 'i1', 'type' => 'product', 'name' => 'Soda', 'price_cents' => 8000, 'vat_category' => 'standard', 'is_active' => true]);
-        Item::query()->create(['id' => 'i2', 'type' => 'product', 'name' => 'Old', 'price_cents' => 100, 'vat_category' => 'standard', 'is_active' => false]);
-
-        Livewire::test(TillReady::class)
-            ->assertSee('Danamo Restaurant')
-            ->assertSee('Till 1 · Nyali')
-            ->assertViewHas('itemCount', 1);
-    });
-
     it('goes back to pairing when a manual sync finds the till removed', function () {
         pairTill();
         Http::fake([TEST_API_URL.'/*' => Http::response([], 401)]);
 
-        Livewire::test(TillReady::class)
+        Livewire::test(SignIn::class)
             ->call('syncNow')
             ->assertRedirect(route('pair'));
     });

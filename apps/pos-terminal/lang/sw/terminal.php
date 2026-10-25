@@ -28,13 +28,33 @@ return [
         'removed' => 'Mashine hii imeondolewa kwenye biashara. Mwombe meneja aiunganishe tena.',
     ],
 
-    'ready' => [
-        'title' => 'Mashine iko tayari',
-        'next' => 'Kuingia kwa wafanyakazi kunakuja kwenye toleo lijalo.',
+    'roles' => [
+        'owner' => 'Mmiliki',
+        'manager' => 'Meneja',
+        'cashier' => 'Keshia',
+        'waiter' => 'Mhudumu',
+    ],
+
+    'sign_in' => [
+        'title' => 'Nani yuko kazini?',
+        'choose' => 'Gusa jina lako.',
+        'enter_pin' => 'Weka PIN yako',
+        'back' => 'Rudi',
+        'wrong' => 'PIN si sahihi. Imebaki nafasi :count.|PIN si sahihi. Zimebaki nafasi :count.',
+        'locked' => 'PIN zisizo sahihi zimezidi. Jaribu tena saa :time.',
+        'no_staff' => 'Bado hakuna anayeweza kuingia',
+        'no_staff_help' => 'Kwenye paneli ya mmiliki, fungua Wafanyakazi na uwape watu PIN. Mashine itawapata ndani ya dakika moja.',
+        'download_pending' => 'Menyu na wafanyakazi vitapakuliwa mara mashine itakapopata mtandao.',
+        'sync_now' => 'Sawazisha sasa',
+    ],
+
+    'home' => [
+        'signed_in_as' => 'Umeingia kama :name',
+        'next' => 'Kuuza kunakuja kwenye toleo lijalo.',
         'items' => 'Bidhaa za menyu',
         'staff' => 'Wafanyakazi',
-        'download_pending' => 'Menyu itapakuliwa mara mashine itakapopata mtandao.',
-        'sync_now' => 'Sawazisha sasa',
+        'switch' => 'Badilisha mtumiaji',
+        'sign_out' => 'Toka',
     ],
 
     'status' => [

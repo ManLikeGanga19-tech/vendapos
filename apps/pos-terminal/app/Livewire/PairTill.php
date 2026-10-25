@@ -23,7 +23,7 @@ final class PairTill extends Component
     public function mount(Till $till): void
     {
         if ($till->isPaired()) {
-            $this->redirectRoute('ready');
+            $this->redirectRoute('sign-in');
         }
     }
 
@@ -76,7 +76,7 @@ final class PairTill extends Component
         }
 
         session()->flash('download_pending', ! $downloaded);
-        $this->redirectRoute('ready');
+        $this->redirectRoute('sign-in');
     }
 
     public function render(Till $till): View
