@@ -15,6 +15,7 @@ use App\Sync\SyncTill;
 use App\Till\Till;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 /** Tap your name, then type your PIN. Checked on the till, so it works offline. */
@@ -45,6 +46,15 @@ final class SignIn extends Component
             $this->staffId = $staffId;
             $this->pin = '';
             $this->message = null;
+        }
+    }
+
+    /** The staff list changed on the server: redraw it, and drop a chosen name that is gone. */
+    #[On('till-updated')]
+    public function refreshStaff(): void
+    {
+        if ($this->staffId !== null && $this->chosen() === null) {
+            $this->back();
         }
     }
 

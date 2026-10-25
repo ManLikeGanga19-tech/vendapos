@@ -7,17 +7,15 @@ namespace App\Till;
 use App\Api\Exceptions\ApiNotConfigured;
 use App\Api\Exceptions\ApiRejected;
 use App\Api\Exceptions\ApiUnavailable;
-use App\Api\Exceptions\TillNotAuthorised;
 use App\Api\VendaApi;
 use App\Jobs\SyncTillJob;
 use App\Security\KeyringUnavailable;
 use App\Security\SecretBox;
-use App\Sync\SyncCatalogue;
-use App\Sync\SyncStaff;
+use App\Sync\SyncTill;
 
 /**
- * Pairs the till with a code from the Owner panel, then downloads staff and
- * menu. A failed download does not undo the pairing: the background sync
+ * Pairs the till with a code from the Owner panel, then runs a first sync
+ * (staff, menu, where to listen for live updates). A failed download does not undo the pairing: the background sync
  * picks it up once the till is online.
  */
 final class PairThisTill
@@ -31,8 +29,7 @@ final class PairThisTill
         private readonly VendaApi $api,
         private readonly Till $till,
         private readonly SecretBox $secrets,
-        private readonly SyncStaff $staff,
-        private readonly SyncCatalogue $catalogue,
+        private readonly SyncTill $sync,
     ) {}
 
     /** "abcd-2345 " becomes "ABCD2345"; the server accepts any case, spaces and dashes too. */
@@ -47,7 +44,7 @@ final class PairThisTill
     }
 
     /**
-     * Returns whether staff and menu were downloaded too. Throws PairingFailed.
+     * Returns whether the first sync completed too. Throws PairingFailed.
      */
     public function handle(string $typedCode): bool
     {
@@ -71,13 +68,9 @@ final class PairThisTill
             throw new PairingFailed('not_configured', $e);
         }
 
-        try {
-            $this->staff->handle();
-            $this->catalogue->handle();
-            $downloaded = true;
-        } catch (ApiUnavailable|ApiRejected|TillNotAuthorised) {
-            $downloaded = false;
-        }
+        // A full round, not only staff and menu: it also brings where to listen for
+        // live updates, so they work from the first screen instead of after a minute.
+        $downloaded = $this->sync->handle();
 
         SyncTillJob::dispatch()->delay(now()->addSeconds((int) config('terminal.sync_interval_seconds')));
 

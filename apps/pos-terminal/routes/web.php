@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\AuthoriseRealtimeChannel;
 use App\Http\Middleware\EnsureStaffSignedIn;
 use App\Livewire\ChangePin;
 use App\Livewire\PairTill;
@@ -14,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', fn (Till $till) => redirect()->route($till->isPaired() ? 'home' : 'pair'))->name('home.entry');
 Route::livewire('/pair', PairTill::class)->name('pair');
 Route::livewire('/sign-in', SignIn::class)->name('sign-in');
+
+// The window's Echo client signs its private-channel subscription here (see resources/js/realtime.js).
+Route::post('/realtime/auth', AuthoriseRealtimeChannel::class)->name('realtime.auth');
 
 // The idle timer posts here after 60 seconds without a tap.
 Route::post('/sign-out', function (TillSession $session) {

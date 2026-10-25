@@ -53,6 +53,12 @@ final class TillSession
         return $staff;
     }
 
+    /** Someone signed in and has not signed out, whether or not they still may be. */
+    public function hasSignedIn(): bool
+    {
+        return is_string($this->session->get(self::STAFF_ID));
+    }
+
     /** Called on what the person does, never on background polling. */
     public function touch(): void
     {

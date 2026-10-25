@@ -55,7 +55,23 @@ final class VendaApi
             branch: self::branch($json),
             tokenExpiresAt: self::date($json, 'token_expires_at'),
             accountStatus: self::string($json, 'account_status'),
+            realtime: self::realtime($json),
         );
+    }
+
+    /**
+     * Sign this till's private-channel subscription. The device token stays
+     * here in PHP; the window only ever sees the signature.
+     *
+     * @return array<mixed> the server's answer, as Pusher clients expect it ({"auth": "..."})
+     */
+    public function authoriseChannel(string $socketId, string $channelName): array
+    {
+        // /api/broadcasting/auth sits beside /api/v1, not under it.
+        return $this->send(fn () => $this->authorised('/api')->post('broadcasting/auth', [
+            'socket_id' => $socketId,
+            'channel_name' => $channelName,
+        ]));
     }
 
     /** Swap a still-valid token for a fresh one. */
@@ -149,7 +165,7 @@ final class VendaApi
         ];
     }
 
-    private function request(): PendingRequest
+    private function request(string $prefix = '/api/v1'): PendingRequest
     {
         $baseUrl = config('terminal.api_url');
 
@@ -157,18 +173,18 @@ final class VendaApi
             throw new ApiNotConfigured('VENDAPOS_API_URL is not set.');
         }
 
-        return Http::baseUrl(rtrim($baseUrl, '/').'/api/v1')
+        return Http::baseUrl(rtrim($baseUrl, '/').$prefix)
             ->acceptJson()
             ->asJson()
             ->timeout((int) config('terminal.http_timeout_seconds'))
             ->connectTimeout((int) config('terminal.http_connect_timeout_seconds'));
     }
 
-    private function authorised(): PendingRequest
+    private function authorised(string $prefix = '/api/v1'): PendingRequest
     {
         $credentials = $this->till->credentials();
 
-        return $this->request()
+        return $this->request($prefix)
             ->withToken($credentials['token'])
             ->withHeader(self::DEVICE_HEADER, $credentials['device_id']);
     }
@@ -201,6 +217,28 @@ final class VendaApi
             ),
             default => new ApiUnavailable("The server answered {$response->status()}.", $response->status()),
         };
+    }
+
+    /**
+     * @param  array<mixed>  $json
+     * @return array{key: string, host: string, port: int, scheme: string, channel: string, event: string}|null
+     */
+    private static function realtime(array $json): ?array
+    {
+        $realtime = data_get($json, 'realtime');
+
+        if (! is_array($realtime)) {
+            return null;
+        }
+
+        return [
+            'key' => self::string($realtime, 'key'),
+            'host' => self::string($realtime, 'host'),
+            'port' => (int) data_get($realtime, 'port'),
+            'scheme' => self::string($realtime, 'scheme'),
+            'channel' => self::string($realtime, 'channel'),
+            'event' => self::string($realtime, 'event'),
+        ];
     }
 
     /** @param  array<mixed>  $json */

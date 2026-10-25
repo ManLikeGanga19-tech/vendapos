@@ -28,6 +28,9 @@ final class SyncTill
 
     public const string ACCOUNT_STATUS = 'account.status';
 
+    /** Where the window listens for "sync now" (public values only), as JSON; null while the server has it off. */
+    public const string REALTIME = 'realtime.config';
+
     public function __construct(
         private readonly Till $till,
         private readonly VendaApi $api,
@@ -36,19 +39,24 @@ final class SyncTill
         private readonly SyncCatalogue $catalogue,
     ) {}
 
-    public function handle(): void
+    /** Whether the whole round completed. */
+    public function handle(): bool
     {
         if (! $this->till->isPaired()) {
-            return;
+            return false;
         }
 
         try {
             $this->round();
+
+            return true;
         } catch (TillNotAuthorised) {
             $this->recoverAccess();
         } catch (ApiUnavailable|ApiRejected|TokenStillValid|ApiNotConfigured|KeyringUnavailable $e) {
             $this->noteError($e);
         }
+
+        return false;
     }
 
     private function round(): void
@@ -62,6 +70,7 @@ final class SyncTill
             'terminal_mode' => $device->branch->terminalMode,
         ]);
         SyncState::write(self::ACCOUNT_STATUS, $device->accountStatus);
+        SyncState::write(self::REALTIME, $device->realtime === null ? null : (string) json_encode($device->realtime));
 
         $this->staff->handle();
         $this->catalogue->handle();

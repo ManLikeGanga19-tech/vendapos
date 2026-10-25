@@ -7,8 +7,13 @@ sections 3.1 and 12.
 ## Developing on Windows
 
 The terminal runs natively on Windows. The platform it talks to (Octane,
-Postgres, Redis, Horizon) stays in Docker: Horizon needs the `pcntl` and
+Postgres, Redis, Horizon, Reverb) stays in Docker: Horizon needs the `pcntl` and
 `posix` extensions, which Windows does not have.
+
+Live updates (a menu or staff change, a revoked till) reach the till through
+Reverb on port 8080: run `php artisan reverb:start --host=0.0.0.0 --port=8080`
+in the platform container. Without it the till still catches up through its
+60-second sync.
 
 Needs PHP 8.4 (NTS x64 from php.net, with `curl fileinfo intl mbstring openssl
 pdo_sqlite sodium sqlite3 zip` enabled), Composer and Node 22.

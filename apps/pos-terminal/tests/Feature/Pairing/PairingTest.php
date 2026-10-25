@@ -7,6 +7,8 @@ use App\Livewire\PairTill;
 use App\Models\Item;
 use App\Models\Preference;
 use App\Models\StaffMember;
+use App\Models\SyncState;
+use App\Sync\SyncTill;
 use App\Till\PairingFailed;
 use App\Till\PairThisTill;
 use App\Till\Till;
@@ -34,6 +36,13 @@ function fakePairingServer(array $overrides = []): void
 {
     Http::fake(array_merge([
         TEST_API_URL.'/api/v1/device/pair' => Http::response(pairAnswer(), 201),
+        TEST_API_URL.'/api/v1/device' => Http::response([
+            'device' => ['id' => TEST_DEVICE_ID, 'name' => 'Till 1'],
+            'branch' => ['id' => '0199b1f2-0000-7000-8000-000000000001', 'name' => 'Nyali', 'business_type' => 'restaurant', 'terminal_mode' => 'table_service'],
+            'token_expires_at' => now()->addHours(12)->toIso8601String(),
+            'account_status' => 'active',
+            'realtime' => ['key' => 'pub-key', 'host' => 'localhost', 'port' => 8080, 'scheme' => 'http', 'channel' => 'till.'.TEST_DEVICE_ID, 'event' => 'till.sync'],
+        ]),
         TEST_API_URL.'/api/v1/staff' => Http::response(['synced_at' => now()->toIso8601String(), 'staff' => [
             ['id' => 's1', 'name' => 'Amina', 'role' => 'cashier', 'permissions' => [], 'pin_hash' => '$2y$04$x', 'pin_length' => 4],
         ]]),
@@ -55,7 +64,7 @@ function pairingFailure(callable $call): ?string
 }
 
 describe('pairing', function () {
-    it('pairs, downloads staff and menu, and starts the background sync', function () {
+    it('pairs, runs a first sync, and starts the background sync', function () {
         fakePairingServer();
 
         $downloaded = app(PairThisTill::class)->handle('abcd-2345');
@@ -64,7 +73,9 @@ describe('pairing', function () {
             ->and(app(Till::class)->isPaired())->toBeTrue()
             ->and(app(Till::class)->credentials()['token'])->toBe('paired-token')
             ->and(StaffMember::query()->count())->toBe(1)
-            ->and(Item::query()->count())->toBe(1);
+            ->and(Item::query()->count())->toBe(1)
+            // Where to listen comes with it, so live updates work from the first screen.
+            ->and(SyncState::read(SyncTill::REALTIME))->not->toBeNull();
         Http::assertSent(fn (Request $request) => str_ends_with($request->url(), '/device/pair') && $request['code'] === 'ABCD2345');
         Queue::assertPushed(SyncTillJob::class);
     });
