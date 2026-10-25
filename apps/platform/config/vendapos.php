@@ -31,7 +31,7 @@ return [
     'pairing_code_minutes' => 15,
 
     // Abilities granted to a terminal's token.
-    'device_abilities' => ['orders:sync', 'payments:initiate', 'staff:read'],
+    'device_abilities' => ['orders:sync', 'payments:initiate', 'staff:read', 'staff:pin'],
 
     /*
     |--------------------------------------------------------------------------

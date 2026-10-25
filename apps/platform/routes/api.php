@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Api\V1\Controllers\ChangeStaffPin;
 use App\Http\Api\V1\Controllers\PairDevice;
 use App\Http\Api\V1\Controllers\RefreshDeviceToken;
 use App\Http\Api\V1\Controllers\RenewDeviceToken;
@@ -27,6 +28,10 @@ Route::prefix('v1')
         Route::get('staff', ShowTillStaff::class)
             ->middleware('ability:staff:read')
             ->name('api.v1.staff');
+        Route::post('staff/{staffId}/pin', ChangeStaffPin::class)
+            ->middleware(['ability:staff:pin', 'body.limit'])
+            ->whereUuid('staffId')
+            ->name('api.v1.staff.pin');
         Route::post('orders/sync', SyncOrders::class)
             ->middleware(['ability:orders:sync', 'body.limit'])
             ->name('api.v1.orders.sync');

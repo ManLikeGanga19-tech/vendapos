@@ -26,6 +26,9 @@ class StaffChange extends Model
 
     public const ACTION_PIN_RESET = 'pin_reset';
 
+    /** Chosen by the person themselves on a till; details.device_id says which. */
+    public const ACTION_PIN_CHANGED = 'pin_changed';
+
     public const ACTION_PIN_CLEARED = 'pin_cleared';
 
     public const ACTION_DEACTIVATED = 'deactivated';
