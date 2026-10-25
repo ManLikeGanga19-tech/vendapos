@@ -17,7 +17,7 @@ function seedMenuAndStaff(): void
 {
     Category::query()->create(['id' => 'c1', 'name' => 'Drinks', 'sort_order' => 1]);
     Item::query()->create(['id' => 'i1', 'category_id' => 'c1', 'type' => 'product', 'name' => 'Soda', 'price_cents' => 8000, 'vat_category' => 'standard', 'is_active' => true]);
-    StaffMember::query()->create(['id' => 's1', 'name' => 'Amina', 'role' => 'cashier', 'permissions' => ['orders.create'], 'pin_hash' => 'hash', 'pin_length' => 4]);
+    StaffMember::query()->create(['id' => 's1', 'name' => 'Amina', 'role' => 'cashier', 'permissions' => ['orders.create'], 'pin_hash_sealed' => 'sealed:hash', 'pin_length' => 4]);
     SyncState::write('catalogue.synced_at', '2026-10-25T08:00:00+00:00');
 }
 

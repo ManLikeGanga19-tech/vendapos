@@ -7,7 +7,9 @@ use App\Models\Category;
 use App\Models\Item;
 use App\Models\StaffMember;
 use App\Models\SyncState;
+use App\Security\SecretBox;
 use App\Sync\SyncCatalogue;
+use App\Sync\SyncStaff;
 use App\Sync\SyncTill;
 use App\Till\Till;
 use Carbon\CarbonImmutable;
@@ -110,7 +112,7 @@ describe('menu', function () {
 describe('staff', function () {
     it('replaces the staff list, so people removed on the server disappear', function () {
         pairTill();
-        StaffMember::query()->create(staffMember('old', 'Left Last Week'));
+        StaffMember::query()->create(SyncStaff::row(staffMember('old', 'Left Last Week'), app(SecretBox::class)));
         fakeServer();
 
         app(SyncTill::class)->handle();

@@ -36,6 +36,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Staff sign-in
+    |--------------------------------------------------------------------------
+    |
+    | Staff sign in with their PIN, checked on the till so it works offline.
+    | Whoever is signed in is signed out after `idle_sign_out_seconds` without
+    | a tap or key press. After `pin_max_attempts` wrong PINs in a row, that
+    | person is locked on this till for `pin_lock_minutes`.
+    |
+    */
+
+    'idle_sign_out_seconds' => (int) env('VENDAPOS_IDLE_SIGN_OUT_SECONDS', 60),
+
+    'pin_max_attempts' => (int) env('VENDAPOS_PIN_MAX_ATTEMPTS', 5),
+
+    'pin_lock_minutes' => (int) env('VENDAPOS_PIN_LOCK_MINUTES', 5),
+
+    /*
+    |--------------------------------------------------------------------------
     | Window
     |--------------------------------------------------------------------------
     |
