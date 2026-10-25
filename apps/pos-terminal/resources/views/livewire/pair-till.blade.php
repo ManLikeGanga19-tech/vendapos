@@ -26,17 +26,41 @@
     >
         <div class="flex flex-col gap-2">
             <span class="text-sm text-muted" id="code-label">{{ __('terminal.pair.code') }}</span>
-            <output aria-labelledby="code-label" aria-live="polite" class="border border-line bg-panel px-6 py-5 text-center font-mono text-5xl tracking-[0.3em]">{{ $display }}</output>
+            {{-- Eight boxes, as the code is shown in the Owner panel: ABCD-2345. --}}
+            <output aria-labelledby="code-label" aria-live="polite" class="flex items-center justify-center gap-3">
+                @foreach ($boxes as $group)
+                    @if (! $loop->first)
+                        <span class="text-4xl text-muted" aria-hidden="true">–</span>
+                    @endif
+                    <span class="flex gap-2">
+                        @foreach ($group as $char)
+                            <span @class([
+                                'flex h-20 w-16 items-center justify-center border bg-panel font-mono text-4xl font-bold',
+                                'border-primary' => $char !== '',
+                                'border-line' => $char === '',
+                            ])>{{ $char }}</span>
+                        @endforeach
+                    </span>
+                @endforeach
+            </output>
+            <p class="text-sm text-muted">{{ __('terminal.pair.not_used') }}</p>
         </div>
 
         @if ($error)
             <p class="border border-danger px-4 py-3 text-danger" role="alert">{{ $error }}</p>
         @endif
 
-        <div class="grid grid-cols-10 gap-2">
-            @foreach ($keys as $key)
-                <button type="button" wire:click="press('{{ $key }}')" class="key h-16 font-mono">{{ $key }}</button>
-            @endforeach
+        <div class="flex flex-col gap-2">
+            <div class="grid grid-cols-8 gap-2">
+                @foreach ($digits as $key)
+                    <button type="button" wire:click="press('{{ $key }}')" class="key h-16 font-mono">{{ $key }}</button>
+                @endforeach
+            </div>
+            <div class="grid grid-cols-11 gap-2">
+                @foreach ($letters as $key)
+                    <button type="button" wire:click="press('{{ $key }}')" class="key h-16 font-mono">{{ $key }}</button>
+                @endforeach
+            </div>
         </div>
 
         <div class="grid grid-cols-4 gap-2">

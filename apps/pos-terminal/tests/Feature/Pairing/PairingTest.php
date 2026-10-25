@@ -137,6 +137,29 @@ describe('screens', function () {
             ->assertSet('code', '');
     });
 
+    it('shows eight boxes, filled as the code is typed', function () {
+        Livewire::test(PairTill::class)
+            ->assertViewHas('boxes', [['', '', '', ''], ['', '', '', '']])
+            ->call('press', 'A')->call('press', '2')
+            ->assertViewHas('boxes', [['A', '2', '', ''], ['', '', '', '']]);
+    });
+
+    it('offers every number and letter a code can have, and only those', function () {
+        Livewire::test(PairTill::class)
+            ->assertViewHas('digits', ['2', '3', '4', '5', '6', '7', '8', '9'])
+            ->assertViewHas('letters', fn (array $letters) => count($letters) === 22 && array_intersect($letters, ['I', 'L', 'O', 'U']) === []);
+    });
+
+    it('explains why 0 or O typed on a keyboard does not appear', function () {
+        Livewire::test(PairTill::class)
+            ->call('press', 'A')
+            ->call('press', '0')
+            ->assertSet('code', 'A')
+            ->assertSet('error', __('terminal.pair.not_used'))
+            ->call('press', 'B')
+            ->assertSet('error', null);
+    });
+
     it('pairs and moves on to the ready screen', function () {
         fakePairingServer();
 

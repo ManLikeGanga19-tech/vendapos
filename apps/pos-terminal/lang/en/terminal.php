@@ -11,7 +11,8 @@ return [
 
     'pair' => [
         'title' => 'Pair this till',
-        'help' => 'In the Owner panel, open Tills and press “Pair a till”. Type the code it shows here.',
+        'help' => 'On a computer or phone, open the Owner panel, go to Tills and press “Pair a till”. Type the 8-character code it shows into the boxes below. The code works once, for 15 minutes.',
+        'not_used' => 'Codes never use 0, 1, I, L, O or U, so they can’t be misread. Those keys are left out on purpose.',
         'code' => 'Pairing code',
         'submit' => 'Pair till',
         'working' => 'Pairing and downloading the menu…',

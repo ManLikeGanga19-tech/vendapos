@@ -12,7 +12,8 @@ return [
 
     'pair' => [
         'title' => 'Unganisha mashine hii',
-        'help' => 'Kwenye paneli ya mmiliki, fungua Mashine za mauzo kisha bonyeza “Unganisha mashine”. Andika msimbo unaoonyeshwa hapa.',
+        'help' => 'Kwenye kompyuta au simu, fungua paneli ya mmiliki, nenda Mashine za mauzo kisha bonyeza “Unganisha mashine”. Andika msimbo wa herufi 8 unaoonyeshwa kwenye visanduku hapa chini. Msimbo unafanya kazi mara moja tu, kwa dakika 15.',
+        'not_used' => 'Misimbo haitumii 0, 1, I, L, O wala U, ili isisomwe vibaya. Vitufe hivyo vimeachwa makusudi.',
         'code' => 'Msimbo wa kuunganisha',
         'submit' => 'Unganisha mashine',
         'working' => 'Inaunganisha na kupakua menyu…',

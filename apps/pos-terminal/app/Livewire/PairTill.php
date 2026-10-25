@@ -41,6 +41,15 @@ final class PairTill extends Component
 
     public function press(string $key): void
     {
+        $key = strtoupper($key);
+
+        // 0, 1, I, L, O and U from a physical keyboard: say why nothing appeared.
+        if (! str_contains(PairThisTill::ALPHABET, $key)) {
+            $this->error = __('terminal.pair.not_used');
+
+            return;
+        }
+
         $this->updatedCode($this->code.$key);
     }
 
@@ -72,10 +81,14 @@ final class PairTill extends Component
 
     public function render(Till $till): View
     {
+        $keys = str_split(PairThisTill::ALPHABET);
+
         return view('livewire.pair-till', [
             'removed' => $till->isRemoved(),
-            'keys' => str_split(PairThisTill::ALPHABET),
-            'display' => trim(chunk_split(str_pad($this->code, PairThisTill::LENGTH, '·'), 4, ' ')),
+            'digits' => array_values(array_filter($keys, ctype_digit(...))),
+            'letters' => array_values(array_filter($keys, ctype_alpha(...))),
+            // One box per character, typed or still empty, in two groups of four. (Not "slots": Livewire reserves it.)
+            'boxes' => array_chunk(array_pad(str_split($this->code), PairThisTill::LENGTH, ''), 4),
             'complete' => PairThisTill::isWellFormed($this->code),
         ]);
     }
