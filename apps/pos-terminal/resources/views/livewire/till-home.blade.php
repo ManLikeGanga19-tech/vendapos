@@ -10,6 +10,10 @@
         <x-language-picker />
     </header>
 
+    @if (session('notice'))
+        <p class="border border-ok px-4 py-3 text-ok" role="status">{{ session('notice') }}</p>
+    @endif
+
     <dl class="grid grid-cols-2 gap-2">
         <div class="border border-line bg-panel px-6 py-5">
             <dt class="text-sm text-muted">{{ __('terminal.home.items') }}</dt>
@@ -23,7 +27,8 @@
 
     <p class="text-muted">{{ __('terminal.home.next') }}</p>
 
-    <div class="grid grid-cols-2 gap-2">
+    <div class="grid grid-cols-3 gap-2">
+        <a href="{{ route('pin') }}" class="key h-16 text-base">{{ __('terminal.home.change_pin') }}</a>
         <button type="button" wire:click="signOut" class="key h-16 text-base">{{ __('terminal.home.switch') }}</button>
         <button type="button" wire:click="signOut" class="key h-16 text-base">{{ __('terminal.home.sign_out') }}</button>
     </div>

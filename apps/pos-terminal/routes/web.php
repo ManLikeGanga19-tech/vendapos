@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Middleware\EnsureStaffSignedIn;
+use App\Livewire\ChangePin;
 use App\Livewire\PairTill;
 use App\Livewire\SignIn;
 use App\Livewire\TillHome;
@@ -23,4 +24,5 @@ Route::post('/sign-out', function (TillSession $session) {
 
 Route::middleware(EnsureStaffSignedIn::class)->group(function () {
     Route::livewire('/home', TillHome::class)->name('home');
+    Route::livewire('/pin', ChangePin::class)->name('pin');
 });

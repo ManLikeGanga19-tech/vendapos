@@ -55,6 +55,29 @@ return [
         'staff' => 'Wafanyakazi',
         'switch' => 'Badilisha mtumiaji',
         'sign_out' => 'Toka',
+        'change_pin' => 'Badilisha PIN yangu',
+    ],
+
+    'pin_change' => [
+        'title' => 'Badilisha PIN yangu',
+        'online_only' => 'Inahitaji intaneti',
+        'steps' => [
+            'current' => 'Weka PIN yako ya sasa',
+            'new' => 'Chagua PIN mpya ya tarakimu :length',
+            'confirm' => 'Andika PIN mpya tena',
+        ],
+        'mismatch' => 'PIN mpya mbili hazifanani. Chagua PIN mpya tena.',
+        'done' => 'PIN yako imebadilishwa. Tumia mpya utakapoingia tena.',
+        'reasons' => [
+            'wrong_pin' => 'Hiyo si PIN yako ya sasa.',
+            'locked' => 'PIN zisizo sahihi zimezidi. Subiri dakika chache kisha ujaribu tena.',
+            'wrong_length' => 'PIN mpya ina idadi isiyo sahihi ya tarakimu.',
+            'too_easy' => 'PIN hiyo ni rahisi kukisiwa. Epuka marudio kama 7777 na mfuatano kama 3456.',
+            'same_pin' => 'PIN mpya ni sawa na ya sasa.',
+            'too_many_tries' => 'Umejaribu mara nyingi mno. Subiri dakika chache kisha ujaribu tena.',
+            'offline' => 'Hakuna mtandao. Kubadilisha PIN kunahitaji intaneti.',
+            'not_on_server' => 'Seva haikukupata. Mwombe meneja aangalie paneli ya mmiliki.',
+        ],
     ],
 
     'status' => [

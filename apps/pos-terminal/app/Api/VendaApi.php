@@ -20,6 +20,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use SensitiveParameter;
 
 /**
  * The till's side of /api/v1. Every failure becomes one of: ApiUnavailable
@@ -119,6 +120,35 @@ final class VendaApi
         ], self::list($json, 'staff'));
     }
 
+    /**
+     * Change a staff member's PIN, proving the current one. Answers with their
+     * new staff-list entry, PIN hash included.
+     *
+     * @return array{id: string, name: string, role: string, permissions: list<string>, pin_hash: string, pin_length: int}
+     */
+    public function changePin(string $staffId, #[SensitiveParameter] string $currentPin, #[SensitiveParameter] string $newPin): array
+    {
+        $json = $this->send(fn () => $this->authorised()->post("staff/{$staffId}/pin", [
+            'current_pin' => $currentPin,
+            'new_pin' => $newPin,
+        ]));
+
+        $staff = data_get($json, 'staff');
+
+        if (! is_array($staff)) {
+            throw new ApiUnavailable('The server sent no staff entry.');
+        }
+
+        return [
+            'id' => self::string($staff, 'id'),
+            'name' => self::string($staff, 'name'),
+            'role' => self::string($staff, 'role'),
+            'permissions' => array_values(array_map(strval(...), (array) data_get($staff, 'permissions', []))),
+            'pin_hash' => self::string($staff, 'pin_hash'),
+            'pin_length' => (int) data_get($staff, 'pin_length'),
+        ];
+    }
+
     private function request(): PendingRequest
     {
         $baseUrl = config('terminal.api_url');
@@ -164,7 +194,11 @@ final class VendaApi
         throw match ($response->status()) {
             401, 403 => new TillNotAuthorised('The server refused this till.'),
             409 => new TokenStillValid('The token has not expired yet.'),
-            422 => new ApiRejected(is_string($response->json('message')) ? $response->json('message') : 'The server refused the request.'),
+            404 => new ApiRejected('Not found.', 'not_found'),
+            422 => new ApiRejected(
+                is_string($response->json('message')) ? $response->json('message') : 'The server refused the request.',
+                is_string($response->json('reason')) ? $response->json('reason') : null,
+            ),
             default => new ApiUnavailable("The server answered {$response->status()}.", $response->status()),
         };
     }
