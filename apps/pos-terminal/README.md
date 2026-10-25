@@ -23,6 +23,7 @@ php artisan native:install -n   # first time: downloads Electron for this OS
 # The till has no field for the server address; set it per environment.
 # A process variable wins over .env, so nothing in .env needs changing.
 $env:VENDAPOS_API_URL = 'http://localhost:8000'
+php artisan native:migrate --force   # native:run does not apply new migrations by itself
 php artisan native:run
 ```
 
