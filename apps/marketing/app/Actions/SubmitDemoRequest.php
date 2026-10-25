@@ -36,6 +36,7 @@ class SubmitDemoRequest
                 'outlets' => $data['outlets'],
                 'contact_window' => $data['contact_window'] ?? null,
                 'message' => $data['message'] ?? null,
+                'plan_interest' => $data['plan_interest'] ?? null,
                 'locale' => $locale,
                 'consented_at' => now(),
             ]);

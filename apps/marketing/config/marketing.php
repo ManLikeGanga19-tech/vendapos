@@ -173,6 +173,7 @@ return [
 
     'solutions' => [
         'bars' => [
+            'business_type' => 'bar',
             'icon' => 'beer',
             'panel' => ['icon' => 'receipt-text', 'badge' => 'pending', 'rows' => [
                 'table3' => ['cents' => 160_000, 'state' => 'success'],
@@ -185,6 +186,7 @@ return [
             'hardware' => ['till' => 'monitor', 'printer' => 'printer'],
         ],
         'salons' => [
+            'business_type' => 'salon',
             'icon' => 'scissors',
             'panel' => ['icon' => 'calendar', 'badge' => 'neutral', 'rows' => [
                 'amina' => ['cents' => 350_000, 'state' => 'success'],
@@ -197,6 +199,7 @@ return [
             'hardware' => ['tablet' => 'monitor', 'phone' => 'smartphone'],
         ],
         'shops' => [
+            'business_type' => 'shop',
             'icon' => 'store',
             'panel' => ['icon' => 'users', 'badge' => 'neutral', 'rows' => [
                 'otieno' => ['cents' => 85_000, 'state' => 'success'],
@@ -208,6 +211,7 @@ return [
             'hardware' => ['scanner' => 'scan-barcode', 'printer' => 'printer'],
         ],
         'supermarkets' => [
+            'business_type' => 'supermarket',
             'icon' => 'shopping-cart',
             'panel' => ['icon' => 'shopping-cart', 'badge' => 'success', 'rows' => [
                 'lane1' => ['cents' => 4_812_000, 'state' => 'success'],
@@ -220,6 +224,7 @@ return [
             'hardware' => ['scanner' => 'scan-barcode', 'scale' => 'package', 'drawer' => 'banknote', 'display' => 'monitor'],
         ],
         'hardware' => [
+            'business_type' => 'hardware',
             'icon' => 'hammer',
             'panel' => ['icon' => 'receipt-text', 'badge' => 'coral', 'rows' => [
                 'cement' => ['cents' => 3_120_000, 'state' => null],
@@ -231,6 +236,7 @@ return [
             'hardware' => ['scanner' => 'scan-barcode', 'a4' => 'printer'],
         ],
         'pharmacy' => [
+            'business_type' => 'pharmacy',
             'icon' => 'pill',
             'panel' => ['icon' => 'pill', 'badge' => 'coral', 'rows' => [
                 'a23' => ['cents' => null, 'state' => 'coral'],
@@ -242,6 +248,7 @@ return [
             'hardware' => ['scanner' => 'scan-barcode', 'printer' => 'printer'],
         ],
         'liquor' => [
+            'business_type' => 'liquor',
             'icon' => 'package',
             'panel' => ['icon' => 'shield-check', 'badge' => 'success', 'rows' => [
                 'age' => ['cents' => null, 'state' => 'pending'],
