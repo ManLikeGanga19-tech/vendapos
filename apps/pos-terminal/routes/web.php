@@ -6,8 +6,8 @@ use App\Http\Controllers\AuthoriseRealtimeChannel;
 use App\Http\Middleware\EnsureStaffSignedIn;
 use App\Livewire\ChangePin;
 use App\Livewire\PairTill;
+use App\Livewire\Sale;
 use App\Livewire\SignIn;
-use App\Livewire\TillHome;
 use App\Staff\TillSession;
 use App\Till\Till;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +27,6 @@ Route::post('/sign-out', function (TillSession $session) {
 })->name('sign-out');
 
 Route::middleware(EnsureStaffSignedIn::class)->group(function () {
-    Route::livewire('/home', TillHome::class)->name('home');
+    Route::livewire('/home', Sale::class)->name('home');
     Route::livewire('/pin', ChangePin::class)->name('pin');
 });

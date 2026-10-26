@@ -27,10 +27,11 @@ final class RecordSale
     /**
      * @param  list<array{item_id: string, quantity: int}>  $cart
      * @param  list<TenderData>  $tenders
+     * @param  string|null  $orderId  the sale's UUID when an M-Pesa payment was already asked for with it
      *
      * @throws SaleRefused
      */
-    public function handle(StaffMember $staff, array $cart, array $tenders): Order
+    public function handle(StaffMember $staff, array $cart, array $tenders, ?string $orderId = null): Order
     {
         if (! $staff->can(StaffMember::TAKE_ORDERS) || ! $staff->can(StaffMember::TAKE_PAYMENTS)) {
             throw new SaleRefused('not_allowed');
@@ -48,12 +49,12 @@ final class RecordSale
             throw new SaleRefused('tenders', $problems);
         }
 
-        $order = DB::transaction(function () use ($staff, $lines, $totals, $tenders): Order {
+        $order = DB::transaction(function () use ($staff, $lines, $totals, $tenders, $orderId): Order {
             // One writer (this till), so the next number is simply the highest plus one.
             $sequence = (int) Order::query()->max('sequence_number') + 1;
 
             $order = Order::query()->create([
-                'id' => (string) Str::uuid7(),
+                'id' => $orderId ?? (string) Str::uuid7(),
                 'sequence_number' => $sequence,
                 'staff_id' => $staff->id,
                 'status' => OrderStatus::Completed->value,

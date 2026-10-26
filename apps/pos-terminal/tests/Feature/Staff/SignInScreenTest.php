@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Sale;
 use App\Livewire\SignIn;
 use App\Livewire\StatusBar;
-use App\Livewire\TillHome;
 use App\Models\StaffMember;
 use App\Security\SecretBox;
 use App\Staff\TillSession;
@@ -101,13 +101,13 @@ it('keeps people off the home screen until they sign in', function () {
 
     app(TillSession::class)->signIn(StaffMember::query()->findOrFail('s1'));
 
-    $this->get(route('home'))->assertOk()->assertSee('Signed in as Amina');
+    $this->get(route('home'))->assertOk()->assertSee('Amina')->assertSee(__('terminal.sale.pay'));
 });
 
 it('signs out and goes back to the names', function () {
     app(TillSession::class)->signIn(StaffMember::query()->findOrFail('s1'));
 
-    Livewire::test(TillHome::class)->call('signOut')->assertRedirect(route('sign-in'));
+    Livewire::test(Sale::class)->call('signOut')->assertRedirect(route('sign-in'));
 
     expect(app(TillSession::class)->staff())->toBeNull();
 });
@@ -122,7 +122,7 @@ it('signs out when the idle timer posts', function () {
 
 it('sends a tap after 60 idle seconds back to sign-in', function () {
     app(TillSession::class)->signIn(StaffMember::query()->findOrFail('s1'));
-    $home = Livewire::test(TillHome::class);
+    $home = Livewire::test(Sale::class);
 
     $this->travel(61)->seconds();
 

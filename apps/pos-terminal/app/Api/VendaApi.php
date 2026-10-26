@@ -9,6 +9,7 @@ use App\Api\Data\CatalogueSnapshot;
 use App\Api\Data\DeviceStatus;
 use App\Api\Data\IssuedToken;
 use App\Api\Data\PairingResult;
+use App\Api\Data\PaymentState;
 use App\Api\Exceptions\ApiNotConfigured;
 use App\Api\Exceptions\ApiRejected;
 use App\Api\Exceptions\ApiUnavailable;
@@ -184,6 +185,27 @@ final class VendaApi
         ], self::list($json, 'results'));
     }
 
+    /**
+     * Ask for an M-Pesa push to the customer's phone. The server answers at
+     * once; the result comes later through payment(). Resending the same
+     * UUID returns the same payment.
+     */
+    public function requestPayment(string $uuid, string $orderUuid, string $phone, int $amountCents): PaymentState
+    {
+        return self::paymentState($this->send(fn () => $this->authorised()->post('payments', [
+            'uuid' => $uuid,
+            'order_uuid' => $orderUuid,
+            'provider' => 'mpesa_ke',
+            'phone' => $phone,
+            'amount_cents' => $amountCents,
+        ])));
+    }
+
+    public function payment(string $uuid): PaymentState
+    {
+        return self::paymentState($this->send(fn () => $this->authorised()->get("payments/{$uuid}")));
+    }
+
     private function request(string $prefix = '/api/v1'): PendingRequest
     {
         $baseUrl = config('terminal.api_url');
@@ -226,15 +248,21 @@ final class VendaApi
             return is_array($json) ? $json : throw new ApiUnavailable('The server sent an answer that is not JSON.');
         }
 
-        throw match ($response->status()) {
-            401, 403 => new TillNotAuthorised('The server refused this till.'),
-            409 => new TokenStillValid('The token has not expired yet.'),
-            404 => new ApiRejected('Not found.', 'not_found'),
-            422 => new ApiRejected(
-                is_string($response->json('message')) ? $response->json('message') : 'The server refused the request.',
-                is_string($response->json('reason')) ? $response->json('reason') : null,
-            ),
-            default => new ApiUnavailable("The server answered {$response->status()}.", $response->status()),
+        $code = is_string($response->json('code')) ? $response->json('code') : null;
+
+        throw match (true) {
+            // A suspended account refuses new M-Pesa requests; the till itself is still fine.
+            $response->status() === 403 && $code === 'tenant_suspended' => new ApiRejected('This account is suspended.', 'tenant_suspended'),
+            default => match ($response->status()) {
+                401, 403 => new TillNotAuthorised('The server refused this till.'),
+                409 => new TokenStillValid('The token has not expired yet.'),
+                404 => new ApiRejected('Not found.', 'not_found'),
+                422 => new ApiRejected(
+                    is_string($response->json('message')) ? $response->json('message') : 'The server refused the request.',
+                    is_string($response->json('reason')) ? $response->json('reason') : $code,
+                ),
+                default => new ApiUnavailable("The server answered {$response->status()}.", $response->status()),
+            },
         };
     }
 
@@ -258,6 +286,18 @@ final class VendaApi
             'channel' => self::string($realtime, 'channel'),
             'event' => self::string($realtime, 'event'),
         ];
+    }
+
+    /** @param  array<mixed>  $json */
+    private static function paymentState(array $json): PaymentState
+    {
+        return new PaymentState(
+            uuid: self::string($json, 'uuid'),
+            status: self::string($json, 'status'),
+            amountCents: (int) data_get($json, 'amount_cents'),
+            providerReference: self::nullableString($json, 'provider_reference'),
+            failureReason: self::nullableString($json, 'failure_reason'),
+        );
     }
 
     /** @param  array<mixed>  $json */
