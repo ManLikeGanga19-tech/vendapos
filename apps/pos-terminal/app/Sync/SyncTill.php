@@ -16,8 +16,8 @@ use App\Till\Till;
 use Illuminate\Support\Facades\Log;
 
 /**
- * One background round: keep the token fresh, then pull device status, staff
- * and menu. Offline is normal and only noted. The till is marked removed only
+ * One background round: keep the token fresh, send unsynced sales, then
+ * pull device status, staff and menu. Offline is normal and only noted. The till is marked removed only
  * when the server refuses to renew its token, never on a single 401.
  */
 final class SyncTill
@@ -37,6 +37,7 @@ final class SyncTill
         private readonly KeepTokenFresh $token,
         private readonly SyncStaff $staff,
         private readonly SyncCatalogue $catalogue,
+        private readonly SyncOrders $orders,
     ) {}
 
     /** Whether the whole round completed. */
@@ -62,6 +63,9 @@ final class SyncTill
     private function round(): void
     {
         $this->token->handle();
+
+        // Sales first: they are the one thing only this till has.
+        $this->orders->handle();
 
         $device = $this->api->device();
         $this->till->identity()?->update([

@@ -10,7 +10,8 @@
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
         "livewire/livewire": "^4.0",
-        "nativephp/desktop": "^2.3.0"
+        "nativephp/desktop": "^2.3.0",
+        "vendapos/core": "@dev"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -87,5 +88,13 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": [{
+        "name": "core",
+        "type": "path",
+        "url": "../../packages/core",
+        "options": {
+            "symlink": false
+        }
+    }]
 }

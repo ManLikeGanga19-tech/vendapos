@@ -165,6 +165,25 @@ final class VendaApi
         ];
     }
 
+    /**
+     * Send up to 50 sales. One answer per sale, in the order sent; one bad
+     * sale never stops the others.
+     *
+     * @param  list<array<string, mixed>>  $orders
+     * @return list<array{uuid: string|null, status: string, reason: string|null, errors: array<mixed>}>
+     */
+    public function syncOrders(array $orders): array
+    {
+        $json = $this->send(fn () => $this->authorised()->post('orders/sync', ['orders' => $orders]));
+
+        return array_map(fn (array $result): array => [
+            'uuid' => self::nullableString($result, 'uuid'),
+            'status' => self::string($result, 'status'),
+            'reason' => self::nullableString($result, 'reason'),
+            'errors' => (array) data_get($result, 'errors', []),
+        ], self::list($json, 'results'));
+    }
+
     private function request(string $prefix = '/api/v1'): PendingRequest
     {
         $baseUrl = config('terminal.api_url');
