@@ -28,6 +28,9 @@ use App\Domain\Tenancy\Models\Tenant;
 use App\Domain\Tenancy\Notifications\PaymentAccountChangedNotice;
 use App\Domain\Tenancy\Observers\TellTillsSetupChanged;
 use App\Domain\Tenancy\Observers\TellTillsStaffChanged;
+use App\Domain\Verticals\Models\DiningTable;
+use App\Domain\Verticals\Models\FloorArea;
+use App\Domain\Verticals\Observers\TellTillsFloorChanged;
 use App\Infrastructure\Notifications\RecordNotificationDelivery;
 use App\Infrastructure\Sms\SmsClient;
 use Filament\Support\Facades\FilamentTimezone;
@@ -115,6 +118,8 @@ class AppServiceProvider extends ServiceProvider
         Staff::observe(TellTillsStaffChanged::class);
         Device::observe(TellTillsSetupChanged::class);
         Branch::observe(TellTillsSetupChanged::class);
+        FloorArea::observe(TellTillsFloorChanged::class);
+        DiningTable::observe(TellTillsFloorChanged::class);
         Tenant::observe(TellTillsSetupChanged::class);
 
         Event::listen(PaymentRequested::class, fn (PaymentRequested $event) => InitiatePayment::dispatch($event->tenantId, $event->eventId));

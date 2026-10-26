@@ -9,6 +9,7 @@ use App\Http\Api\V1\Controllers\RenewDeviceToken;
 use App\Http\Api\V1\Controllers\RequestPayment;
 use App\Http\Api\V1\Controllers\ShowCatalogue;
 use App\Http\Api\V1\Controllers\ShowDevice;
+use App\Http\Api\V1\Controllers\ShowFloor;
 use App\Http\Api\V1\Controllers\ShowPayment;
 use App\Http\Api\V1\Controllers\ShowTillStaff;
 use App\Http\Api\V1\Controllers\SyncOrders;
@@ -25,6 +26,7 @@ Route::prefix('v1')
         Route::get('device', ShowDevice::class)->name('api.v1.device');
         Route::post('device/token', RefreshDeviceToken::class)->name('api.v1.device.token');
         Route::get('catalogue', ShowCatalogue::class)->name('api.v1.catalogue');
+        Route::get('floor', ShowFloor::class)->name('api.v1.floor');
         Route::get('staff', ShowTillStaff::class)
             ->middleware('ability:staff:read')
             ->name('api.v1.staff');

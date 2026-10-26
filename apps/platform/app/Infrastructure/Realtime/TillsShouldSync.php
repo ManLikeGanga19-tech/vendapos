@@ -25,7 +25,10 @@ final class TillsShouldSync implements ShouldBroadcastNow
     /** The business: suspended or reactivated. */
     public const string ACCOUNT = 'account';
 
-    public const array WHAT = [self::MENU, self::STAFF, self::DEVICE, self::ACCOUNT];
+    /** A branch's floor plan: areas and tables (table service). */
+    public const string TABLES = 'tables';
+
+    public const array WHAT = [self::MENU, self::STAFF, self::DEVICE, self::ACCOUNT, self::TABLES];
 
     /** @param  list<string>  $deviceIds */
     public function __construct(public readonly array $deviceIds, public readonly string $what) {}
