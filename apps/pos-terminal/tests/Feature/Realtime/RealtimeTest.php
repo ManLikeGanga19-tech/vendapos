@@ -30,6 +30,7 @@ function serverWith(array $staff, ?array $realtime = REALTIME, int $deviceStatus
             'realtime' => $realtime,
         ], $deviceStatus),
         TEST_API_URL.'/api/v1/staff' => Http::response(['synced_at' => now()->toIso8601String(), 'staff' => $staff]),
+        TEST_API_URL.'/api/v1/floor' => Http::response(['areas' => []]),
         TEST_API_URL.'/api/v1/catalogue*' => Http::response(['synced_at' => now()->toIso8601String(), 'full' => true, 'categories' => [], 'items' => []]),
     ]);
 }

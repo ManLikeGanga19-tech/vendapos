@@ -119,6 +119,28 @@ final class VendaApi
     }
 
     /**
+     * This till's branch's areas and tables in use (table service); empty elsewhere.
+     *
+     * @return list<array{id: string, name: string, sort_order: int, tables: list<array{id: string, name: string, seats: int, sort_order: int}>}>
+     */
+    public function floor(): array
+    {
+        $json = $this->send(fn () => $this->authorised()->get('floor'));
+
+        return array_map(fn (array $area): array => [
+            'id' => self::string($area, 'id'),
+            'name' => self::string($area, 'name'),
+            'sort_order' => (int) data_get($area, 'sort_order'),
+            'tables' => array_map(fn (array $table): array => [
+                'id' => self::string($table, 'id'),
+                'name' => self::string($table, 'name'),
+                'seats' => (int) data_get($table, 'seats'),
+                'sort_order' => (int) data_get($table, 'sort_order'),
+            ], self::list($area, 'tables')),
+        ], self::list($json, 'areas'));
+    }
+
+    /**
      * Everyone who can sign in on this till's branch, with PIN hashes.
      *
      * @return list<array{id: string, name: string, role: string, permissions: list<string>, pin_hash: string, pin_length: int}>

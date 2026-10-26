@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Jobs\SyncTillJob;
 use App\Models\Category;
+use App\Models\DiningTable;
+use App\Models\FloorArea;
 use App\Models\Item;
 use App\Models\StaffMember;
 use App\Models\SyncState;
@@ -55,6 +57,7 @@ function fakeServer(array $overrides = []): void
         'device' => Http::response(deviceResponse()),
         'staff' => Http::response(['synced_at' => now()->toIso8601String(), 'staff' => [staffMember('s1', 'Amina')]]),
         'catalogue*' => Http::response(catalogueResponse([item('i1')])),
+        'floor' => Http::response(['areas' => []]),
     ], $overrides);
 
     Http::fake(array_combine(
@@ -106,6 +109,25 @@ describe('menu', function () {
         app(SyncCatalogue::class)->handle();
 
         expect(Item::query()->count())->toBe(6000);
+    });
+});
+
+describe('floor plan', function () {
+    it('replaces the floor plan in full, so tables switched off disappear', function () {
+        pairTill();
+        FloorArea::query()->create(['id' => 'old-area', 'name' => 'Gone', 'sort_order' => 1]);
+        fakeServer(['floor' => Http::response(['areas' => [
+            ['id' => 'a1', 'name' => 'Main hall', 'sort_order' => 1, 'tables' => [
+                ['id' => 't1', 'name' => '1', 'seats' => 4, 'sort_order' => 1],
+                ['id' => 't2', 'name' => '2', 'seats' => 2, 'sort_order' => 2],
+            ]],
+        ]])]);
+
+        app(SyncTill::class)->handle();
+
+        expect(FloorArea::query()->pluck('name')->all())->toBe(['Main hall'])
+            ->and(FloorArea::query()->sole()->tables->pluck('name')->all())->toBe(['1', '2'])
+            ->and(DiningTable::query()->find('t2')?->seats)->toBe(2);
     });
 });
 
