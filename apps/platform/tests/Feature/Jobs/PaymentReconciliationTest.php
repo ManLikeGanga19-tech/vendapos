@@ -33,6 +33,11 @@ final class StatusEndpointDownGateway extends MobileMoneyGateway
     {
         return null;
     }
+
+    public function checkCredentials(array $credentials, string $environment): ?string
+    {
+        return null;
+    }
 }
 
 beforeEach(function () {

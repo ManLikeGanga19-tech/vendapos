@@ -4,22 +4,24 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Domain\Payments\Actions\SavePaymentAccount;
+use App\Domain\Payments\Exceptions\PaymentAccountRefused;
 use App\Domain\Payments\Gateways\DarajaGateway;
-use App\Domain\Payments\Models\PaymentCredential;
+use App\Domain\Payments\Models\PaymentAccount;
 use App\Domain\Tenancy\Models\Tenant;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use VendaPOS\Core\Enums\MobileMoneyProvider;
 
-#[Signature('payments:credentials {tenant : Tenant ID} {provider : mpesa_ke or airtel_ke} {--environment=sandbox : sandbox or production}')]
-#[Description('Store a business’s own mobile-money keys, encrypted. Values are prompted for, never passed as arguments.')]
+#[Signature('payments:credentials {tenant : Tenant ID} {provider : mpesa_ke or airtel_ke} {--environment=sandbox : sandbox or production} {--name=Default : Account name, for a new default account}')]
+#[Description('Store a business’s keys in its default payment account, encrypted. Values are prompted for, never passed as arguments.')]
 final class SetPaymentCredentialsCommand extends Command
 {
     /** Fields that are typed hidden. */
     private const array SECRETS = ['consumer_secret', 'passkey', 'client_secret'];
 
-    public function handle(): int
+    public function handle(SavePaymentAccount $save): int
     {
         /** @var string $tenantId */
         $tenantId = $this->argument('tenant');
@@ -27,19 +29,21 @@ final class SetPaymentCredentialsCommand extends Command
         $providerName = $this->argument('provider');
         /** @var string $environment */
         $environment = $this->option('environment');
+        /** @var string $name */
+        $name = $this->option('name');
 
         $tenant = Tenant::find($tenantId);
         $provider = MobileMoneyProvider::tryFrom($providerName);
 
-        if (! $tenant instanceof Tenant || $provider === null || ! in_array($environment, [PaymentCredential::SANDBOX, PaymentCredential::PRODUCTION], true)) {
+        if (! $tenant instanceof Tenant || $provider === null || ! in_array($environment, PaymentAccount::ENVIRONMENTS, true)) {
             $this->error('Unknown tenant, provider or environment.');
 
             return self::FAILURE;
         }
 
-        [$fields, $options] = match ($provider) {
-            MobileMoneyProvider::MpesaKe => [DarajaGateway::CREDENTIAL_FIELDS, DarajaGateway::CREDENTIAL_OPTIONS],
-            MobileMoneyProvider::AirtelKe => [null, []],
+        $fields = match ($provider) {
+            MobileMoneyProvider::MpesaKe => DarajaGateway::CREDENTIAL_FIELDS,
+            MobileMoneyProvider::AirtelKe => null,
         };
 
         if ($fields === null) {
@@ -59,22 +63,22 @@ final class SetPaymentCredentialsCommand extends Command
                 return self::FAILURE;
             }
 
-            // A wrong value here is only refused by the provider at the first payment, so stop it now.
-            if (isset($options[$field]) && ! in_array(trim($value), $options[$field], true)) {
-                $this->error("{$field} must be one of: ".implode(', ', $options[$field]).'. Nothing was saved.');
-
-                return self::FAILURE;
-            }
-
             $credentials[$field] = trim($value);
         }
 
-        $tenant->run(fn () => PaymentCredential::query()->updateOrCreate(
-            ['provider' => $provider],
-            ['environment' => $environment, 'credentials' => $credentials, 'is_active' => true],
-        ));
+        try {
+            $tenant->run(function () use ($save, $provider, $environment, $name, $credentials) {
+                $default = PaymentAccount::defaultFor($provider);
 
-        $this->info("{$provider->value} ({$environment}) credentials saved for {$tenant->id}.");
+                $save->handle($default?->id, $default->name ?? $name, $provider, $environment, $credentials, isDefault: true, changedBy: null);
+            });
+        } catch (PaymentAccountRefused $e) {
+            $this->error("{$e->getMessage()} Nothing was saved.");
+
+            return self::FAILURE;
+        }
+
+        $this->info("{$provider->value} ({$environment}) default account saved for {$tenant->id}.");
 
         return self::SUCCESS;
     }

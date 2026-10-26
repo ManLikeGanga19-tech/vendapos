@@ -13,6 +13,12 @@ use App\Domain\Payments\Models\Payment;
  */
 abstract class MobileMoneyGateway
 {
+    /** checkCredentials(): the provider refused the keys. */
+    public const string KEYS_REFUSED = 'keys_refused';
+
+    /** checkCredentials(): the provider could not be reached, so the keys are unchecked. */
+    public const string UNREACHABLE = 'unreachable';
+
     /** Pushes the payment request to the customer's phone. Never retried automatically. */
     abstract public function initiate(Payment $payment): GatewayResult;
 
@@ -28,4 +34,12 @@ abstract class MobileMoneyGateway
      * @return array{requestId: string, result: GatewayResult}|null
      */
     abstract public function parseCallback(array $body): ?array;
+
+    /**
+     * Tries keys an owner is about to save, without taking a payment.
+     *
+     * @param  array<string, string>  $credentials
+     * @return self::KEYS_REFUSED|self::UNREACHABLE|null null when the provider accepted them
+     */
+    abstract public function checkCredentials(array $credentials, string $environment): ?string;
 }

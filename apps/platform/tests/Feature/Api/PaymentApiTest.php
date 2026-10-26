@@ -35,6 +35,11 @@ final class UnreachableGateway extends MobileMoneyGateway
     {
         return null;
     }
+
+    public function checkCredentials(array $credentials, string $environment): ?string
+    {
+        return self::UNREACHABLE;
+    }
 }
 
 /** Refuses every push, like a provider rejecting a bad shortcode. */
@@ -53,6 +58,11 @@ final class RejectingGateway extends MobileMoneyGateway
     public function parseCallback(array $body): ?array
     {
         return null;
+    }
+
+    public function checkCredentials(array $credentials, string $environment): ?string
+    {
+        return self::KEYS_REFUSED;
     }
 }
 

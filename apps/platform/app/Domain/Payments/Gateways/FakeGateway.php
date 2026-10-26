@@ -41,4 +41,9 @@ final class FakeGateway extends MobileMoneyGateway
                 : GatewayResult::unsuccessful($status, 'fake_'.$status->value, 'Reported by the fake gateway.'),
         ];
     }
+
+    public function checkCredentials(array $credentials, string $environment): ?string
+    {
+        return null;
+    }
 }

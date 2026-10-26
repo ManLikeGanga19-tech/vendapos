@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Domain\Payments\Actions;
 
 use App\Domain\Payments\Events\PaymentRequested;
+use App\Domain\Payments\Exceptions\PaymentAccountMissing;
 use App\Domain\Payments\Exceptions\PaymentConflict;
 use App\Domain\Payments\Models\Payment;
+use App\Domain\Payments\Models\PaymentAccount;
 use App\Domain\Tenancy\Data\DeviceContext;
 use App\Infrastructure\Outbox\DomainEvent;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -19,6 +21,8 @@ use VendaPOS\Core\Enums\PaymentStatus;
  * Records a pending mobile-money payment, its callback route and its outbox
  * event in one transaction; the push itself runs in a job after commit.
  * Resending the same UUID with the same details returns the existing payment.
+ * The payment keeps the account it was made with, so a later change of the
+ * branch's account never moves a payment already in flight.
  */
 final class RequestPayment
 {
@@ -26,6 +30,7 @@ final class RequestPayment
      * @return array{0: Payment, 1: bool} the payment, and whether it was created now
      *
      * @throws PaymentConflict
+     * @throws PaymentAccountMissing
      */
     public function handle(PaymentRequestData $data, DeviceContext $context): array
     {
@@ -44,6 +49,9 @@ final class RequestPayment
             return [$this->existing($data, $context), false];
         }
 
+        $account = PaymentAccount::forBranch($data->provider, $context->branchId)
+            ?? throw new PaymentAccountMissing("No {$data->provider->value} account for branch {$context->branchId}.");
+
         $token = Str::random(48);
 
         $payment = Payment::create([
@@ -51,6 +59,7 @@ final class RequestPayment
             'order_id' => $data->order_uuid,
             'branch_id' => $context->branchId,
             'device_id' => $context->deviceId,
+            'payment_account_id' => $account->id,
             'provider' => $data->provider,
             'phone' => $data->phone,
             'amount_cents' => $data->amount()->cents,

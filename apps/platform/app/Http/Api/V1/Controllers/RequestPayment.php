@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Api\V1\Controllers;
 
 use App\Domain\Payments\Actions\RequestPayment as RequestPaymentAction;
+use App\Domain\Payments\Exceptions\PaymentAccountMissing;
 use App\Domain\Payments\Exceptions\PaymentConflict;
 use App\Domain\Tenancy\Data\DeviceContext;
 use App\Domain\Tenancy\Models\Device;
@@ -32,6 +33,11 @@ final class RequestPayment
             );
         } catch (PaymentConflict) {
             return response()->json(['message' => 'This payment UUID is already used for a different payment.'], Response::HTTP_CONFLICT);
+        } catch (PaymentAccountMissing) {
+            return response()->json([
+                'message' => 'This branch has no account to take this payment into.',
+                'code' => PaymentAccountMissing::CODE,
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         return response()->json(ShowPayment::present($payment), $created ? Response::HTTP_ACCEPTED : Response::HTTP_OK);

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Domain\Payments\Actions\ApplyPaymentOutcome;
 use App\Domain\Payments\Gateways\DarajaGateway;
 use App\Domain\Payments\Models\Payment;
-use App\Domain\Payments\Models\PaymentCredential;
+use App\Domain\Payments\Models\PaymentAccount;
 use App\Domain\Tenancy\Models\Tenant;
 use App\Infrastructure\Outbox\DomainEvent;
 use App\Infrastructure\Webhooks\WebhookReceipt;
@@ -31,20 +31,8 @@ beforeEach(function () {
     $this->travelTo('2026-10-21 16:15:00'); // 19:15 in Nairobi
 
     [$this->tenant, $this->branch] = tenantWithBranch();
+    // tenantWithBranch() gave the business a default account with Safaricom's sandbox keys.
     $this->enrolment = enrolFor($this->tenant, $this->branch);
-
-    $this->tenant->run(fn () => PaymentCredential::create([
-        'provider' => 'mpesa_ke',
-        'environment' => PaymentCredential::SANDBOX,
-        'credentials' => [
-            'consumer_key' => 'sandbox-consumer-key',
-            'consumer_secret' => 'sandbox-consumer-secret',
-            'passkey' => SANDBOX_PASSKEY,
-            'shortcode' => SANDBOX_SHORTCODE,
-            'party_b' => SANDBOX_SHORTCODE,
-            'transaction_type' => 'CustomerPayBillOnline',
-        ],
-    ]));
 });
 
 afterEach(function () {
@@ -159,17 +147,11 @@ it('fails the payment with Daraja’s reason when the push is refused', function
         ->failure_reason->toBe('Bad Request - Invalid BusinessShortCode');
 });
 
-it('fails the payment when Daraja errors or the business has no M-Pesa keys', function (Closure $setUp) {
-    $setUp();
+it('fails the payment when Daraja errors', function () {
+    fakeDaraja(['errorMessage' => 'Internal error'], 500);
 
     expect(pushedPayment())->status->toBe(PaymentStatus::Failed)->failure_code->toBe('initiation_error');
-})->with([
-    'server error' => [fn () => fakeDaraja(['errorMessage' => 'Internal error'], 500)],
-    'no credentials' => [function () {
-        fakeDaraja();
-        test()->tenant->run(fn () => PaymentCredential::query()->delete());
-    }],
-]);
+});
 
 it('marks the payment paid from Safaricom’s callback and keeps the raw body', function () {
     fakeDaraja();
@@ -276,7 +258,6 @@ it('keeps one tenant’s callback token away from another tenant’s payment', f
     $ours = pushedPayment();
 
     [$otherTenant, $otherBranch] = tenantWithBranch();
-    $otherTenant->run(fn () => PaymentCredential::create(['provider' => 'mpesa_ke', 'environment' => 'sandbox', 'credentials' => $this->tenant->run(fn () => PaymentCredential::query()->sole()->credentials)]));
     $this->enrolment = enrolFor($otherTenant, $otherBranch);
     $theirs = pushedPayment($otherTenant);
 
@@ -313,6 +294,8 @@ it('adds the receipt number from a late callback to a payment a status query alr
 });
 
 it('stores keys encrypted and takes them from prompts, never arguments', function () {
+    Http::fake(['api.safaricom.co.ke/oauth/v1/generate*' => Http::response(['access_token' => 'live-access-token', 'expires_in' => '3599'])]);
+
     $this->artisan('payments:credentials', ['tenant' => $this->tenant->id, 'provider' => 'mpesa_ke', '--environment' => 'production'])
         ->expectsQuestion('consumer_key', 'live-consumer-key')
         ->expectsQuestion('consumer_secret', 'live-consumer-secret')
@@ -322,8 +305,8 @@ it('stores keys encrypted and takes them from prompts, never arguments', functio
         ->expectsQuestion('transaction_type', 'CustomerBuyGoodsOnline')
         ->assertSuccessful();
 
-    $raw = $this->tenant->run(fn () => DB::table('payment_credentials')->value('credentials'));
-    $stored = $this->tenant->run(fn () => PaymentCredential::query()->sole());
+    $raw = $this->tenant->run(fn () => DB::table('payment_accounts')->value('credentials'));
+    $stored = $this->tenant->run(fn () => PaymentAccount::query()->sole());
 
     expect($raw)->not->toContain('live-passkey-0f9e8d7c6b5a')
         ->and($stored->environment)->toBe('production')
@@ -341,7 +324,7 @@ it('refuses a transaction type daraja does not accept and keeps the saved keys',
         ->expectsOutputToContain('transaction_type must be one of: CustomerPayBillOnline, CustomerBuyGoodsOnline')
         ->assertFailed();
 
-    expect($this->tenant->run(fn () => PaymentCredential::query()->sole())->credentials)
+    expect($this->tenant->run(fn () => PaymentAccount::query()->sole())->credentials)
         ->consumer_key->toBe('sandbox-consumer-key')
         ->transaction_type->toBe('CustomerPayBillOnline');
 });

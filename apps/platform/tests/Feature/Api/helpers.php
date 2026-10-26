@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 use App\Domain\Catalogue\Models\Item;
 use App\Domain\Payments\Models\Payment;
+use App\Domain\Payments\Models\PaymentAccount;
 use App\Domain\Tenancy\Actions\EnrolDevice;
 use App\Domain\Tenancy\Data\DeviceEnrolment;
 use App\Domain\Tenancy\Models\Branch;
@@ -22,8 +23,28 @@ function tenantWithBranch(BusinessType $type = BusinessType::Restaurant): array
     $tenant = Tenant::create(['id' => 't'.Str::lower(Str::random(10))]);
 
     $branch = $tenant->run(fn () => Branch::create(['name' => 'Nyali '.$tenant->id, 'business_type' => $type]));
+    paymentAccountFor($tenant, ['name' => 'Default', 'is_default' => true]);
 
     return [$tenant, $branch];
+}
+
+/** A sandbox M-Pesa account, written directly (no key check, audit or alert). */
+function paymentAccountFor(Tenant $tenant, array $overrides = []): PaymentAccount
+{
+    return $tenant->run(fn () => PaymentAccount::create(array_merge([
+        'name' => 'Paybill '.Str::random(4),
+        'provider' => 'mpesa_ke',
+        'environment' => PaymentAccount::SANDBOX,
+        'credentials' => [
+            'consumer_key' => 'sandbox-consumer-key',
+            'consumer_secret' => 'sandbox-consumer-secret',
+            'passkey' => 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+            'shortcode' => '174379',
+            'party_b' => '174379',
+            'transaction_type' => 'CustomerPayBillOnline',
+        ],
+        'is_default' => false,
+    ], $overrides)));
 }
 
 function enrolFor(Tenant $tenant, Branch $branch): DeviceEnrolment

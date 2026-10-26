@@ -34,4 +34,16 @@ return [
         'subject' => ':business: your VendaPOS data has been deleted',
         'body' => 'As we notified you, the data of :business has been permanently deleted from VendaPOS. An encrypted copy is kept until :date; contact us if you need it.',
     ],
+
+    'payment_account_changed' => [
+        'sms' => 'VendaPOS: :name changed payment account ":account" of :business (:change) on :date at :time. If this was not you, sign in and check it now.',
+        'subject' => ':business: payment account ":account" was changed',
+        'body' => ':name changed the payment account ":account" (:change) on :date at :time.',
+        'not_you' => 'If you did not expect this, sign in to VendaPOS and check your payment accounts now: customers’ payments may be going to another paybill or till.',
+        'actions' => [
+            'added' => 'added',
+            'updated' => 'keys or details changed',
+            'branches_changed' => 'branches changed',
+        ],
+    ],
 ];

@@ -34,4 +34,16 @@ return [
         'subject' => ':business: data yako ya VendaPOS imefutwa',
         'body' => 'Kama tulivyokujulisha, data ya :business imefutwa kabisa kutoka VendaPOS. Nakala iliyosimbwa inahifadhiwa hadi :date; wasiliana nasi ukiihitaji.',
     ],
+
+    'payment_account_changed' => [
+        'sms' => 'VendaPOS: :name amebadilisha akaunti ya malipo ":account" ya :business (:change) tarehe :date saa :time. Kama si wewe, ingia ukague sasa hivi.',
+        'subject' => ':business: akaunti ya malipo ":account" imebadilishwa',
+        'body' => ':name amebadilisha akaunti ya malipo ":account" (:change) tarehe :date saa :time.',
+        'not_you' => 'Kama hukutarajia hili, ingia VendaPOS ukague akaunti zako za malipo sasa hivi: huenda malipo ya wateja yanaenda kwenye paybill au till nyingine.',
+        'actions' => [
+            'added' => 'imeongezwa',
+            'updated' => 'funguo au maelezo yamebadilishwa',
+            'branches_changed' => 'matawi yamebadilishwa',
+        ],
+    ],
 ];

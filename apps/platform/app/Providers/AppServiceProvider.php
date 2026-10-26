@@ -13,6 +13,7 @@ use App\Domain\Inventory\Jobs\DecrementStock;
 use App\Domain\Inventory\Jobs\RestoreStock;
 use App\Domain\Orders\Events\OrderRecorded;
 use App\Domain\Orders\Events\OrderVoided;
+use App\Domain\Payments\Events\PaymentAccountChanged;
 use App\Domain\Payments\Events\PaymentRequested;
 use App\Domain\Payments\Jobs\FlagPaymentsForCancelledOrder;
 use App\Domain\Payments\Jobs\InitiatePayment;
@@ -21,6 +22,7 @@ use App\Domain\Tenancy\Models\Branch;
 use App\Domain\Tenancy\Models\Device;
 use App\Domain\Tenancy\Models\Staff;
 use App\Domain\Tenancy\Models\Tenant;
+use App\Domain\Tenancy\Notifications\PaymentAccountChangedNotice;
 use App\Domain\Tenancy\Observers\TellTillsSetupChanged;
 use App\Domain\Tenancy\Observers\TellTillsStaffChanged;
 use App\Infrastructure\Notifications\RecordNotificationDelivery;
@@ -109,6 +111,16 @@ class AppServiceProvider extends ServiceProvider
         Tenant::observe(TellTillsSetupChanged::class);
 
         Event::listen(PaymentRequested::class, fn (PaymentRequested $event) => InitiatePayment::dispatch($event->tenantId, $event->eventId));
+
+        // Money could be redirected to another paybill: the owner hears of every account change.
+        Event::listen(PaymentAccountChanged::class, function (PaymentAccountChanged $event) {
+            $tenant = tenant();
+
+            if ($tenant instanceof Tenant) {
+                $by = $event->changedBy !== null ? Staff::query()->find($event->changedBy)?->name : null;
+                $tenant->notify(new PaymentAccountChangedNotice($event->accountName, $event->action, $by ?? 'VendaPOS', now()->toImmutable()));
+            }
+        });
 
         Event::listen(Login::class, function (Login $event) {
             if ($event->user instanceof Staff) {

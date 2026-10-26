@@ -6,7 +6,8 @@ namespace App\Domain\Payments\Gateways;
 
 use App\Domain\Payments\Data\GatewayResult;
 use App\Domain\Payments\Models\Payment;
-use App\Domain\Payments\Models\PaymentCredential;
+use App\Domain\Payments\Models\PaymentAccount;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
@@ -23,7 +24,7 @@ use VendaPOS\Core\Enums\PaymentStatus;
  */
 final class DarajaGateway extends MobileMoneyGateway
 {
-    /** What `payments:credentials` asks for. */
+    /** What an account holds: asked for by `payments:credentials` and the Owner panel. */
     public const array CREDENTIAL_FIELDS = ['consumer_key', 'consumer_secret', 'passkey', 'shortcode', 'party_b', 'transaction_type'];
 
     /** Fields Daraja only accepts fixed values for: paybill or till (buy goods). */
@@ -32,8 +33,8 @@ final class DarajaGateway extends MobileMoneyGateway
     ];
 
     private const array BASE_URLS = [
-        PaymentCredential::SANDBOX => 'https://sandbox.safaricom.co.ke',
-        PaymentCredential::PRODUCTION => 'https://api.safaricom.co.ke',
+        PaymentAccount::SANDBOX => 'https://sandbox.safaricom.co.ke',
+        PaymentAccount::PRODUCTION => 'https://api.safaricom.co.ke',
     ];
 
     /** STK query error while the customer has not answered yet. */
@@ -41,7 +42,7 @@ final class DarajaGateway extends MobileMoneyGateway
 
     public function initiate(Payment $payment): GatewayResult
     {
-        $credentials = $this->credentials();
+        $credentials = $this->credentials($payment);
         $timestamp = $this->timestamp();
         $phone = ltrim($payment->phone, '+');
 
@@ -84,7 +85,7 @@ final class DarajaGateway extends MobileMoneyGateway
             return GatewayResult::pending();
         }
 
-        $credentials = $this->credentials();
+        $credentials = $this->credentials($payment);
         $timestamp = $this->timestamp();
 
         $response = $this->client($credentials)->post('/mpesa/stkpushquery/v1/query', [
@@ -148,13 +149,39 @@ final class DarajaGateway extends MobileMoneyGateway
         };
     }
 
-    /** @return array<string, string> */
-    private function credentials(): array
+    public function checkCredentials(array $credentials, string $environment): ?string
     {
-        $credential = PaymentCredential::activeFor(MobileMoneyProvider::MpesaKe)
+        try {
+            // Asked fresh, never from the token cache: the point is to try these keys.
+            $response = Http::withBasicAuth($credentials['consumer_key'] ?? '', $credentials['consumer_secret'] ?? '')
+                ->acceptJson()
+                ->connectTimeout(5)
+                ->timeout(10)
+                ->get($this->baseUrl(['environment' => $environment]).'/oauth/v1/generate', ['grant_type' => 'client_credentials']);
+        } catch (ConnectionException) {
+            return self::UNREACHABLE;
+        }
+
+        if ($response->serverError()) {
+            return self::UNREACHABLE;
+        }
+
+        return $response->successful() && is_string($response->json('access_token')) ? null : self::KEYS_REFUSED;
+    }
+
+    /**
+     * The keys of the account the payment was pushed with. Payments from
+     * before accounts existed carry none and use the default account.
+     *
+     * @return array<string, string>
+     */
+    private function credentials(Payment $payment): array
+    {
+        $account = ($payment->payment_account_id !== null ? PaymentAccount::query()->find($payment->payment_account_id) : null)
+            ?? PaymentAccount::defaultFor(MobileMoneyProvider::MpesaKe)
             ?? throw new LogicException('M-Pesa is not set up for this business.');
 
-        return [...$credential->credentials, 'environment' => $credential->environment];
+        return [...$account->credentials, 'environment' => $account->environment];
     }
 
     /** @param array<string, string> $credentials */

@@ -18,6 +18,7 @@ use VendaPOS\Core\ValueObjects\Money;
  * @property string|null $order_id
  * @property string $branch_id
  * @property string $device_id
+ * @property int|null $payment_account_id the account whose keys pushed it
  * @property MobileMoneyProvider $provider
  * @property string $phone
  * @property int $amount_cents
@@ -48,6 +49,7 @@ class Payment extends Model
             'provider' => MobileMoneyProvider::class,
             'status' => PaymentStatus::class,
             'amount_cents' => 'integer',
+            'payment_account_id' => 'integer',
             'callback_token' => 'encrypted',
             'initiated_at' => 'datetime',
             'completed_at' => 'datetime',
