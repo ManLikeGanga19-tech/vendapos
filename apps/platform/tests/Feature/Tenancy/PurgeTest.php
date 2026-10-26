@@ -72,7 +72,7 @@ function seedCentralRows(Tenant $tenant, string $branchId): void
 
     app('auth')->forgetGuards();
     test()->withHeaders(['Authorization' => "Bearer {$token}", 'X-Device-ID' => $device->id])
-        ->postJson('/api/v1/orders/sync', ['orders' => [saleOf([[$item, 1]])]])
+        ->postJson('/api/v1/orders/sync', ['orders' => [saleOf([[$item, 1]], 1, ['staff_id' => sellerFor($tenant)])]])
         ->assertJsonPath('results.0.status', 'accepted');
     tenancy()->end();
 

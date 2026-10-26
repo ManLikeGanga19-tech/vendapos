@@ -219,11 +219,12 @@ it('queues each side effect on its own queue, carrying the tenant and outbox eve
 });
 
 it('queues nothing for an order whose transaction rolled back', function () {
+    $sale = saleOf([[$this->nyama, 1]]);
     Queue::fake();
     // tenant_id is varchar(255): an over-long value makes the outbox insert fail mid-transaction.
     $context = new DeviceContext(str_repeat('x', 300), $this->branch->id, $this->enrolment->device->id);
 
-    expect(fn () => $this->tenant->run(fn () => app(RecordOrder::class)->handle(OrderData::from(saleOf([[$this->nyama, 1]])), $context)))
+    expect(fn () => $this->tenant->run(fn () => app(RecordOrder::class)->handle(OrderData::from($sale), $context)))
         ->toThrow(QueryException::class);
 
     Queue::assertNothingPushed();

@@ -31,6 +31,8 @@ final class OrderData extends Data
         public int $sequence_number,
         // When the sale happened on the terminal, ISO 8601.
         public string $placed_at,
+        // The signed-in staff member who made the sale.
+        public string $staff_id,
         public OrderStatus $status,
         #[DataCollectionOf(OrderLineData::class)]
         public DataCollection $lines,
@@ -76,6 +78,7 @@ final class OrderData extends Data
             'uuid' => ['required', 'string', 'uuid'],
             'sequence_number' => ['required', 'integer', 'min:1'],
             'placed_at' => ['required', 'date'],
+            'staff_id' => ['required', 'string', 'uuid'],
             'status' => ['required', Rule::enum(OrderStatus::class)],
             'lines' => ['required', 'array', 'min:1', 'max:500'],
             'tenders' => ['present', 'array', 'max:'.Tenders::MAX_TENDERS],

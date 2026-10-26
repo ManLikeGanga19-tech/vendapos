@@ -10,12 +10,34 @@ use App\Domain\Payments\Models\PaymentAccount;
 use App\Domain\Tenancy\Actions\EnrolDevice;
 use App\Domain\Tenancy\Data\DeviceEnrolment;
 use App\Domain\Tenancy\Models\Branch;
+use App\Domain\Tenancy\Models\Staff;
 use App\Domain\Tenancy\Models\Tenant;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use VendaPOS\Core\Data\OrderLineData;
 use VendaPOS\Core\Enums\BusinessType;
 use VendaPOS\Core\Tax\OrderTotals;
+
+/** A cashier at $tenant to make test sales, created once per tenant. */
+function sellerFor(Tenant $tenant): string
+{
+    static $sellers = [];
+
+    return $sellers[$tenant->id] ??= $tenant->run(function () {
+        $staff = Staff::create(['name' => 'Achieng Seller']);
+        $staff->assignRole('cashier');
+
+        return $staff->id;
+    });
+}
+
+/** The tenant a test's sale belongs to: the enrolled till's, else the test's own. */
+function saleTenant(): Tenant
+{
+    $tenantId = isset(test()->enrolment) ? test()->enrolment->device->tenant_id : test()->tenant->id;
+
+    return Tenant::query()->findOrFail($tenantId);
+}
 
 /** @return array{0: Tenant, 1: Branch} */
 function tenantWithBranch(BusinessType $type = BusinessType::Restaurant): array
@@ -90,6 +112,7 @@ function saleOf(array $lines, int $sequence = 1, array $overrides = []): array
         'uuid' => (string) Str::uuid(),
         'sequence_number' => $sequence,
         'placed_at' => '2026-10-21T19:15:00+03:00',
+        'staff_id' => sellerFor(saleTenant()),
         'status' => 'completed',
         'lines' => $lineData,
         'tenders' => $cancelled ? [] : [cashTender($totals->total->cents)],

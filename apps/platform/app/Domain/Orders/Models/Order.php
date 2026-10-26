@@ -18,6 +18,7 @@ use VendaPOS\Core\ValueObjects\Money;
  * @property string $id
  * @property string $branch_id
  * @property string $device_id
+ * @property string|null $staff_id who made the sale; null only for orders from before tills sent it
  * @property int $sequence_number
  * @property OrderStatus $status
  * @property Carbon $placed_at

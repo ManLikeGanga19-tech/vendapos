@@ -15,6 +15,7 @@ function orderPayload(array $overrides = []): array
         'uuid' => fake()->uuid(),
         'sequence_number' => 42,
         'placed_at' => '2026-10-21T18:30:00+03:00',
+        'staff_id' => fake()->uuid(),
         'status' => 'completed',
         'lines' => [
             [
@@ -60,6 +61,14 @@ it('carries no tenant, branch or device: the server takes those from the device 
     expect($properties)->not->toContain('tenant_id')
         ->not->toContain('branch_id')
         ->not->toContain('device_id');
+});
+
+it('names who made the sale', function () {
+    $staffId = fake()->uuid();
+
+    expect(OrderData::from(orderPayload(['staff_id' => $staffId]))->staff_id)->toBe($staffId)
+        ->and(Validator::make(orderPayload(['staff_id' => null]), OrderData::validationRules())->errors()->keys())->toContain('staff_id')
+        ->and(Validator::make(orderPayload(['staff_id' => 'cashier-1']), OrderData::validationRules())->errors()->keys())->toContain('staff_id');
 });
 
 it('validates orders and their lines together', function () {

@@ -8,6 +8,7 @@ use App\Domain\Orders\Events\OrderRecorded;
 use App\Domain\Orders\Events\OrderVoided;
 use App\Domain\Orders\Models\Order;
 use App\Domain\Tenancy\Data\DeviceContext;
+use App\Domain\Tenancy\Models\Staff;
 use App\Domain\Tenancy\Models\Tenant;
 use App\Infrastructure\Outbox\DomainEvent;
 use Illuminate\Database\QueryException;
@@ -107,6 +108,39 @@ it('rejects items that are not in the tenant’s catalogue', function () {
         ->assertJsonPath('results.0.status', 'rejected')
         ->assertJsonPath('results.0.reason', 'unknown_items')
         ->assertJsonPath('results.0.errors.item_ids.0', $foreign->id);
+});
+
+it('records who made the sale, and keeps it in the outbox event', function () {
+    $sale = saleOf([[$this->nyama, 1]]);
+
+    sync([$sale])->assertOk()->assertJsonPath('results.0.status', 'accepted');
+
+    expect($this->tenant->run(fn () => Order::query()->findOrFail($sale['uuid'])->staff_id))->toBe($sale['staff_id'])
+        ->and(DomainEvent::query()->where('aggregate_id', $sale['uuid'])->sole()->payload['staff_id'])->toBe($sale['staff_id']);
+});
+
+it('rejects a sale by no one at this business, including staff of another business', function () {
+    [$other] = tenantWithBranch();
+    $theirs = sellerFor($other);
+
+    $stranger = saleOf([[$this->nyama, 1]], 1, ['staff_id' => (string) Str::uuid()]);
+    $foreign = saleOf([[$this->nyama, 1]], 2, ['staff_id' => $theirs]);
+    $missing = saleOf([[$this->nyama, 1]], 3);
+    unset($missing['staff_id']);
+
+    sync([$stranger, $foreign, $missing])->assertOk()
+        ->assertJsonPath('results.0.reason', 'unknown_staff')
+        ->assertJsonPath('results.1.reason', 'unknown_staff')
+        ->assertJsonPath('results.2.status', 'rejected');
+
+    expect($this->tenant->run(fn () => Order::query()->count()))->toBe(0);
+});
+
+it('accepts a sale made offline by someone switched off since', function () {
+    $sale = saleOf([[$this->nyama, 1]]);
+    $this->tenant->run(fn () => Staff::query()->whereKey($sale['staff_id'])->update(['is_active' => false]));
+
+    sync([$sale])->assertOk()->assertJsonPath('results.0.status', 'accepted');
 });
 
 it('rejects unknown fields, including a tenant in the body', function () {

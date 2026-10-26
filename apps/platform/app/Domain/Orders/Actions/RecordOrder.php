@@ -12,6 +12,7 @@ use App\Domain\Orders\Models\Order;
 use App\Domain\Orders\Models\OrderLine;
 use App\Domain\Orders\Models\OrderTender;
 use App\Domain\Payments\Actions\FindTenderPayments;
+use App\Domain\Tenancy\Actions\FindUnknownStaff;
 use App\Domain\Tenancy\Data\DeviceContext;
 use App\Infrastructure\Outbox\DomainEvent;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -34,6 +35,7 @@ final class RecordOrder
     public function __construct(
         private readonly FindUnknownItems $findUnknownItems,
         private readonly FindTenderPayments $findTenderPayments,
+        private readonly FindUnknownStaff $findUnknownStaff,
     ) {}
 
     public function handle(OrderData $data, DeviceContext $context): SyncResult
@@ -52,6 +54,10 @@ final class RecordOrder
 
         if ($unknownItems !== []) {
             return SyncResult::rejected($data->uuid, 'unknown_items', ['item_ids' => $unknownItems]);
+        }
+
+        if ($this->findUnknownStaff->handle([$data->staff_id]) !== []) {
+            return SyncResult::rejected($data->uuid, 'unknown_staff', ['staff_id' => 'No one at this business has this ID.']);
         }
 
         $tenderProblems = Tenders::problems($data->tenderList(), $data->status, $data->total_cents);
@@ -96,6 +102,7 @@ final class RecordOrder
             'id' => $data->uuid,
             'branch_id' => $context->branchId,
             'device_id' => $context->deviceId,
+            'staff_id' => $data->staff_id,
             'sequence_number' => $data->sequence_number,
             'status' => $data->status,
             'placed_at' => Carbon::parse($data->placed_at)->utc(),
@@ -194,6 +201,7 @@ final class RecordOrder
     {
         return [
             'order_id' => $order->id,
+            'staff_id' => $order->staff_id,
             'sequence_number' => $order->sequence_number,
             'status' => $order->status->value,
             'placed_at' => $order->placed_at->toIso8601String(),
