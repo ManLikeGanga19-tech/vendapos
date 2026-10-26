@@ -249,6 +249,56 @@ it('keeps waiting through a network blip, and only offers to stop after two minu
         ->assertSee(__('terminal.sale.mpesa.stopped'));
 });
 
+it('takes a typed M-Pesa code offline, with the cents in cash', function () {
+    Http::fake(fn () => throw new ConnectionException('Network is unreachable'));
+
+    Livewire::test(Sale::class)
+        ->call('add', CHAI)
+        ->call('startPayment')
+        ->assertSet('codeAmount', '50')
+        ->set('typedCode', 'tjl7 qw2e9r')
+        ->call('addTypedCode')
+        ->assertSee('M-Pesa code TJL7QW2E9R')
+        ->call('quickCash', 1)
+        ->call('complete')
+        ->assertSet('step', Sale::DONE);
+
+    $tenders = Order::query()->sole()->tenders()->get();
+
+    expect($tenders->firstWhere('method', 'mpesa_code')?->only(['amount_cents', 'mpesa_reference', 'payment_uuid']))
+        ->toBe(['amount_cents' => 5_000, 'mpesa_reference' => 'TJL7QW2E9R', 'payment_uuid' => null])
+        ->and($tenders->firstWhere('method', 'cash')?->amount_cents)->toBe(50);
+});
+
+it('completes by itself when a typed code pays the whole sale', function () {
+    Livewire::test(Sale::class)
+        ->call('add', MANDAZI)
+        ->call('startPayment')
+        ->set('typedCode', 'TJL7QW2E9R')
+        ->call('addTypedCode')
+        ->assertSet('step', Sale::DONE);
+});
+
+it('checks typed codes and lets a mistyped one be removed', function () {
+    Livewire::test(Sale::class)
+        ->call('add', CHAI)
+        ->call('add', CHAI)
+        ->call('startPayment')
+        ->set('typedCode', 'TJL7QW')
+        ->call('addTypedCode')
+        ->assertSee(__('terminal.sale.code.bad_code'))
+        ->set('typedCode', 'TJL7QW2E9R')
+        ->set('codeAmount', '50')
+        ->call('addTypedCode')
+        ->set('typedCode', 'TJL7QW2E9R')
+        ->set('codeAmount', '20')
+        ->call('addTypedCode')
+        ->assertSee(__('terminal.sale.code.duplicate'))
+        ->call('removeTypedCode', 0)
+        ->assertSet('mpesaPaid', [])
+        ->assertSet('codeAmount', '101');
+});
+
 it('lets a waiter build a sale but not take the payment', function () {
     $waiter = StaffMember::query()->create(SyncStaff::row(
         ['id' => '0199b1f2-0000-7000-8000-00000000d002', 'name' => 'Otieno', 'role' => 'waiter', 'permissions' => ['orders.take'], 'pin_hash' => '$2y$04$hash', 'pin_length' => 4],

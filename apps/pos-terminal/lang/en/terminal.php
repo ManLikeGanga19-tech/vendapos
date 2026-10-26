@@ -95,6 +95,15 @@ return [
                 'other' => 'The M-Pesa request was refused. Check the number and amount, or take cash.',
             ],
         ],
+        'code' => [
+            'title' => 'Paid to the paybill or till? Type the code from the customer’s SMS',
+            'code' => 'M-Pesa code',
+            'add' => 'Add M-Pesa code',
+            'bad_code' => 'An M-Pesa code is 10 letters and numbers, like TJL7QW2E9R.',
+            'duplicate' => 'This code is already on this sale.',
+            'paid' => 'M-Pesa code :reference',
+            'remove' => 'Remove this code',
+        ],
         'done' => [
             'title' => 'Sale :number done',
             'total' => 'Total :amount',

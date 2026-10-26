@@ -106,8 +106,16 @@
 
                 <dl class="space-y-1 border-t border-line px-3 py-2 text-sm">
                     <div class="flex justify-between text-muted"><dt>{{ __('terminal.sale.vat') }}</dt><dd class="font-mono">{{ $totals->vat->format() }}</dd></div>
-                    @foreach ($mpesaPaid as $paid)
-                        <div class="flex justify-between text-ok"><dt>{{ __('terminal.sale.mpesa.paid', ['reference' => $paid['reference'] ?? '']) }}</dt><dd class="font-mono">− {{ \VendaPOS\Core\ValueObjects\Money::fromCents($paid['amount_cents'])->format() }}</dd></div>
+                    @foreach ($mpesaPaid as $index => $paid)
+                        <div wire:key="paid-{{ $index }}" class="flex items-center justify-between gap-2 text-ok">
+                            <dt>{{ __($paid['method'] === 'mpesa_code' ? 'terminal.sale.code.paid' : 'terminal.sale.mpesa.paid', ['reference' => $paid['reference'] ?? '']) }}</dt>
+                            <dd class="flex items-center gap-2 font-mono">
+                                − {{ \VendaPOS\Core\ValueObjects\Money::fromCents($paid['amount_cents'])->format() }}
+                                @if ($paid['method'] === 'mpesa_code' && $step === 'pay')
+                                    <button type="button" wire:click="removeTypedCode({{ $index }})" class="key size-12 text-base" aria-label="{{ __('terminal.sale.code.remove') }}">×</button>
+                                @endif
+                            </dd>
+                        </div>
                     @endforeach
                     <div class="flex justify-between text-2xl font-bold text-white"><dt>{{ $mpesaPaid === [] ? __('terminal.sale.total') : __('terminal.sale.to_pay') }}</dt><dd class="font-mono">{{ $remaining->format() }}</dd></div>
                 </dl>
@@ -122,7 +130,7 @@
                         <button type="button" wire:click="startPayment" class="key-primary h-16" @disabled($lines === [])>{{ __('terminal.sale.pay') }}</button>
                     </div>
                 @elseif ($step === 'pay')
-                    <div class="space-y-2 border-t border-line p-3">
+                    <div class="max-h-[70%] shrink-0 space-y-2 overflow-y-auto border-t border-line p-3">
                         <p class="text-sm text-muted">{{ __('terminal.sale.cash') }}</p>
                         <div class="flex items-center justify-between border border-line bg-surface px-3 py-2">
                             <span class="text-muted">{{ __('terminal.sale.given') }}</span>
@@ -150,6 +158,16 @@
                                 <input type="text" wire:model="mpesaAmount" inputmode="numeric" class="h-12 border border-line bg-surface px-3 font-mono text-white" aria-label="{{ __('terminal.sale.mpesa.amount') }}">
                             </div>
                             <button type="submit" class="key h-12 w-full text-base" @disabled(! $online)>{{ __('terminal.sale.mpesa.send') }}</button>
+                        </form>
+
+                        {{-- Paid straight to the paybill or till: works offline, confirmed later on the server. --}}
+                        <form wire:submit="addTypedCode" class="space-y-1 border-t border-line pt-2">
+                            <p class="text-sm text-muted">{{ __('terminal.sale.code.title') }}</p>
+                            <div class="grid grid-cols-[1fr_7rem] gap-1">
+                                <input type="text" wire:model="typedCode" maxlength="12" autocomplete="off" autocapitalize="characters" placeholder="TJL7QW2E9R" class="h-12 border border-line bg-surface px-3 font-mono text-white uppercase" aria-label="{{ __('terminal.sale.code.code') }}">
+                                <input type="text" wire:model="codeAmount" inputmode="numeric" class="h-12 border border-line bg-surface px-3 font-mono text-white" aria-label="{{ __('terminal.sale.mpesa.amount') }}">
+                            </div>
+                            <button type="submit" class="key h-12 w-full text-base">{{ __('terminal.sale.code.add') }}</button>
                         </form>
                     </div>
                 @elseif ($step === 'mpesa')

@@ -96,6 +96,15 @@ return [
                 'other' => 'Ombi la M-Pesa limekataliwa. Kagua nambari na kiasi, au pokea pesa taslimu.',
             ],
         ],
+        'code' => [
+            'title' => 'Amelipa kwa paybill au till? Andika msimbo kutoka SMS ya mteja',
+            'code' => 'Msimbo wa M-Pesa',
+            'add' => 'Ongeza msimbo wa M-Pesa',
+            'bad_code' => 'Msimbo wa M-Pesa ni herufi na nambari 10, kama TJL7QW2E9R.',
+            'duplicate' => 'Msimbo huu tayari uko kwenye mauzo haya.',
+            'paid' => 'Msimbo wa M-Pesa :reference',
+            'remove' => 'Ondoa msimbo huu',
+        ],
         'done' => [
             'title' => 'Mauzo :number yamekamilika',
             'total' => 'Jumla :amount',

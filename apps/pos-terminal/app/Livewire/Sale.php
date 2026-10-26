@@ -63,8 +63,19 @@ final class Sale extends Component
     /** The sale's UUID, fixed once payment starts so an M-Pesa push and the order share it. */
     public ?string $saleId = null;
 
-    /** @var list<array{payment_uuid: string, amount_cents: int, reference: string|null}> M-Pesa payments that succeeded */
+    /**
+     * M-Pesa taken so far: pushes that succeeded, and codes typed from the
+     * customer's SMS (accepted offline, confirmed later on the server).
+     *
+     * @var list<array{method: string, amount_cents: int, payment_uuid: string|null, reference: string|null}>
+     */
     public array $mpesaPaid = [];
+
+    /** A code from the customer's M-Pesa SMS, for money paid straight to the paybill or till. */
+    public string $typedCode = '';
+
+    /** In whole shillings. */
+    public string $codeAmount = '';
 
     /** @var array{uuid: string, amount_cents: int, started_at: int}|null the push being waited on */
     public ?array $waiting = null;
@@ -153,7 +164,7 @@ final class Sale extends Component
         $this->step = self::PAY;
         $this->message = null;
         $this->cashGiven = '';
-        $this->mpesaAmount = (string) intdiv($this->remainingCents(), 100);
+        $this->resetAmounts();
     }
 
     /** Back to the cart, unless an M-Pesa payment already went through for this total. */
@@ -258,9 +269,9 @@ final class Sale extends Component
             return;
         }
 
-        $this->mpesaPaid[] = ['payment_uuid' => $payment->uuid, 'amount_cents' => $this->waiting['amount_cents'], 'reference' => $payment->providerReference];
+        $this->mpesaPaid[] = ['method' => 'mpesa_push', 'amount_cents' => $this->waiting['amount_cents'], 'payment_uuid' => $payment->uuid, 'reference' => $payment->providerReference];
         $this->waiting = null;
-        $this->mpesaAmount = (string) intdiv($this->remainingCents(), 100);
+        $this->resetAmounts();
 
         // Paid in full by M-Pesa: nothing left to take.
         if ($this->remainingCents() === 0) {
@@ -281,6 +292,57 @@ final class Sale extends Component
         }
     }
 
+    /**
+     * The customer paid straight to the paybill or till and shows the SMS.
+     * Works offline: the server confirms the code against Safaricom's notice
+     * later and flags it for the owner if it never comes (T3a, T3d).
+     */
+    public function addTypedCode(RecordSale $recordSale, TillSession $session): void
+    {
+        if ($this->step !== self::PAY) {
+            return;
+        }
+
+        $code = strtoupper(preg_replace('/\s+/', '', $this->typedCode) ?? '');
+        $amount = ctype_digit($this->codeAmount) ? (int) $this->codeAmount * 100 : 0;
+
+        if (preg_match('/^[A-Z0-9]{10}$/', $code) !== 1) {
+            $this->message = __('terminal.sale.code.bad_code');
+
+            return;
+        }
+
+        if (in_array($code, array_column($this->mpesaPaid, 'reference'), true)) {
+            $this->message = __('terminal.sale.code.duplicate');
+
+            return;
+        }
+
+        if ($amount < 100 || $amount > $this->remainingCents()) {
+            $this->message = __('terminal.sale.mpesa.bad_amount', ['max' => intdiv($this->remainingCents(), 100)]);
+
+            return;
+        }
+
+        $this->mpesaPaid[] = ['method' => 'mpesa_code', 'amount_cents' => $amount, 'payment_uuid' => null, 'reference' => $code];
+        $this->typedCode = '';
+        $this->message = null;
+        $this->resetAmounts();
+
+        if ($this->remainingCents() === 0) {
+            $this->complete($recordSale, $session);
+        }
+    }
+
+    /** A typed code can be taken off again (a typo); a push that went through cannot. */
+    public function removeTypedCode(int $index): void
+    {
+        if ($this->step === self::PAY && ($this->mpesaPaid[$index]['method'] ?? null) === 'mpesa_code') {
+            $this->mpesaPaid = array_values(array_filter($this->mpesaPaid, fn (int $key) => $key !== $index, ARRAY_FILTER_USE_KEY));
+            $this->resetAmounts();
+        }
+    }
+
     public function complete(RecordSale $recordSale, TillSession $session): void
     {
         $staff = $session->staff();
@@ -298,11 +360,9 @@ final class Sale extends Component
             return;
         }
 
-        $tenders = array_map(fn (array $paid) => TenderData::from([
-            'method' => 'mpesa_push',
-            'amount_cents' => $paid['amount_cents'],
-            'payment_uuid' => $paid['payment_uuid'],
-        ]), $this->mpesaPaid);
+        $tenders = array_map(fn (array $paid) => TenderData::from($paid['method'] === 'mpesa_push'
+            ? ['method' => 'mpesa_push', 'amount_cents' => $paid['amount_cents'], 'payment_uuid' => $paid['payment_uuid']]
+            : ['method' => 'mpesa_code', 'amount_cents' => $paid['amount_cents'], 'mpesa_reference' => $paid['reference']]), $this->mpesaPaid);
 
         if ($remaining > 0) {
             $tenders[] = TenderData::from([
@@ -332,7 +392,14 @@ final class Sale extends Component
 
     public function newSale(): void
     {
-        $this->reset(['cart', 'step', 'saleId', 'mpesaPaid', 'waiting', 'cashGiven', 'phone', 'mpesaAmount', 'message', 'done']);
+        $this->reset(['cart', 'step', 'saleId', 'mpesaPaid', 'waiting', 'cashGiven', 'phone', 'mpesaAmount', 'typedCode', 'codeAmount', 'message', 'done']);
+    }
+
+    /** Both M-Pesa amount fields start at what is left, in whole shillings. */
+    private function resetAmounts(): void
+    {
+        $this->mpesaAmount = (string) intdiv($this->remainingCents(), 100);
+        $this->codeAmount = $this->mpesaAmount;
     }
 
     /** Polled while money is being taken, so the session does not time out mid-payment. */
