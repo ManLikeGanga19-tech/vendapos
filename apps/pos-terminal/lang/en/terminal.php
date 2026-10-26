@@ -110,6 +110,8 @@ return [
             'change' => 'Change',
             'no_change' => 'No change',
             'new' => 'New sale',
+            'reprint' => 'Print receipt again',
+            'print_failed' => 'The receipt did not print: :reason',
         ],
         'refused' => [
             'not_allowed' => 'You can’t take payments. Ask a cashier or manager.',
@@ -149,4 +151,43 @@ return [
         'suspended' => 'Account suspended: M-Pesa is paused, take cash.',
     ],
 
+    'printer' => [
+        'title' => 'Printer',
+        'help' => 'Connect the receipt printer to this till. Most receipt printers work; plug it in and switch it on first.',
+        'connection' => 'How is the printer connected?',
+        'connections' => [
+            'none' => 'No printer',
+            'windows' => 'USB, on Windows (shared printer)',
+            'device' => 'USB, on the till (Linux)',
+            'network' => 'Network (cable or Wi-Fi)',
+        ],
+        'target' => 'Printer',
+        'examples' => [
+            'windows' => 'POS-80',
+            'device' => '/dev/usb/lp0',
+            'network' => '192.168.1.50',
+        ],
+        'target_help' => [
+            'windows' => 'Install the printer in Windows, share it, and type its share name.',
+            'device' => 'Usually /dev/usb/lp0 for the first USB printer.',
+            'network' => 'The printer’s IP address, as printed on its self-test page. Port 9100 unless you add another, e.g. 192.168.1.50:9100.',
+        ],
+        'paper' => 'Paper width',
+        'save' => 'Save',
+        'test' => 'Print a test page',
+        'saved' => 'Printer saved.',
+        'test_sent' => 'Test page sent. Check that it printed and was cut.',
+        'failed' => 'The printer did not print: :reason',
+    ],
+
+    'receipt' => [
+        'sale' => 'Sale :number   :time',
+        'served_by' => 'Served by :name',
+        'total' => 'TOTAL',
+        'vat' => 'Of which VAT',
+        'cash' => 'Cash',
+        'change' => 'Change',
+        'thanks' => 'Thank you. Asante!',
+        'test' => 'Printer test',
+    ],
 ];

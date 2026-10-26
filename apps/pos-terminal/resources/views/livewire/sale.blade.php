@@ -36,6 +36,9 @@
         </div>
         <div class="flex items-center gap-2">
             <x-language-picker />
+            @if (in_array($staff?->role, ['manager', 'owner'], true))
+                <a href="{{ route('printer') }}" class="key h-12 px-4 text-sm">{{ __('terminal.printer.title') }}</a>
+            @endif
             <a href="{{ route('pin') }}" class="key h-12 px-4 text-sm">{{ __('terminal.home.change_pin') }}</a>
             <button type="button" wire:click="signOut" class="key h-12 px-4 text-sm" @disabled(in_array($step, ['pay', 'mpesa'], true))>{{ __('terminal.home.switch') }}</button>
         </div>
@@ -72,7 +75,7 @@
         {{-- Cart and payment --}}
         <aside class="flex min-h-0 flex-col bg-panel">
             @if ($step === 'done' && $done)
-                <div class="flex flex-1 flex-col items-center justify-center gap-6 p-6 text-center" role="status">
+                <div class="flex flex-1 flex-col items-center justify-center gap-6 p-6 text-center" role="status" @if ($printerReady) wire:poll.5s @endif>
                     <p class="text-sm tracking-widest text-ok uppercase">{{ __('terminal.sale.done.title', ['number' => $done['sequence']]) }}</p>
                     <p class="text-muted">{{ __('terminal.sale.done.total', ['amount' => \VendaPOS\Core\ValueObjects\Money::fromCents($done['total_cents'])->format()]) }}</p>
                     @if ($done['change_cents'] > 0)
@@ -84,6 +87,12 @@
                         <p class="text-2xl font-semibold">{{ __('terminal.sale.done.no_change') }}</p>
                     @endif
                     <button type="button" wire:click="newSale" class="key-primary h-16 w-full" autofocus>{{ __('terminal.sale.done.new') }}</button>
+                    @if ($printerReady && $staff?->can(\App\Models\StaffMember::REPRINT_RECEIPTS))
+                        <button type="button" wire:click="reprint" class="key h-12 w-full text-base">{{ __('terminal.sale.done.reprint') }}</button>
+                    @endif
+                    @if ($printError)
+                        <p class="text-sm text-danger" role="alert">{{ __('terminal.sale.done.print_failed', ['reason' => $printError]) }}</p>
+                    @endif
                 </div>
             @else
                 <ul class="min-h-0 flex-1 divide-y divide-line overflow-y-auto" aria-label="{{ __('terminal.sale.cart') }}">

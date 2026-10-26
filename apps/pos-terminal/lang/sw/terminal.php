@@ -111,6 +111,8 @@ return [
             'change' => 'Chenji',
             'no_change' => 'Hakuna chenji',
             'new' => 'Mauzo mapya',
+            'reprint' => 'Chapisha risiti tena',
+            'print_failed' => 'Risiti haikuchapishwa: :reason',
         ],
         'refused' => [
             'not_allowed' => 'Huwezi kupokea malipo. Muulize keshia au meneja.',
@@ -150,4 +152,43 @@ return [
         'suspended' => 'Akaunti imesimamishwa: M-Pesa imesitishwa, pokea pesa taslimu.',
     ],
 
+    'printer' => [
+        'title' => 'Printa',
+        'help' => 'Unganisha printa ya risiti na mashine hii. Printa nyingi za risiti zinafanya kazi; iunganishe na uiwashe kwanza.',
+        'connection' => 'Printa imeunganishwa vipi?',
+        'connections' => [
+            'none' => 'Hakuna printa',
+            'windows' => 'USB, kwenye Windows (printa iliyoshirikiwa)',
+            'device' => 'USB, kwenye mashine (Linux)',
+            'network' => 'Mtandao (waya au Wi-Fi)',
+        ],
+        'target' => 'Printa',
+        'examples' => [
+            'windows' => 'POS-80',
+            'device' => '/dev/usb/lp0',
+            'network' => '192.168.1.50',
+        ],
+        'target_help' => [
+            'windows' => 'Weka printa kwenye Windows, ishiriki, kisha andika jina lake la kushiriki.',
+            'device' => 'Kwa kawaida /dev/usb/lp0 kwa printa ya kwanza ya USB.',
+            'network' => 'Anwani ya IP ya printa, kama ilivyochapishwa kwenye ukurasa wake wa majaribio. Port 9100 usipoongeza nyingine, k.m. 192.168.1.50:9100.',
+        ],
+        'paper' => 'Upana wa karatasi',
+        'save' => 'Hifadhi',
+        'test' => 'Chapisha ukurasa wa majaribio',
+        'saved' => 'Printa imehifadhiwa.',
+        'test_sent' => 'Ukurasa wa majaribio umetumwa. Hakikisha umechapishwa na kukatwa.',
+        'failed' => 'Printa haikuchapisha: :reason',
+    ],
+
+    'receipt' => [
+        'sale' => 'Mauzo :number   :time',
+        'served_by' => 'Amehudumiwa na :name',
+        'total' => 'JUMLA',
+        'vat' => 'Kati yake VAT',
+        'cash' => 'Pesa taslimu',
+        'change' => 'Chenji',
+        'thanks' => 'Asante sana. Karibu tena!',
+        'test' => 'Majaribio ya printa',
+    ],
 ];

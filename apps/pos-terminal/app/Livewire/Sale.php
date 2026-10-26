@@ -9,12 +9,15 @@ use App\Api\Exceptions\ApiRejected;
 use App\Api\Exceptions\ApiUnavailable;
 use App\Api\Exceptions\TillNotAuthorised;
 use App\Api\VendaApi;
+use App\Jobs\PrintReceiptJob;
 use App\Livewire\Concerns\FollowsTillLanguage;
 use App\Livewire\Concerns\NeedsSignedInStaff;
 use App\Livewire\Concerns\PicksLanguage;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\StaffMember;
+use App\Models\SyncState;
+use App\Printing\PrinterSettings;
 use App\Sales\RecordSale;
 use App\Sales\SaleRefused;
 use App\Security\KeyringUnavailable;
@@ -90,7 +93,7 @@ final class Sale extends Component
 
     public ?string $message = null;
 
-    /** @var array{total_cents: int, change_cents: int, sequence: int}|null */
+    /** @var array{order_id: string, total_cents: int, change_cents: int, sequence: int}|null */
     public ?array $done = null;
 
     public function add(string $itemId): void
@@ -382,12 +385,27 @@ final class Sale extends Component
         }
 
         $this->done = [
+            'order_id' => $order->id,
             'total_cents' => $order->total_cents,
             'change_cents' => $remaining > 0 ? $given - $remaining : 0,
             'sequence' => $order->sequence_number,
         ];
         $this->step = self::DONE;
         $this->message = null;
+
+        // After the sale is saved, never before: a printer problem must not lose a sale.
+        SyncState::write(PrintReceiptJob::LAST_ERROR, null);
+        PrintReceiptJob::dispatch($order->id, openDrawer: $remaining > 0);
+    }
+
+    /** Prints the last sale's receipt again (no drawer). */
+    public function reprint(TillSession $session): void
+    {
+        if ($this->step !== self::DONE || $this->done === null || ! $session->can(StaffMember::REPRINT_RECEIPTS)) {
+            return;
+        }
+
+        PrintReceiptJob::dispatch($this->done['order_id']);
     }
 
     public function newSale(): void
@@ -434,6 +452,8 @@ final class Sale extends Component
             'quickCash' => self::quickCashOptions($remaining),
             'online' => SyncStatus::current()->connection === SyncStatus::ONLINE,
             'waitedLongEnough' => $this->waitedLongEnough(),
+            'printerReady' => PrinterSettings::current()->isSet(),
+            'printError' => $this->step === self::DONE ? SyncState::read(PrintReceiptJob::LAST_ERROR) : null,
         ]);
     }
 
