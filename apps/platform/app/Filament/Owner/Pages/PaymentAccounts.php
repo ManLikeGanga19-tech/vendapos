@@ -8,6 +8,7 @@ use App\Domain\Payments\Actions\AssignPaymentAccountBranches;
 use App\Domain\Payments\Actions\SavePaymentAccount;
 use App\Domain\Payments\Exceptions\PaymentAccountRefused;
 use App\Domain\Payments\Gateways\DarajaGateway;
+use App\Domain\Payments\Jobs\RegisterConfirmationUrls;
 use App\Domain\Payments\Models\PaymentAccount;
 use App\Domain\Tenancy\Actions\ListBranches;
 use App\Domain\Tenancy\Models\Staff;
@@ -101,6 +102,10 @@ class PaymentAccounts extends Page implements HasTable
                     ->state(fn (PaymentAccount $record): string => $record->hint('consumer_key') ?? '—'),
                 TextColumn::make('branches')->label(__('owner.payment_accounts.branches'))
                     ->state(fn (PaymentAccount $record): string => $this->branchesLabel($record)),
+                // Whether typed M-Pesa codes can be confirmed for this account (C2B, T3d).
+                TextColumn::make('c2b_status')->label(__('owner.payment_accounts.c2b'))
+                    ->state(fn (PaymentAccount $record): string => __('owner.payment_accounts.c2b_statuses.'.($record->c2b_status ?? 'none')))
+                    ->description(fn (PaymentAccount $record): ?string => $record->c2b_status === PaymentAccount::C2B_FAILED ? $record->c2b_message : null),
             ])
             ->headerActions([
                 Action::make('addAccount')
@@ -128,6 +133,16 @@ class PaymentAccounts extends Page implements HasTable
                     ->action(function (Action $action, PaymentAccount $record, array $data) {
                         $this->change($action, fn () => $this->save($record->id, $data));
                         Notification::make()->title(__('owner.payment_accounts.saved'))->success()->send();
+                    }),
+                Action::make('registerC2b')
+                    ->label(__('owner.payment_accounts.c2b_retry'))
+                    ->authorize(fn () => static::canAccess())
+                    ->visible(fn (PaymentAccount $record) => $record->c2b_status !== PaymentAccount::C2B_REGISTERED)
+                    ->action(function (PaymentAccount $record) {
+                        RegisterConfirmationUrls::dispatch((string) tenant('id'), $record->id);
+                        $record->update(['c2b_status' => PaymentAccount::C2B_PENDING, 'c2b_message' => null]);
+                        $this->flushCachedTableRecords();
+                        Notification::make()->title(__('owner.payment_accounts.c2b_sent'))->success()->send();
                     }),
                 Action::make('assignBranches')
                     ->label(__('owner.payment_accounts.assign'))

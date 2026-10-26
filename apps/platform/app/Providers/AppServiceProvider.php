@@ -13,10 +13,13 @@ use App\Domain\Inventory\Jobs\DecrementStock;
 use App\Domain\Inventory\Jobs\RestoreStock;
 use App\Domain\Orders\Events\OrderRecorded;
 use App\Domain\Orders\Events\OrderVoided;
+use App\Domain\Payments\Events\MpesaConfirmed;
 use App\Domain\Payments\Events\PaymentAccountChanged;
 use App\Domain\Payments\Events\PaymentRequested;
 use App\Domain\Payments\Jobs\FlagPaymentsForCancelledOrder;
 use App\Domain\Payments\Jobs\InitiatePayment;
+use App\Domain\Payments\Jobs\MatchMpesaConfirmation;
+use App\Domain\Payments\Jobs\RecordMpesaTenders;
 use App\Domain\Tenancy\Listeners\RetireReplacedDeviceTokens;
 use App\Domain\Tenancy\Models\Branch;
 use App\Domain\Tenancy\Models\Device;
@@ -90,7 +93,11 @@ class AppServiceProvider extends ServiceProvider
             UpdateSalesSummaries::dispatch($event->tenantId, $event->eventId);
             SubmitSaleToEtims::dispatch($event->tenantId, $event->eventId);
             FlagPaymentsForCancelledOrder::dispatch($event->tenantId, $event->eventId);
+            RecordMpesaTenders::dispatch($event->tenantId, $event->eventId);
         });
+
+        // A C2B confirmation stored: settle the typed codes waiting on it (T3d).
+        Event::listen(MpesaConfirmed::class, fn (MpesaConfirmed $event) => MatchMpesaConfirmation::dispatch($event->tenantId, $event->confirmationId));
 
         Event::listen(OrderVoided::class, function (OrderVoided $event) {
             RestoreStock::dispatch($event->tenantId, $event->eventId);

@@ -8,6 +8,7 @@ use App\Domain\Payments\Events\PaymentCompleted;
 use App\Domain\Payments\Gateways\MobileMoneyGateway;
 use App\Domain\Payments\Jobs\InitiatePayment;
 use App\Domain\Payments\Models\Payment;
+use App\Domain\Payments\Models\PaymentAccount;
 use App\Domain\Tenancy\Models\Tenant;
 use App\Infrastructure\Outbox\DomainEvent;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -36,6 +37,11 @@ final class UnreachableGateway extends MobileMoneyGateway
         return null;
     }
 
+    public function registerConfirmationUrls(PaymentAccount $account): ?string
+    {
+        return null;
+    }
+
     public function checkCredentials(array $credentials, string $environment): ?string
     {
         return self::UNREACHABLE;
@@ -56,6 +62,11 @@ final class RejectingGateway extends MobileMoneyGateway
     }
 
     public function parseCallback(array $body): ?array
+    {
+        return null;
+    }
+
+    public function registerConfirmationUrls(PaymentAccount $account): ?string
     {
         return null;
     }

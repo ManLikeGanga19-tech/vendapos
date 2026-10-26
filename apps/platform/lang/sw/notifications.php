@@ -46,4 +46,17 @@ return [
             'branches_changed' => 'matawi yamebadilishwa',
         ],
     ],
+
+    'mpesa_checks' => [
+        'sms' => '{1} VendaPOS: malipo 1 ya M-Pesa ya :business yanahitaji kukaguliwa. Fungua "M-Pesa ya kukagua" kwenye paneli ya mmiliki.|[2,*] VendaPOS: malipo :count ya M-Pesa ya :business yanahitaji kukaguliwa. Fungua "M-Pesa ya kukagua" kwenye paneli ya mmiliki.',
+        'subject' => '{1} :business: malipo 1 ya M-Pesa ya kukagua|[2,*] :business: malipo :count ya M-Pesa ya kukagua',
+        'intro' => 'Baadhi ya pesa za M-Pesa kwenye mashine zako bado hazilingani:',
+        'kinds' => [
+            'unconfirmed_code' => '{1} msimbo 1 wa M-Pesa ulioandikwa ambao Safaricom haijathibitisha|[2,*] misimbo :count ya M-Pesa iliyoandikwa ambayo Safaricom haijathibitisha',
+            'amount_mismatch' => '{1} msimbo 1 wa M-Pesa uliothibitishwa kwa kiasi tofauti na mauzo|[2,*] misimbo :count ya M-Pesa iliyothibitishwa kwa kiasi tofauti na mauzo',
+            'code_reused' => '{1} msimbo 1 wa M-Pesa ulioandikwa kwa mauzo zaidi ya moja|[2,*] misimbo :count ya M-Pesa iliyoandikwa kwa mauzo zaidi ya moja',
+            'unclaimed_push' => '{1} malipo 1 ya M-Pesa yaliyopokelewa bila mauzo|[2,*] malipo :count ya M-Pesa yaliyopokelewa bila mauzo',
+        ],
+        'where' => 'Fungua "M-Pesa ya kukagua" kwenye paneli ya mmiliki kuona kila moja na kuliweka kama limekaguliwa.',
+    ],
 ];

@@ -8,6 +8,7 @@ use App\Domain\Payments\Gateways\MobileMoneyGateway;
 use App\Domain\Payments\Jobs\InitiatePayment;
 use App\Domain\Payments\Jobs\QueryPaymentStatus;
 use App\Domain\Payments\Models\Payment;
+use App\Domain\Payments\Models\PaymentAccount;
 use App\Domain\Tenancy\Models\Tenant;
 use App\Infrastructure\Outbox\DomainEvent;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -30,6 +31,11 @@ final class StatusEndpointDownGateway extends MobileMoneyGateway
     }
 
     public function parseCallback(array $body): ?array
+    {
+        return null;
+    }
+
+    public function registerConfirmationUrls(PaymentAccount $account): ?string
     {
         return null;
     }

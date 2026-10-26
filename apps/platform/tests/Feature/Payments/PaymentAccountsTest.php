@@ -33,6 +33,8 @@ beforeEach(function () {
     Cache::flush();
     Http::preventStrayRequests();
     Notification::fake();
+    // Saving new keys also registers C2B URLs (tested in C2bTest); Safaricom accepts here.
+    Http::fake(['sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl' => Http::response(['ResponseCode' => '0', 'ResponseDescription' => 'success'])]);
 
     // tenantWithBranch() gives the business a default sandbox account.
     [$this->tenant, $this->nyali] = tenantWithBranch();

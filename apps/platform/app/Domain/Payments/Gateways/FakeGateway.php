@@ -6,6 +6,7 @@ namespace App\Domain\Payments\Gateways;
 
 use App\Domain\Payments\Data\GatewayResult;
 use App\Domain\Payments\Models\Payment;
+use App\Domain\Payments\Models\PaymentAccount;
 use VendaPOS\Core\Enums\PaymentStatus;
 
 /** Stands in for every provider in tests, demos and local work without sandbox keys. */
@@ -43,6 +44,11 @@ final class FakeGateway extends MobileMoneyGateway
     }
 
     public function checkCredentials(array $credentials, string $environment): ?string
+    {
+        return null;
+    }
+
+    public function registerConfirmationUrls(PaymentAccount $account): ?string
     {
         return null;
     }

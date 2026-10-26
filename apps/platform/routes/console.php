@@ -11,6 +11,9 @@ Artisan::command('inspire', function () {
 // Settles payments whose provider callback is late or missing.
 Schedule::command('payments:reconcile')->everyMinute()->withoutOverlapping()->onOneServer();
 
+// Flags typed M-Pesa codes never confirmed and paid pushes no sale claims; one owner digest per half hour.
+Schedule::command('payments:check-mpesa')->everyFiveMinutes()->withoutOverlapping()->onOneServer();
+
 // Resends eTIMS documents whose retry is due (30 s, 60 s, 120 s, then hourly).
 Schedule::command('etims:retry')->everyMinute()->withoutOverlapping()->onOneServer();
 

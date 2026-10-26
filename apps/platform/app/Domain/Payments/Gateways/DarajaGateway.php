@@ -170,6 +170,36 @@ final class DarajaGateway extends MobileMoneyGateway
     }
 
     /**
+     * C2B Register URL. In production Safaricom takes this once per shortcode;
+     * changing the URLs later means deleting them on the Daraja portal first,
+     * so a refusal is reported to the owner rather than retried.
+     */
+    public function registerConfirmationUrls(PaymentAccount $account): ?string
+    {
+        $credentials = [...$account->credentials, 'environment' => $account->environment];
+
+        try {
+            $response = $this->client($credentials)->post('/mpesa/c2b/v1/registerurl', [
+                'ShortCode' => $credentials['shortcode'],
+                // If our server cannot be reached, Safaricom still completes the customer's payment.
+                'ResponseType' => 'Completed',
+                'ConfirmationURL' => $account->confirmationUrl(),
+                'ValidationURL' => $account->validationUrl(),
+            ]);
+        } catch (ConnectionException) {
+            return 'Safaricom could not be reached.';
+        }
+
+        $body = (array) $response->json();
+
+        if ($response->successful() && (string) ($body['ResponseCode'] ?? '') === '0') {
+            return null;
+        }
+
+        return (string) ($body['errorMessage'] ?? $body['ResponseDescription'] ?? "Safaricom answered {$response->status()}.");
+    }
+
+    /**
      * The keys of the account the payment was pushed with. Payments from
      * before accounts existed carry none and use the default account.
      *

@@ -46,4 +46,17 @@ return [
             'branches_changed' => 'branches changed',
         ],
     ],
+
+    'mpesa_checks' => [
+        'sms' => '{1} VendaPOS: 1 M-Pesa payment at :business needs checking. Open "M-Pesa to check" in the owner panel.|[2,*] VendaPOS: :count M-Pesa payments at :business need checking. Open "M-Pesa to check" in the owner panel.',
+        'subject' => '{1} :business: 1 M-Pesa payment to check|[2,*] :business: :count M-Pesa payments to check',
+        'intro' => 'Some M-Pesa money at your tills does not add up yet:',
+        'kinds' => [
+            'unconfirmed_code' => '{1} 1 typed M-Pesa code that Safaricom has not confirmed|[2,*] :count typed M-Pesa codes that Safaricom has not confirmed',
+            'amount_mismatch' => '{1} 1 M-Pesa code confirmed for a different amount than the sale|[2,*] :count M-Pesa codes confirmed for a different amount than the sale',
+            'code_reused' => '{1} 1 M-Pesa code typed for more than one sale|[2,*] :count M-Pesa codes typed for more than one sale',
+            'unclaimed_push' => '{1} 1 M-Pesa payment received with no sale|[2,*] :count M-Pesa payments received with no sale',
+        ],
+        'where' => 'Open "M-Pesa to check" in the owner panel to see each one and mark it checked.',
+    ],
 ];

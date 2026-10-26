@@ -157,6 +157,12 @@ return [
         // Callbacks per minute per source IP.
         'callback_rate_limit' => (int) env('VENDAPOS_PAYMENTS_CALLBACK_RATE_LIMIT', 600),
 
+        // payments:check-mpesa (every 5 minutes): a typed code Safaricom has not confirmed after
+        // this long, or a paid push no sale has claimed, becomes a check for the owner (T3d)...
+        'typed_code_grace_minutes' => (int) env('VENDAPOS_TYPED_CODE_GRACE_MINUTES', 30),
+        // ...who is told in one digest at most this often.
+        'check_digest_minutes' => (int) env('VENDAPOS_MPESA_CHECK_DIGEST_MINUTES', 30),
+
         // payments:reconcile (every minute) for late or missing callbacks.
         'reconcile' => [
             // Ask the provider once the customer has had time to answer the prompt.

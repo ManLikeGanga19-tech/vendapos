@@ -8,6 +8,7 @@ use App\Domain\Payments\Events\PaymentAccountChanged;
 use App\Domain\Payments\Exceptions\PaymentAccountRefused;
 use App\Domain\Payments\Gateways\DarajaGateway;
 use App\Domain\Payments\Gateways\PaymentGateways;
+use App\Domain\Payments\Jobs\RegisterConfirmationUrls;
 use App\Domain\Payments\Models\PaymentAccount;
 use App\Domain\Payments\Models\PaymentAccountChange;
 use Illuminate\Support\Facades\DB;
@@ -82,7 +83,9 @@ final class SavePaymentAccount
         $environmentChanged = $account !== null && $account->environment !== $environment;
 
         // Renaming needs no call to the provider; new keys or a new environment do.
-        if ($account === null || $changedFields !== [] || $environmentChanged) {
+        $keysChanged = $account === null || $changedFields !== [] || $environmentChanged;
+
+        if ($keysChanged) {
             $problem = $this->gateways->for($provider)->checkCredentials($merged, $environment);
 
             if ($problem !== null) {
@@ -90,7 +93,7 @@ final class SavePaymentAccount
             }
         }
 
-        return DB::transaction(function () use ($account, $name, $provider, $environment, $merged, $isDefault, $changedBy, $changedFields, $environmentChanged) {
+        return DB::transaction(function () use ($account, $name, $provider, $environment, $merged, $isDefault, $changedBy, $changedFields, $environmentChanged, $keysChanged) {
             $currentDefault = PaymentAccount::query()->where('provider', $provider)->where('is_default', true)->lockForUpdate()->first();
 
             // The first account is the default; the default stays one until another takes over.
@@ -121,6 +124,11 @@ final class SavePaymentAccount
             ]);
 
             PaymentAccountChanged::dispatch($account->id, $account->name, $action, $changedBy);
+
+            // New keys or shortcode: tell Safaricom where to confirm money paid straight in (T3d).
+            if ($keysChanged) {
+                RegisterConfirmationUrls::dispatch((string) tenant('id'), $account->id)->afterCommit();
+            }
 
             return $account;
         });

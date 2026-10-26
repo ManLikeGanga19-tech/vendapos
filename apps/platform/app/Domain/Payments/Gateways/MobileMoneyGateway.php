@@ -6,6 +6,7 @@ namespace App\Domain\Payments\Gateways;
 
 use App\Domain\Payments\Data\GatewayResult;
 use App\Domain\Payments\Models\Payment;
+use App\Domain\Payments\Models\PaymentAccount;
 
 /**
  * One mobile-money provider's API. An abstract class rather than an interface
@@ -42,4 +43,12 @@ abstract class MobileMoneyGateway
      * @return self::KEYS_REFUSED|self::UNREACHABLE|null null when the provider accepted them
      */
     abstract public function checkCredentials(array $credentials, string $environment): ?string;
+
+    /**
+     * Tells the provider where to confirm money paid straight into the
+     * account (C2B), using the account's own keys.
+     *
+     * @return string|null null when registered, otherwise the provider's reason
+     */
+    abstract public function registerConfirmationUrls(PaymentAccount $account): ?string;
 }

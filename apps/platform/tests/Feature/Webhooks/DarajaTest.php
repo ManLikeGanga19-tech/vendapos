@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Payments\Actions\ApplyPaymentOutcome;
 use App\Domain\Payments\Gateways\DarajaGateway;
+use App\Domain\Payments\Jobs\RegisterConfirmationUrls;
 use App\Domain\Payments\Models\Payment;
 use App\Domain\Payments\Models\PaymentAccount;
 use App\Domain\Tenancy\Models\Tenant;
@@ -14,6 +15,7 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Testing\TestResponse;
 use VendaPOS\Core\Enums\PaymentStatus;
 
@@ -28,6 +30,8 @@ beforeEach(function () {
     config(['vendapos.payments.fake' => false]);
     Cache::flush();
     Http::preventStrayRequests();
+    // Registering C2B URLs has tests of its own (C2bTest).
+    Queue::fake([RegisterConfirmationUrls::class]);
     $this->travelTo('2026-10-21 16:15:00'); // 19:15 in Nairobi
 
     [$this->tenant, $this->branch] = tenantWithBranch();
