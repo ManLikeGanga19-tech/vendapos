@@ -86,7 +86,7 @@ it('takes a takeaway order with an optional name', function () {
         ->call('sendOrder')
         ->set('takeawayName', '  Achieng ')
         ->call('sendTo')
-        ->assertSee(__('terminal.tickets.sent', ['ticket' => 'Achieng']));
+        ->assertSee(__('terminal.tickets.sent', ['ticket' => __('terminal.tickets.takeaway_for', ['name' => 'Achieng'])]));
 
     expect(Ticket::query()->sole()->only(['table_id', 'label']))->toBe(['table_id' => null, 'label' => 'Achieng']);
 });

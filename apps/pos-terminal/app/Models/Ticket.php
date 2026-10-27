@@ -64,12 +64,12 @@ final class Ticket extends Model
         $query->where('status', '!=', self::CLOSED)->orderBy('opened_at');
     }
 
-    /** What the guest sees: the table, or the takeaway name. */
+    /** What the guest sees: the table, or the takeaway and the customer's name. */
     public function title(): string
     {
         return match (true) {
             $this->table_name !== null => __('terminal.tickets.table', ['name' => $this->table_name]),
-            $this->label !== null && $this->label !== '' => $this->label,
+            $this->label !== null && $this->label !== '' => __('terminal.tickets.takeaway_for', ['name' => $this->label]),
             default => __('terminal.tickets.takeaway'),
         };
     }
