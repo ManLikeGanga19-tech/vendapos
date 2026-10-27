@@ -47,6 +47,7 @@ function fakePairingServer(array $overrides = []): void
             ['id' => 's1', 'name' => 'Amina', 'role' => 'cashier', 'permissions' => [], 'pin_hash' => '$2y$04$x', 'pin_length' => 4],
         ]]),
         TEST_API_URL.'/api/v1/floor' => Http::response(['areas' => []]),
+        TEST_API_URL.'/api/v1/tickets' => Http::response(['tickets' => []]),
         TEST_API_URL.'/api/v1/catalogue*' => Http::response(['synced_at' => now()->toIso8601String(), 'full' => true, 'categories' => [], 'items' => [
             ['id' => 'i1', 'category_id' => null, 'type' => 'product', 'name' => 'Soda', 'sku' => null, 'barcode' => null, 'price_cents' => 8000, 'vat_category' => 'standard', 'is_active' => true],
         ]]),

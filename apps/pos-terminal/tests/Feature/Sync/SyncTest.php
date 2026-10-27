@@ -58,6 +58,7 @@ function fakeServer(array $overrides = []): void
         'staff' => Http::response(['synced_at' => now()->toIso8601String(), 'staff' => [staffMember('s1', 'Amina')]]),
         'catalogue*' => Http::response(catalogueResponse([item('i1')])),
         'floor' => Http::response(['areas' => []]),
+        'tickets' => Http::response(['tickets' => []]),
     ], $overrides);
 
     Http::fake(array_combine(

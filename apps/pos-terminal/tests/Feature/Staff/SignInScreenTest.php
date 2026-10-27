@@ -101,7 +101,7 @@ it('keeps people off the home screen until they sign in', function () {
 
     app(TillSession::class)->signIn(StaffMember::query()->findOrFail('s1'));
 
-    $this->get(route('home'))->assertOk()->assertSee('Amina')->assertSee(__('terminal.sale.pay'));
+    $this->get(route('home'))->assertOk()->assertSee('Amina')->assertSee(__('terminal.tickets.send'));
 });
 
 it('signs out and goes back to the names', function () {

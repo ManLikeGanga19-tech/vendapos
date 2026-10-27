@@ -208,6 +208,47 @@ final class VendaApi
     }
 
     /**
+     * This branch's tickets not yet paid, in full (table service).
+     *
+     * @return list<array{id: string, status: string, table_id: string|null, table_name: string|null, label: string|null, staff_id: string, opened_at: string, bill_requested_at: string|null, lines: list<array<string, mixed>>}>
+     */
+    public function tickets(): array
+    {
+        $json = $this->send(fn () => $this->authorised()->get('tickets'));
+
+        return array_map(fn (array $ticket): array => [
+            'id' => self::string($ticket, 'id'),
+            'status' => self::string($ticket, 'status'),
+            'table_id' => self::nullableString($ticket, 'table_id'),
+            'table_name' => self::nullableString($ticket, 'table_name'),
+            'label' => self::nullableString($ticket, 'label'),
+            'staff_id' => self::string($ticket, 'staff_id'),
+            'opened_at' => self::string($ticket, 'opened_at'),
+            'bill_requested_at' => self::nullableString($ticket, 'bill_requested_at'),
+            'lines' => self::list($ticket, 'lines'),
+        ], self::list($json, 'tickets'));
+    }
+
+    /**
+     * Send tickets this till opened or added to; one result per ticket.
+     *
+     * @param  list<array<string, mixed>>  $tickets
+     * @return list<array{uuid: string|null, status: string, ticket_status: string|null, refused_lines: list<string>, reason: string|null}>
+     */
+    public function syncTickets(array $tickets): array
+    {
+        $json = $this->send(fn () => $this->authorised()->post('tickets/sync', ['tickets' => $tickets]));
+
+        return array_map(fn (array $result): array => [
+            'uuid' => self::nullableString($result, 'uuid'),
+            'status' => self::string($result, 'status'),
+            'ticket_status' => self::nullableString($result, 'ticket_status'),
+            'refused_lines' => array_values(array_filter((array) data_get($result, 'refused_lines', []), is_string(...))),
+            'reason' => self::nullableString($result, 'reason'),
+        ], self::list($json, 'results'));
+    }
+
+    /**
      * Ask for an M-Pesa push to the customer's phone. The server answers at
      * once; the result comes later through payment(). Resending the same
      * UUID returns the same payment.

@@ -8,6 +8,8 @@ use App\Jobs\PushOrdersJob;
 use App\Models\Item;
 use App\Models\Order;
 use App\Models\StaffMember;
+use App\Models\Ticket;
+use App\Models\TicketLine;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use VendaPOS\Core\Data\OrderLineData;
@@ -28,20 +30,28 @@ final class RecordSale
      * @param  list<array{item_id: string, quantity: int}>  $cart
      * @param  list<TenderData>  $tenders
      * @param  string|null  $orderId  the sale's UUID when an M-Pesa payment was already asked for with it
+     * @param  Ticket|null  $ticket  the ticket this sale pays: its sent lines, at the prices they were sent at, replace $cart
      *
      * @throws SaleRefused
      */
-    public function handle(StaffMember $staff, array $cart, array $tenders, ?string $orderId = null): Order
+    public function handle(StaffMember $staff, array $cart, array $tenders, ?string $orderId = null, ?Ticket $ticket = null): Order
     {
         if (! $staff->can(StaffMember::TAKE_ORDERS) || ! $staff->can(StaffMember::TAKE_PAYMENTS)) {
             throw new SaleRefused('not_allowed');
         }
 
-        if ($cart === []) {
+        if ($ticket !== null && $ticket->status === Ticket::CLOSED) {
+            throw new SaleRefused('ticket_paid');
+        }
+
+        $lines = $ticket !== null
+            ? array_map(fn (TicketLine $line) => $line->toOrderLine(), $ticket->load('lines')->billedLines())
+            : ($cart === [] ? [] : $this->lines($cart));
+
+        if ($lines === []) {
             throw new SaleRefused('empty');
         }
 
-        $lines = $this->lines($cart);
         $totals = OrderTotals::fromLines($lines);
         $problems = Tenders::problems($tenders, OrderStatus::Completed, $totals->total->cents);
 
@@ -49,7 +59,7 @@ final class RecordSale
             throw new SaleRefused('tenders', $problems);
         }
 
-        $order = DB::transaction(function () use ($staff, $lines, $totals, $tenders, $orderId): Order {
+        $order = DB::transaction(function () use ($staff, $lines, $totals, $tenders, $orderId, $ticket): Order {
             // One writer (this till), so the next number is simply the highest plus one.
             $sequence = (int) Order::query()->max('sequence_number') + 1;
 
@@ -63,6 +73,7 @@ final class RecordSale
                 'vat_cents' => $totals->vat->cents,
                 'total_cents' => $totals->total->cents,
                 'sync_status' => Order::PENDING,
+                'ticket_id' => $ticket?->id,
             ]);
 
             $order->lines()->createMany(array_map(fn (OrderLineData $line, int $index) => [
@@ -84,6 +95,9 @@ final class RecordSale
                 'payment_uuid' => $tender->payment_uuid,
                 'mpesa_reference' => $tender->mpesa_reference,
             ], $tenders, array_keys($tenders)));
+
+            // Paid: off this till's queue now; the server closes it when the sale reaches it.
+            $ticket?->update(['status' => Ticket::CLOSED, 'order_id' => $order->id]);
 
             return $order;
         });

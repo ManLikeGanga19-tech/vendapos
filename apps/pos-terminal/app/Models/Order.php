@@ -27,6 +27,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $sync_reason
  * @property array<string, mixed>|null $sync_errors
  * @property Carbon|null $synced_at
+ * @property string|null $ticket_id the ticket this sale paid (table service)
  */
 #[Table(name: 'orders', keyType: 'string', incrementing: false, timestamps: false)]
 #[Unguarded]
@@ -102,6 +103,8 @@ final class Order extends Model
             'subtotal_cents' => $this->subtotal_cents,
             'vat_cents' => $this->vat_cents,
             'total_cents' => $this->total_cents,
+            // Only when it paid a ticket; a quick sale sends none.
+            ...($this->ticket_id !== null ? ['ticket_uuid' => $this->ticket_id] : []),
         ];
     }
 }

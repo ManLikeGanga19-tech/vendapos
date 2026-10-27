@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * One background round: keep the token fresh, send unsynced sales, then
- * pull device status, staff, menu and floor plan. Offline is normal and only noted. The till is marked removed only
+ * pull device status, staff, menu, floor plan and open tickets. Offline is normal and only noted. The till is marked removed only
  * when the server refuses to renew its token, never on a single 401.
  */
 final class SyncTill
@@ -39,6 +39,7 @@ final class SyncTill
         private readonly SyncCatalogue $catalogue,
         private readonly SyncOrders $orders,
         private readonly SyncFloor $floor,
+        private readonly SyncTickets $tickets,
     ) {}
 
     /** Whether the whole round completed. */
@@ -80,6 +81,7 @@ final class SyncTill
         $this->staff->handle();
         $this->catalogue->handle();
         $this->floor->handle();
+        $this->tickets->handle();
 
         SyncState::write(self::LAST_SUCCESS, now()->toIso8601String());
         SyncState::write(self::LAST_ERROR, null);

@@ -14,30 +14,41 @@ use App\Livewire\Concerns\FollowsTillLanguage;
 use App\Livewire\Concerns\NeedsSignedInStaff;
 use App\Livewire\Concerns\PicksLanguage;
 use App\Models\Category;
+use App\Models\FloorArea;
 use App\Models\Item;
 use App\Models\StaffMember;
 use App\Models\SyncState;
+use App\Models\Ticket;
+use App\Models\TicketLine;
 use App\Printing\PrinterSettings;
 use App\Sales\RecordSale;
 use App\Sales\SaleRefused;
 use App\Security\KeyringUnavailable;
 use App\Staff\TillSession;
 use App\Sync\SyncStatus;
+use App\Tickets\PrintBill;
+use App\Tickets\SendOrder;
+use App\Tickets\TicketRefused;
 use App\Till\Till;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use VendaPOS\Core\Data\OrderLineData;
 use VendaPOS\Core\Data\TenderData;
+use VendaPOS\Core\Enums\TerminalMode;
 use VendaPOS\Core\Rules\PhoneNumber;
 use VendaPOS\Core\Tax\OrderTotals;
 use VendaPOS\Core\ValueObjects\Money;
 
 /**
- * The quick-sale screen: pick items (or scan them), then take cash, an
- * M-Pesa push, or both. M-Pesa pays whole shillings and cash the rest
- * (Daniel, T3a). The sale is written to the till first and synced after.
+ * The sale screen: pick items (or scan them), then take cash, an M-Pesa
+ * push, or both. M-Pesa pays whole shillings and cash the rest (Daniel, T3a).
+ * The sale is written to the till first and synced after.
+ *
+ * At table-service branches a waiter sends the order to a ticket instead, and
+ * the cashier pays tickets from the branch's queue; quick sale stays (T4b).
  */
 final class Sale extends Component
 {
@@ -53,6 +64,12 @@ final class Sale extends Component
 
     public const string DONE = 'done';
 
+    /** The branch's unpaid tickets (table service). */
+    public const string TICKETS = 'tickets';
+
+    /** Where a new ticket goes: a table, or takeaway. */
+    public const string TABLE = 'table';
+
     /** How long the till waits on the customer's phone before offering to stop. */
     public const int MPESA_PATIENCE_SECONDS = 120;
 
@@ -60,6 +77,15 @@ final class Sale extends Component
     public array $cart = [];
 
     public ?string $category = null;
+
+    /** The ticket on screen: its sent lines are locked, the cart holds the next round. */
+    public ?string $ticketId = null;
+
+    /** Name for a takeaway or counter ticket, optional. */
+    public string $takeawayName = '';
+
+    /** "Sent to Table 4", shown after an order is sent. */
+    public ?string $notice = null;
 
     public string $step = self::CART;
 
@@ -104,6 +130,7 @@ final class Sale extends Component
 
         $this->cart[$itemId] = ($this->cart[$itemId] ?? 0) + 1;
         $this->message = null;
+        $this->notice = null;
     }
 
     /** A barcode scanner types the code and Enter, like a keyboard. */
@@ -151,15 +178,122 @@ final class Sale extends Component
         $this->category = $categoryId;
     }
 
-    public function startPayment(TillSession $session): void
+    /** The branch's unpaid tickets, to pick one to add to, bill or pay. */
+    public function showTickets(): void
     {
-        if ($this->cart === []) {
+        if (in_array($this->step, [self::CART, self::TABLE], true)) {
+            $this->step = self::TICKETS;
+            $this->message = null;
+        }
+    }
+
+    /** Open a ticket: its sent lines show locked, and the cart becomes its next round. */
+    public function openTicket(string $ticketId): void
+    {
+        if ($this->step !== self::TICKETS || ! Ticket::query()->unpaid()->whereKey($ticketId)->exists()) {
+            return;
+        }
+
+        $this->ticketId = $ticketId;
+        $this->step = self::CART;
+        $this->message = null;
+        $this->notice = null;
+    }
+
+    /** Back to a plain sale; the cart is kept. */
+    public function closeTicket(): void
+    {
+        if (in_array($this->step, [self::CART, self::TICKETS, self::TABLE], true)) {
+            $this->ticketId = null;
+            $this->step = self::CART;
+            $this->message = null;
+        }
+    }
+
+    /**
+     * Send the cart to the ticket on screen, or pick where a new one goes.
+     * Then a fresh screen for the next table.
+     */
+    public function sendOrder(SendOrder $sendOrder, TillSession $session): void
+    {
+        if ($this->step !== self::CART || $this->cart === []) {
+            return;
+        }
+
+        if ($this->ticketId === null) {
+            $this->step = self::TABLE;
+            $this->message = null;
+
+            return;
+        }
+
+        $ticket = $this->openTicketModel();
+
+        if ($ticket === null) {
+            $this->ticketId = null;
+            $this->message = __('terminal.tickets.paid_elsewhere');
+
+            return;
+        }
+
+        $this->send($sendOrder, $session, $ticket);
+    }
+
+    /** A new ticket at $tableId, or takeaway when null. */
+    public function sendTo(SendOrder $sendOrder, TillSession $session, ?string $tableId = null): void
+    {
+        if ($this->step === self::TABLE) {
+            $this->send($sendOrder, $session, null, $tableId);
+        }
+    }
+
+    public function printBill(PrintBill $printBill): void
+    {
+        $ticket = $this->openTicketModel();
+
+        if ($this->step !== self::CART || $ticket === null) {
+            return;
+        }
+
+        if ($this->cart !== []) {
+            $this->message = __('terminal.tickets.send_first');
+
+            return;
+        }
+
+        try {
+            $printBill->handle($ticket);
+        } catch (TicketRefused $e) {
+            $this->message = __('terminal.tickets.refused.'.$e->reason);
+
+            return;
+        }
+
+        SyncState::write(PrintReceiptJob::LAST_ERROR, null);
+        $this->message = null;
+        $this->notice = __('terminal.tickets.bill_printed', ['ticket' => $ticket->title()]);
+    }
+
+    public function startPayment(TillSession $session, SendOrder $sendOrder): void
+    {
+        $ticket = $this->openTicketModel();
+
+        if ($this->cart === [] && $ticket === null) {
             return;
         }
 
         if (! $session->can(StaffMember::TAKE_PAYMENTS)) {
             $this->message = __('terminal.sale.refused.not_allowed');
 
+            return;
+        }
+
+        // A round still in the cart goes on the ticket first, so the bill and the payment match.
+        if ($ticket !== null && $this->cart !== [] && ! $this->send($sendOrder, $session, $ticket, keepTicket: true)) {
+            return;
+        }
+
+        if ($this->payLines() === []) {
             return;
         }
 
@@ -377,7 +511,7 @@ final class Sale extends Component
         }
 
         try {
-            $order = $recordSale->handle($staff, $this->cartEntries(), $tenders, $this->saleId);
+            $order = $recordSale->handle($staff, $this->cartEntries(), $tenders, $this->saleId, $this->openTicketModel());
         } catch (SaleRefused $e) {
             $this->message = __('terminal.sale.refused.'.$e->reason);
 
@@ -410,7 +544,68 @@ final class Sale extends Component
 
     public function newSale(): void
     {
-        $this->reset(['cart', 'step', 'saleId', 'mpesaPaid', 'waiting', 'cashGiven', 'phone', 'mpesaAmount', 'typedCode', 'codeAmount', 'message', 'done']);
+        $this->reset(['cart', 'step', 'saleId', 'mpesaPaid', 'waiting', 'cashGiven', 'phone', 'mpesaAmount', 'typedCode', 'codeAmount', 'message', 'done', 'ticketId', 'takeawayName', 'notice']);
+    }
+
+    /** Another till sent, billed or paid a ticket: redraw, and let go of one paid elsewhere. */
+    #[On('till-updated')]
+    public function tillUpdated(): void
+    {
+        if ($this->ticketId !== null && $this->step === self::CART && $this->openTicketModel() === null) {
+            $this->ticketId = null;
+            $this->message = __('terminal.tickets.paid_elsewhere');
+        }
+    }
+
+    /** @return bool whether the order was sent */
+    private function send(SendOrder $sendOrder, TillSession $session, ?Ticket $ticket, ?string $tableId = null, bool $keepTicket = false): bool
+    {
+        $staff = $session->staff();
+
+        if ($staff === null) {
+            return false;
+        }
+
+        try {
+            $ticket = $sendOrder->handle($staff, $this->cartEntries(), $ticket, $tableId, $ticket === null ? $this->takeawayName : null);
+        } catch (TicketRefused $e) {
+            $this->message = __('terminal.tickets.refused.'.$e->reason);
+
+            return false;
+        }
+
+        $this->cart = [];
+        $this->takeawayName = '';
+        $this->message = null;
+        $this->step = self::CART;
+
+        if ($keepTicket) {
+            $this->ticketId = $ticket->id;
+        } else {
+            $this->ticketId = null;
+            $this->notice = __('terminal.tickets.sent', ['ticket' => $ticket->title()]);
+        }
+
+        return true;
+    }
+
+    private function openTicketModel(): ?Ticket
+    {
+        return $this->ticketId === null ? null : Ticket::query()->unpaid()->with('lines')->find($this->ticketId);
+    }
+
+    /**
+     * What is being paid: the ticket's sent lines at their sent prices, or the cart.
+     *
+     * @return list<OrderLineData>
+     */
+    private function payLines(): array
+    {
+        $ticket = $this->openTicketModel();
+
+        return $ticket !== null
+            ? array_map(fn (TicketLine $line) => $line->toOrderLine(), $ticket->billedLines())
+            : array_column($this->lines(), 'data');
     }
 
     /** Both M-Pesa amount fields start at what is left, in whole shillings. */
@@ -436,11 +631,24 @@ final class Sale extends Component
     public function render(Till $till, TillSession $session): View
     {
         $lines = $this->lines();
-        $totals = OrderTotals::fromLines(array_column($lines, 'data'));
+        $ticket = $this->openTicketModel();
+        $sent = $ticket?->billedLines() ?? [];
+        // What was sent plus the round in the cart; when paying, the cart is already on the ticket.
+        $totals = OrderTotals::fromLines([...array_map(fn (TicketLine $line) => $line->toOrderLine(), $sent), ...array_column($lines, 'data')]);
         $remaining = $this->remainingCents($totals);
+        $identity = $till->identity();
 
         return view('livewire.sale', [
-            'identity' => $till->identity(),
+            'identity' => $identity,
+            'tableService' => $identity?->terminal_mode === TerminalMode::TableService->value,
+            'ticket' => $ticket,
+            'sent' => $sent,
+            // Unpaid tickets, and paid ones the server refused lines on, until a manager deals with them.
+            'openTickets' => $this->step === self::TICKETS
+                ? Ticket::query()->with('lines')->where(fn ($query) => $query->where('status', '!=', Ticket::CLOSED)->orWhere('sync_status', Ticket::REJECTED))->orderBy('opened_at')->get()
+                : collect(),
+            'openTicketCount' => Ticket::query()->unpaid()->count(),
+            'areas' => $this->step === self::TABLE ? FloorArea::query()->orderBy('sort_order')->orderBy('name')->get() : collect(),
             'staff' => $session->staff(),
             'categories' => Category::query()->orderBy('sort_order')->orderBy('name')->get(),
             'items' => Item::query()->where('is_active', true)
@@ -522,7 +730,7 @@ final class Sale extends Component
 
     private function remainingCents(?OrderTotals $totals = null): int
     {
-        $totals ??= OrderTotals::fromLines(array_column($this->lines(), 'data'));
+        $totals ??= OrderTotals::fromLines($this->payLines());
 
         return max(0, $totals->total->cents - array_sum(array_column($this->mpesaPaid, 'amount_cents')));
     }

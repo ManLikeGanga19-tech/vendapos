@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderLine;
 use App\Models\OrderTender;
 use App\Models\StaffMember;
+use App\Models\Ticket;
 use App\Till\Till;
 use Mike42\Escpos\Printer;
 use Throwable;
@@ -76,6 +77,50 @@ class ReceiptPrinter
             if ($openDrawer) {
                 $printer->pulse();
             }
+        });
+    }
+
+    /**
+     * The guest's bill before paying. Not a tax invoice: no KRA PIN, QR code
+     * or eTIMS details; the receipt after payment is the fiscal document.
+     *
+     * @throws PrintFailed
+     */
+    public function bill(Ticket $ticket): void
+    {
+        $ticket->loadMissing('lines');
+
+        $this->print(function (Printer $printer, int $columns) use ($ticket) {
+            $this->header($printer);
+
+            $printer->selectPrintMode(Printer::MODE_EMPHASIZED);
+            $printer->text(self::ascii(__('terminal.bill.title'))."\n");
+            $printer->selectPrintMode();
+            $printer->text(self::ascii(__('terminal.bill.not_invoice'))."\n");
+
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printer->text(self::ascii($ticket->title().'   '.now()->setTimezone(StatusBar::TIMEZONE)->format('d/m/Y H:i'))."\n");
+            $staff = StaffMember::query()->find($ticket->staff_id);
+
+            if ($staff !== null) {
+                $printer->text(self::ascii(__('terminal.receipt.served_by', ['name' => $staff->name]))."\n");
+            }
+
+            $printer->text(str_repeat('-', $columns)."\n");
+
+            foreach ($ticket->billedLines() as $line) {
+                $printer->text(self::row("{$line->quantity} x {$line->name}", self::money($line->unit_price_cents * $line->quantity), $columns));
+            }
+
+            $totals = $ticket->totals();
+            $printer->text(str_repeat('-', $columns)."\n");
+            $printer->setEmphasis(true);
+            $printer->text(self::row(__('terminal.bill.to_pay'), 'KES '.self::money($totals->total->cents), $columns));
+            $printer->setEmphasis(false);
+            $printer->text(self::row(__('terminal.receipt.vat'), self::money($totals->vat->cents), $columns));
+            $printer->text(str_repeat('-', $columns)."\n");
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text(self::ascii(__('terminal.bill.footer'))."\n");
         });
     }
 

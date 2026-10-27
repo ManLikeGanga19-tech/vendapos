@@ -35,6 +35,9 @@
             <p class="truncate text-sm text-muted">{{ $staff?->name }} · {{ $staff ? __("terminal.roles.{$staff->role}") : '' }}</p>
         </div>
         <div class="flex items-center gap-2">
+            @if ($tableService)
+                <button type="button" wire:click="showTickets" @class(['key h-12 px-4 text-sm', 'border-primary text-primary' => $step === 'tickets']) @disabled(! in_array($step, ['cart', 'table', 'tickets'], true))>{{ __('terminal.tickets.open', ['count' => $openTicketCount]) }}</button>
+            @endif
             <x-language-picker />
             @if (in_array($staff?->role, ['manager', 'owner'], true))
                 <a href="{{ route('printer') }}" class="key h-12 px-4 text-sm">{{ __('terminal.printer.title') }}</a>
@@ -94,8 +97,85 @@
                         <p class="text-sm text-danger" role="alert">{{ __('terminal.sale.done.print_failed', ['reason' => $printError]) }}</p>
                     @endif
                 </div>
+            @elseif ($step === 'tickets')
+                <div class="flex min-h-0 flex-1 flex-col" wire:poll.10s>
+                    <div class="flex items-center justify-between border-b border-line px-3 py-2">
+                        <p class="font-semibold">{{ __('terminal.tickets.title') }}</p>
+                        <button type="button" wire:click="closeTicket" class="key h-12 px-4 text-sm">{{ __('terminal.sale.back') }}</button>
+                    </div>
+                    <ul class="min-h-0 flex-1 divide-y divide-line overflow-y-auto">
+                        @forelse ($openTickets as $open)
+                            <li wire:key="ticket-{{ $open->id }}">
+                                <button type="button" wire:click="openTicket('{{ $open->id }}')" class="flex w-full items-center gap-3 px-3 py-3 text-left hover:bg-line active:bg-line disabled:opacity-40" @disabled($open->status === 'closed')>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="truncate text-lg">{{ $open->title() }}</p>
+                                        <p class="text-sm text-muted">
+                                            {{ $open->opened_at->setTimezone(\App\Livewire\StatusBar::TIMEZONE)->format('H:i') }}
+                                            @if ($open->status === 'bill_requested') · <span class="text-primary">{{ __('terminal.tickets.billed') }}</span>@endif
+                                            @if ($open->sync_status === 'pending') · {{ __('terminal.tickets.not_sent') }}@endif
+                                        </p>
+                                        @if ($open->sync_status === 'rejected')
+                                            <p class="text-sm text-danger">{{ __('terminal.tickets.rejected.'.($open->sync_reason === \App\Sync\SyncTickets::LINES_AFTER_PAYMENT ? 'lines_after_payment' : 'other')) }}</p>
+                                        @endif
+                                    </div>
+                                    <p class="font-mono">{{ $open->totals()->total->format() }}</p>
+                                </button>
+                            </li>
+                        @empty
+                            <li class="p-6 text-muted">{{ __('terminal.tickets.none') }}</li>
+                        @endforelse
+                    </ul>
+                </div>
+            @elseif ($step === 'table')
+                <div class="flex min-h-0 flex-1 flex-col">
+                    <div class="flex items-center justify-between border-b border-line px-3 py-2">
+                        <p class="font-semibold">{{ __('terminal.tickets.where') }}</p>
+                        <button type="button" wire:click="closeTicket" class="key h-12 px-4 text-sm">{{ __('terminal.sale.back') }}</button>
+                    </div>
+                    <div class="min-h-0 flex-1 space-y-3 overflow-y-auto p-3">
+                        @foreach ($areas as $area)
+                            <div wire:key="area-{{ $area->id }}">
+                                <p class="mb-1 text-sm text-muted">{{ $area->name }}</p>
+                                <div class="grid grid-cols-4 gap-1">
+                                    @foreach ($area->tables()->orderBy('sort_order')->orderBy('name')->get() as $diningTable)
+                                        <button type="button" wire:key="table-{{ $diningTable->id }}" wire:click="sendTo('{{ $diningTable->id }}')" class="key h-14 font-mono text-base">{{ $diningTable->name }}</button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                        <form wire:submit="sendTo" class="space-y-1 border-t border-line pt-3">
+                            <p class="text-sm text-muted">{{ __('terminal.tickets.takeaway_help') }}</p>
+                            <input type="text" wire:model="takeawayName" maxlength="40" autocomplete="off" placeholder="{{ __('terminal.tickets.takeaway_name') }}" class="h-12 w-full border border-line bg-surface px-3 text-white" aria-label="{{ __('terminal.tickets.takeaway_name') }}">
+                            <button type="submit" class="key h-12 w-full text-base">{{ __('terminal.tickets.send_takeaway') }}</button>
+                        </form>
+                    </div>
+                    @if ($message)
+                        <p class="mx-3 mb-2 border border-danger px-3 py-2 text-sm text-danger" role="alert">{{ $message }}</p>
+                    @endif
+                </div>
             @else
+                @if ($ticket)
+                    <div class="flex items-center justify-between gap-2 border-b border-line px-3 py-2">
+                        <div class="min-w-0">
+                            <p class="truncate text-lg font-semibold">{{ $ticket->title() }}</p>
+                            @if ($ticket->status === 'bill_requested')<p class="text-sm text-primary">{{ __('terminal.tickets.billed') }}</p>@endif
+                        </div>
+                        @if ($step === 'cart')
+                            <button type="button" wire:click="closeTicket" class="key size-12 text-xl" aria-label="{{ __('terminal.tickets.close') }}">×</button>
+                        @endif
+                    </div>
+                @endif
                 <ul class="min-h-0 flex-1 divide-y divide-line overflow-y-auto" aria-label="{{ __('terminal.sale.cart') }}">
+                    {{-- Sent lines are locked: taking one off is a manager void. --}}
+                    @foreach ($sent as $sentLine)
+                        <li wire:key="sent-{{ $sentLine->id }}" class="flex items-center gap-2 px-3 py-2 text-muted">
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate">{{ $sentLine->name }}</p>
+                                <p class="font-mono text-sm">{{ $sentLine->quantity }} × {{ \VendaPOS\Core\ValueObjects\Money::fromCents($sentLine->unit_price_cents)->format() }} · {{ __('terminal.tickets.sent_line') }}</p>
+                            </div>
+                            <p class="font-mono">{{ \VendaPOS\Core\ValueObjects\Money::fromCents($sentLine->unit_price_cents * $sentLine->quantity)->format() }}</p>
+                        </li>
+                    @endforeach
                     @forelse ($lines as $line)
                         <li wire:key="line-{{ $line['item']->id }}" class="flex items-center gap-2 px-3 py-2">
                             <div class="min-w-0 flex-1">
@@ -109,7 +189,9 @@
                             @endif
                         </li>
                     @empty
-                        <li class="p-6 text-muted">{{ __('terminal.sale.empty') }}</li>
+                        @if ($sent === [])
+                            <li class="p-6 text-muted">{{ __('terminal.sale.empty') }}</li>
+                        @endif
                     @endforelse
                 </ul>
 
@@ -132,8 +214,22 @@
                 @if ($message)
                     <p class="mx-3 mb-2 border border-danger px-3 py-2 text-sm text-danger" role="alert">{{ $message }}</p>
                 @endif
+                @if ($notice)
+                    <p class="mx-3 mb-2 border border-ok px-3 py-2 text-sm text-ok" role="status">{{ $notice }}</p>
+                @endif
 
-                @if ($step === 'cart')
+                @if ($step === 'cart' && $tableService)
+                    <div class="grid grid-cols-2 gap-2 p-3">
+                        <button type="button" wire:click="clearCart" class="key h-14 px-4 text-base" @disabled($lines === [])>{{ __('terminal.sale.clear') }}</button>
+                        <button type="button" wire:click="sendOrder" class="key h-14 text-base" @disabled($lines === [] || ! $staff?->can(\App\Models\StaffMember::TAKE_ORDERS))>{{ $ticket ? __('terminal.tickets.send_more') : __('terminal.tickets.send') }}</button>
+                        @if ($ticket)
+                            <button type="button" wire:click="printBill" class="key h-14 text-base" @disabled(! $printerReady || $sent === [])>{{ __('terminal.tickets.print_bill') }}</button>
+                        @endif
+                        @if ($staff?->can(\App\Models\StaffMember::TAKE_PAYMENTS))
+                            <button type="button" wire:click="startPayment" @class(['key-primary h-14', 'col-span-2' => ! $ticket]) @disabled($lines === [] && $sent === [])>{{ __('terminal.sale.pay') }}</button>
+                        @endif
+                    </div>
+                @elseif ($step === 'cart')
                     <div class="grid grid-cols-[auto_1fr] gap-2 p-3">
                         <button type="button" wire:click="clearCart" class="key h-16 px-4 text-base" @disabled($lines === [])>{{ __('terminal.sale.clear') }}</button>
                         <button type="button" wire:click="startPayment" class="key-primary h-16" @disabled($lines === [])>{{ __('terminal.sale.pay') }}</button>
