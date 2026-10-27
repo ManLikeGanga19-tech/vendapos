@@ -119,13 +119,35 @@ it('keeps the confirmation URL free of the words Safaricom refuses', function ()
 });
 
 it('shows the owner why Safaricom refused the registration', function () {
-    fakeRegisterUrl(['requestId' => '1', 'errorCode' => '500.003.1001', 'errorMessage' => 'Urls are already registered'], 500);
+    fakeRegisterUrl(['requestId' => '1', 'errorCode' => '400.003.02', 'errorMessage' => 'Bad Request - Invalid ShortCode'], 400);
+    $job = (new RegisterConfirmationUrls($this->tenant->id, $this->account->id))->withFakeQueueInteractions();
 
-    (new RegisterConfirmationUrls($this->tenant->id, $this->account->id))->handle(app(PaymentGateways::class));
+    $job->handle(app(PaymentGateways::class));
 
+    $job->assertNotReleased();
     expect($this->tenant->run(fn () => $this->account->fresh()))
         ->c2b_status->toBe(PaymentAccount::C2B_FAILED)
-        ->c2b_message->toBe('Urls are already registered');
+        ->c2b_message->toBe('Bad Request - Invalid ShortCode');
+});
+
+it('tries again while Safaricom is down, and shows why only after the last try', function () {
+    // What the sandbox answers now and then (2026-10-27).
+    fakeRegisterUrl(['requestId' => '1', 'errorCode' => '500.003.1001', 'errorMessage' => 'Service is currently unreachable. Please try again later.'], 500);
+    $job = fn (int $attempt) => tap((new RegisterConfirmationUrls($this->tenant->id, $this->account->id))->withFakeQueueInteractions(), fn ($job) => $job->job->attempts = $attempt);
+
+    $first = $job(1);
+    $first->handle(app(PaymentGateways::class));
+
+    $first->assertReleased(60);
+    expect($this->tenant->run(fn () => $this->account->fresh()))->c2b_status->toBe(PaymentAccount::C2B_PENDING);
+
+    $last = $job(3);
+    $last->handle(app(PaymentGateways::class));
+
+    $last->assertNotReleased();
+    expect($this->tenant->run(fn () => $this->account->fresh()))
+        ->c2b_status->toBe(PaymentAccount::C2B_FAILED)
+        ->c2b_message->toBe('Service is currently unreachable. Please try again later.');
 });
 
 it('takes Safaricom’s all-zero answer as registered', function () {

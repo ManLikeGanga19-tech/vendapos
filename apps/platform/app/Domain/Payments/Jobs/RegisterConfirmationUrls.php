@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Payments\Jobs;
 
+use App\Domain\Payments\Exceptions\ProviderUnreachable;
 use App\Domain\Payments\Gateways\PaymentGateways;
 use App\Domain\Payments\Models\PaymentAccount;
 use App\Infrastructure\Queue\LiveTenants;
@@ -18,7 +19,7 @@ use Throwable;
 /**
  * Gives an account its C2B confirmation URL (a secret token, routed centrally)
  * and registers it with the provider. A refusal is recorded for the owner to
- * see; an unreachable provider is retried.
+ * see; an unreachable provider is retried, and only the last try's reason is shown.
  */
 final class RegisterConfirmationUrls implements ShouldQueue
 {
@@ -60,7 +61,17 @@ final class RegisterConfirmationUrls implements ShouldQueue
             $this->ensureToken($account);
             $account->update(['c2b_status' => PaymentAccount::C2B_PENDING, 'c2b_message' => null]);
 
-            $problem = $gateways->for($account->provider)->registerConfirmationUrls($account);
+            try {
+                $problem = $gateways->for($account->provider)->registerConfirmationUrls($account);
+            } catch (ProviderUnreachable $e) {
+                if ($this->attempts() < $this->tries) {
+                    $this->release($this->backoff()[$this->attempts() - 1] ?? 300);
+
+                    return;
+                }
+
+                $problem = $e->getMessage();
+            }
 
             $account->update($problem === null
                 ? ['c2b_status' => PaymentAccount::C2B_REGISTERED, 'c2b_message' => null, 'c2b_registered_at' => now()]

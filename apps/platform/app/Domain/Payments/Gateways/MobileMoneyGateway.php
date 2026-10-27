@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Payments\Gateways;
 
 use App\Domain\Payments\Data\GatewayResult;
+use App\Domain\Payments\Exceptions\ProviderUnreachable;
 use App\Domain\Payments\Models\Payment;
 use App\Domain\Payments\Models\PaymentAccount;
 
@@ -49,6 +50,8 @@ abstract class MobileMoneyGateway
      * account (C2B), using the account's own keys.
      *
      * @return string|null null when registered, otherwise the provider's reason
+     *
+     * @throws ProviderUnreachable when the provider is down; the caller tries again later
      */
     abstract public function registerConfirmationUrls(PaymentAccount $account): ?string;
 }

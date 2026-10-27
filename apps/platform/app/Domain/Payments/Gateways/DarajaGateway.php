@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Payments\Gateways;
 
 use App\Domain\Payments\Data\GatewayResult;
+use App\Domain\Payments\Exceptions\ProviderUnreachable;
 use App\Domain\Payments\Models\Payment;
 use App\Domain\Payments\Models\PaymentAccount;
 use Illuminate\Http\Client\ConnectionException;
@@ -179,7 +180,9 @@ final class DarajaGateway extends MobileMoneyGateway
     /**
      * C2B Register URL. In production Safaricom takes this once per shortcode;
      * changing the URLs later means deleting them on the Daraja portal first,
-     * so a refusal is reported to the owner rather than retried.
+     * so a refusal is reported to the owner rather than retried. Safaricom being
+     * down (no answer, or a 5xx such as the sandbox's "Service is currently
+     * unreachable") is thrown so the job tries again.
      */
     public function registerConfirmationUrls(PaymentAccount $account): ?string
     {
@@ -194,10 +197,14 @@ final class DarajaGateway extends MobileMoneyGateway
                 'ValidationURL' => $account->validationUrl(),
             ]);
         } catch (ConnectionException) {
-            return 'Safaricom could not be reached.';
+            throw new ProviderUnreachable('Safaricom could not be reached.');
         }
 
         $body = (array) $response->json();
+
+        if ($response->serverError()) {
+            throw new ProviderUnreachable((string) ($body['errorMessage'] ?? "Safaricom answered {$response->status()}."));
+        }
 
         // Safaricom answers "0" or "00000000".
         if ($response->successful() && preg_match('/^0+$/', (string) ($body['ResponseCode'] ?? '')) === 1) {
