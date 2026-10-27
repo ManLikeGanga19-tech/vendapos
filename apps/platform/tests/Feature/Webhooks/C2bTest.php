@@ -128,6 +128,17 @@ it('shows the owner why Safaricom refused the registration', function () {
         ->c2b_message->toBe('Urls are already registered');
 });
 
+it('takes Safaricom’s all-zero answer as registered', function () {
+    // What the sandbox sent on 2026-10-27; the docs show "0".
+    fakeRegisterUrl(['OriginatorCoversationID' => '7619-37765134-1', 'ResponseCode' => '00000000', 'ResponseDescription' => 'Success']);
+
+    (new RegisterConfirmationUrls($this->tenant->id, $this->account->id))->handle(app(PaymentGateways::class));
+
+    expect($this->tenant->run(fn () => $this->account->fresh()))
+        ->c2b_status->toBe(PaymentAccount::C2B_REGISTERED)
+        ->c2b_message->toBeNull();
+});
+
 it('stores a confirmation once, in shillings to cents, Nairobi time to UTC, phone still masked', function () {
     Event::fake([MpesaConfirmed::class]);
     $token = registeredToken($this->tenant, $this->account);

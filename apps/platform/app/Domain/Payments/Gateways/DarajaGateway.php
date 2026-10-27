@@ -192,7 +192,8 @@ final class DarajaGateway extends MobileMoneyGateway
 
         $body = (array) $response->json();
 
-        if ($response->successful() && (string) ($body['ResponseCode'] ?? '') === '0') {
+        // Safaricom answers "0" or "00000000".
+        if ($response->successful() && preg_match('/^0+$/', (string) ($body['ResponseCode'] ?? '')) === 1) {
             return null;
         }
 
