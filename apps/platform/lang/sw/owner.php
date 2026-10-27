@@ -241,6 +241,8 @@ return [
         'shortcode_help' => 'Nambari ya paybill, au kwa till nambari ya duka uliyopewa na Safaricom.',
         'party_b' => 'Nambari wateja hulipia',
         'party_b_help' => 'Nambari ya paybill, au nambari ya till kwa Buy Goods.',
+        'c2b_shortcode' => 'Short code ya pesa zinazolipwa moja kwa moja (si lazima)',
+        'c2b_shortcode_help' => 'Tu kama Safaricom ilikupa short code tofauti ya C2B. Acha wazi kutumia short code ya biashara.',
         'consumer_key' => 'Consumer key',
         'consumer_secret' => 'Consumer secret',
         'passkey' => 'Passkey',

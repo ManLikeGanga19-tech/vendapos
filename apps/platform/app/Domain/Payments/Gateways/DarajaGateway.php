@@ -27,6 +27,13 @@ final class DarajaGateway extends MobileMoneyGateway
     /** What an account holds: asked for by `payments:credentials` and the Owner panel. */
     public const array CREDENTIAL_FIELDS = ['consumer_key', 'consumer_secret', 'passkey', 'shortcode', 'party_b', 'transaction_type'];
 
+    /**
+     * Fields an account may leave out. c2b_shortcode is for when money paid
+     * straight in arrives under another shortcode than STK (Daraja's sandbox
+     * gives 174379 for STK and a 600xxx one for C2B); without it C2B uses shortcode.
+     */
+    public const array OPTIONAL_FIELDS = ['c2b_shortcode'];
+
     /** Fields Daraja only accepts fixed values for: paybill or till (buy goods). */
     public const array CREDENTIAL_OPTIONS = [
         'transaction_type' => ['CustomerPayBillOnline', 'CustomerBuyGoodsOnline'],
@@ -180,7 +187,7 @@ final class DarajaGateway extends MobileMoneyGateway
 
         try {
             $response = $this->client($credentials)->post('/mpesa/c2b/v1/registerurl', [
-                'ShortCode' => $credentials['shortcode'],
+                'ShortCode' => $credentials['c2b_shortcode'] ?? $credentials['shortcode'],
                 // If our server cannot be reached, Safaricom still completes the customer's payment.
                 'ResponseType' => 'Completed',
                 'ConfirmationURL' => $account->confirmationUrl(),

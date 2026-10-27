@@ -39,8 +39,8 @@ final class SavePaymentAccount
         bool $isDefault,
         ?string $changedBy,
     ): PaymentAccount {
-        [$fields, $options] = match ($provider) {
-            MobileMoneyProvider::MpesaKe => [DarajaGateway::CREDENTIAL_FIELDS, DarajaGateway::CREDENTIAL_OPTIONS],
+        [$fields, $optional, $options] = match ($provider) {
+            MobileMoneyProvider::MpesaKe => [DarajaGateway::CREDENTIAL_FIELDS, DarajaGateway::OPTIONAL_FIELDS, DarajaGateway::CREDENTIAL_OPTIONS],
             MobileMoneyProvider::AirtelKe => throw new PaymentAccountRefused('unsupported_provider'),
         };
 
@@ -79,7 +79,17 @@ final class SavePaymentAccount
             }
         }
 
-        $changedFields = array_keys(array_filter($merged, fn (string $value, string $field) => ($saved[$field] ?? null) !== $value, ARRAY_FILTER_USE_BOTH));
+        // An optional field is taken as given: blank removes it.
+        foreach ($optional as $field) {
+            $value = trim(is_string($credentials[$field] ?? null) ? $credentials[$field] : '');
+
+            if ($value !== '') {
+                $merged[$field] = $value;
+            }
+        }
+
+        $removedFields = array_values(array_diff(array_intersect($optional, array_keys($saved)), array_keys($merged)));
+        $changedFields = [...$removedFields, ...array_keys(array_filter($merged, fn (string $value, string $field) => ($saved[$field] ?? null) !== $value, ARRAY_FILTER_USE_BOTH))];
         $environmentChanged = $account !== null && $account->environment !== $environment;
 
         // Renaming needs no call to the provider; new keys or a new environment do.

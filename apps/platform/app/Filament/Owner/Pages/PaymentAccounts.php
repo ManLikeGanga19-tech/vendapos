@@ -127,6 +127,7 @@ class PaymentAccounts extends Page implements HasTable
                         'transaction_type' => $record->credentials['transaction_type'] ?? null,
                         'shortcode' => $record->credentials['shortcode'] ?? null,
                         'party_b' => $record->credentials['party_b'] ?? null,
+                        'c2b_shortcode' => $record->credentials['c2b_shortcode'] ?? null,
                         'is_default' => $record->is_default,
                     ])
                     ->schema(fn (PaymentAccount $record) => $this->accountForm($record))
@@ -171,7 +172,7 @@ class PaymentAccounts extends Page implements HasTable
             (string) $data['name'],
             MobileMoneyProvider::MpesaKe,
             (string) ($data['environment'] ?? PaymentAccount::businessEnvironment()),
-            array_intersect_key($data, array_flip(DarajaGateway::CREDENTIAL_FIELDS)),
+            array_intersect_key($data, array_flip([...DarajaGateway::CREDENTIAL_FIELDS, ...DarajaGateway::OPTIONAL_FIELDS])),
             (bool) ($data['is_default'] ?? false) || ($accountId !== null && PaymentAccount::query()->whereKey($accountId)->where('is_default', true)->exists()),
             $this->staff()->id,
         );
@@ -222,6 +223,9 @@ class PaymentAccounts extends Page implements HasTable
             TextInput::make('party_b')->label(__('owner.payment_accounts.party_b'))
                 ->helperText(__('owner.payment_accounts.party_b_help'))
                 ->required()->regex('/^\d{5,7}$/'),
+            TextInput::make('c2b_shortcode')->label(__('owner.payment_accounts.c2b_shortcode'))
+                ->helperText(__('owner.payment_accounts.c2b_shortcode_help'))
+                ->regex('/^\d{5,7}$/'),
         ];
 
         foreach (self::SECRETS as $secret) {

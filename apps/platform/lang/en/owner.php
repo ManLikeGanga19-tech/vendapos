@@ -241,6 +241,8 @@ return [
         'shortcode_help' => 'The paybill number, or for a till the store number Safaricom gave you.',
         'party_b' => 'Number customers pay to',
         'party_b_help' => 'The paybill number, or the till number for Buy Goods.',
+        'c2b_shortcode' => 'Short code for money paid in directly (optional)',
+        'c2b_shortcode_help' => 'Only if Safaricom gave a different short code for C2B. Leave blank to use the business short code.',
         'consumer_key' => 'Consumer key',
         'consumer_secret' => 'Consumer secret',
         'passkey' => 'Passkey',

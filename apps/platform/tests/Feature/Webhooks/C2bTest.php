@@ -139,6 +139,28 @@ it('takes Safaricom’s all-zero answer as registered', function () {
         ->c2b_message->toBeNull();
 });
 
+it('registers and confirms under the C2B shortcode when the account has one', function () {
+    $this->tenant->run(fn () => $this->account->update(['credentials' => [...$this->account->credentials, 'c2b_shortcode' => '600996']]));
+    $token = registeredToken($this->tenant, $this->account);
+
+    postConfirmation($token, c2bBody(['BusinessShortCode' => '600996']))->assertOk();
+    postConfirmation($token, c2bBody(['TransID' => 'TJL7QW2E9S']))->assertOk();
+
+    Http::assertSent(fn (Request $request) => str_ends_with($request->url(), '/mpesa/c2b/v1/registerurl') && $request['ShortCode'] === '600996');
+    expect($this->tenant->run(fn () => MpesaConfirmation::query()->count()))->toBe(2);
+});
+
+it('keeps the C2B shortcode optional and drops it when cleared', function () {
+    Queue::fake();
+    Http::fake(['sandbox.safaricom.co.ke/oauth/v1/generate*' => Http::response(['access_token' => 'token', 'expires_in' => '3599'])]);
+    $save = fn (string $c2b) => $this->tenant->run(fn () => app(SavePaymentAccount::class)->handle($this->account->id, 'Main', MobileMoneyProvider::MpesaKe, 'sandbox', ['c2b_shortcode' => $c2b], true, null));
+
+    expect($save('600996')->credentials)->toHaveKey('c2b_shortcode', '600996')->toHaveKey('shortcode', '174379')
+        ->and($save('')->credentials)->not->toHaveKey('c2b_shortcode');
+
+    Queue::assertPushed(RegisterConfirmationUrls::class, 2);
+});
+
 it('stores a confirmation once, in shillings to cents, Nairobi time to UTC, phone still masked', function () {
     Event::fake([MpesaConfirmed::class]);
     $token = registeredToken($this->tenant, $this->account);

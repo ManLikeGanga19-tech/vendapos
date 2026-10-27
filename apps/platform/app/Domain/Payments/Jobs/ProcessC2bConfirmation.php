@@ -67,8 +67,10 @@ final class ProcessC2bConfirmation implements ShouldQueue
                 return;
             }
 
-            // A till's money may be confirmed under its store number or its till number.
-            if (! in_array($parsed['business_short_code'], [$account->credentials['shortcode'] ?? null, $account->credentials['party_b'] ?? null], true)) {
+            // A till's money may be confirmed under its store number, its till number or its own C2B shortcode.
+            $shortCodes = [$account->credentials['shortcode'] ?? null, $account->credentials['party_b'] ?? null, $account->credentials['c2b_shortcode'] ?? null];
+
+            if (! in_array($parsed['business_short_code'], array_filter($shortCodes), true)) {
                 $receipt->reject('shortcode_mismatch');
 
                 return;
