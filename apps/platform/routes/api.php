@@ -11,8 +11,10 @@ use App\Http\Api\V1\Controllers\ShowCatalogue;
 use App\Http\Api\V1\Controllers\ShowDevice;
 use App\Http\Api\V1\Controllers\ShowFloor;
 use App\Http\Api\V1\Controllers\ShowPayment;
+use App\Http\Api\V1\Controllers\ShowTickets;
 use App\Http\Api\V1\Controllers\ShowTillStaff;
 use App\Http\Api\V1\Controllers\SyncOrders;
+use App\Http\Api\V1\Controllers\SyncTickets;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,6 +39,13 @@ Route::prefix('v1')
         Route::post('orders/sync', SyncOrders::class)
             ->middleware(['ability:orders:sync', 'body.limit'])
             ->name('api.v1.orders.sync');
+        // Tickets are sales not yet paid, so they share the orders:sync ability.
+        Route::get('tickets', ShowTickets::class)
+            ->middleware('ability:orders:sync')
+            ->name('api.v1.tickets');
+        Route::post('tickets/sync', SyncTickets::class)
+            ->middleware(['ability:orders:sync', 'body.limit'])
+            ->name('api.v1.tickets.sync');
         Route::post('payments', RequestPayment::class)
             ->middleware(['ability:payments:initiate', 'tenant.active', 'body.limit'])
             ->name('api.v1.payments.store');

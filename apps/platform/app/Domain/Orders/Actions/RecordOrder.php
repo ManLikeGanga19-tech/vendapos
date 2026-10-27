@@ -103,6 +103,7 @@ final class RecordOrder
             'branch_id' => $context->branchId,
             'device_id' => $context->deviceId,
             'staff_id' => $data->staff_id,
+            'ticket_id' => $data->ticket_uuid,
             'sequence_number' => $data->sequence_number,
             'status' => $data->status,
             'placed_at' => Carbon::parse($data->placed_at)->utc(),
@@ -202,6 +203,7 @@ final class RecordOrder
         return [
             'order_id' => $order->id,
             'staff_id' => $order->staff_id,
+            'ticket_id' => $order->ticket_id,
             'sequence_number' => $order->sequence_number,
             'status' => $order->status->value,
             'placed_at' => $order->placed_at->toIso8601String(),

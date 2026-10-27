@@ -42,6 +42,8 @@ final class OrderData extends Data
         public int $subtotal_cents,
         public int $vat_cents,
         public int $total_cents,
+        // The ticket this sale pays (table service); null for a quick sale.
+        public ?string $ticket_uuid = null,
     ) {}
 
     /** @return list<TenderData> */
@@ -85,6 +87,7 @@ final class OrderData extends Data
             'subtotal_cents' => ['required', 'integer', 'min:0'],
             'vat_cents' => ['required', 'integer', 'min:0'],
             'total_cents' => ['required', 'integer', 'min:0'],
+            'ticket_uuid' => ['sometimes', 'nullable', 'string', 'uuid'],
         ];
     }
 

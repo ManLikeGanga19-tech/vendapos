@@ -28,6 +28,7 @@ use App\Domain\Tenancy\Models\Tenant;
 use App\Domain\Tenancy\Notifications\PaymentAccountChangedNotice;
 use App\Domain\Tenancy\Observers\TellTillsSetupChanged;
 use App\Domain\Tenancy\Observers\TellTillsStaffChanged;
+use App\Domain\Verticals\Jobs\CloseTicketOnSale;
 use App\Domain\Verticals\Models\DiningTable;
 use App\Domain\Verticals\Models\FloorArea;
 use App\Domain\Verticals\Observers\TellTillsFloorChanged;
@@ -97,6 +98,7 @@ class AppServiceProvider extends ServiceProvider
             SubmitSaleToEtims::dispatch($event->tenantId, $event->eventId);
             FlagPaymentsForCancelledOrder::dispatch($event->tenantId, $event->eventId);
             RecordMpesaTenders::dispatch($event->tenantId, $event->eventId);
+            CloseTicketOnSale::dispatch($event->tenantId, $event->eventId);
         });
 
         // A C2B confirmation stored: settle the typed codes waiting on it (T3d).
