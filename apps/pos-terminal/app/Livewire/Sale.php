@@ -10,6 +10,7 @@ use App\Api\Exceptions\ApiUnavailable;
 use App\Api\Exceptions\TillNotAuthorised;
 use App\Api\VendaApi;
 use App\Jobs\PrintReceiptJob;
+use App\Jobs\ReleaseTicketHoldJob;
 use App\Livewire\Concerns\FollowsTillLanguage;
 use App\Livewire\Concerns\NeedsSignedInStaff;
 use App\Livewire\Concerns\PicksLanguage;
@@ -27,6 +28,7 @@ use App\Sales\SaleRefused;
 use App\Security\KeyringUnavailable;
 use App\Staff\TillSession;
 use App\Sync\SyncStatus;
+use App\Tickets\HoldForPayment;
 use App\Tickets\PrintBill;
 use App\Tickets\SendOrder;
 use App\Tickets\TicketRefused;
@@ -275,7 +277,7 @@ final class Sale extends Component
         $this->notice = __('terminal.tickets.bill_printed', ['ticket' => $ticket->title()]);
     }
 
-    public function startPayment(TillSession $session, SendOrder $sendOrder): void
+    public function startPayment(TillSession $session, SendOrder $sendOrder, HoldForPayment $hold): void
     {
         $ticket = $this->openTicketModel();
 
@@ -305,6 +307,21 @@ final class Sale extends Component
             $ticket->update(['sale_id' => $this->saleId]);
         } elseif ($ticket !== null && $this->mpesaPaid === []) {
             $this->saleId = $ticket->sale_id;
+        }
+
+        // A ticket is paid once, on one till: the server must agree first.
+        if ($ticket !== null && $this->mpesaPaid === []) {
+            $outcome = $hold->handle($ticket, (string) $this->saleId);
+
+            if ($outcome !== HoldForPayment::HELD) {
+                $this->message = __("terminal.tickets.hold.{$outcome}");
+
+                if ($outcome === HoldForPayment::PAID) {
+                    $this->ticketId = null;
+                }
+
+                return;
+            }
         }
 
         $this->step = self::PAY;
@@ -352,6 +369,11 @@ final class Sale extends Component
             $this->message = __('terminal.sale.paid_in_part');
 
             return;
+        }
+
+        // No payment taken: another till may take this ticket's payment now.
+        if ($this->ticketId !== null && $this->saleId !== null) {
+            ReleaseTicketHoldJob::dispatch($this->ticketId, $this->saleId);
         }
 
         $this->step = self::CART;

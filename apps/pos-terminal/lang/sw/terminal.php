@@ -150,6 +150,11 @@ return [
         'close' => 'Ondoka kwenye tiketi hii',
         'send_first' => 'Tuma bidhaa mpya kwenye tiketi kwanza, kisha uchapishe bili.',
         'paid_elsewhere' => 'Tiketi hiyo imelipwa kwenye till nyingine.',
+        'hold' => [
+            'ticket_paid' => 'Tiketi hii tayari imelipwa. Haiwezi kulipwa tena.',
+            'ticket_being_paid' => 'Till nyingine inapokea malipo ya tiketi hii sasa hivi.',
+            'needs_internet' => 'Till nyingine zinaiona tiketi hii, kwa hiyo kuilipia kunahitaji intaneti. Jaribu tena till ikiwa mtandaoni.',
+        ],
         'refused' => [
             'not_allowed' => 'Huwezi kuchukua oda. Muulize mhudumu au meneja.',
             'empty' => 'Hakuna cha kutuma bado.',

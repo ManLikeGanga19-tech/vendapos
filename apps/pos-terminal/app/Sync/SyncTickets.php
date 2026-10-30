@@ -92,6 +92,7 @@ final class SyncTickets
                         'opened_at' => Carbon::parse($row['opened_at'])->utc(),
                         'bill_requested_at' => $row['bill_requested_at'] !== null ? Carbon::parse($row['bill_requested_at'])->utc() : null,
                         'sync_status' => Ticket::SYNCED,
+                        'on_server' => true,
                     ]);
                 } elseif ($local->sync_status === Ticket::SYNCED && $local->status !== Ticket::CLOSED) {
                     // Paid here but not yet on the server: it stays closed on this till.
@@ -163,6 +164,7 @@ final class SyncTickets
         }
 
         DB::transaction(function () use ($ticket, $result): void {
+            $ticket->update(['on_server' => true]);
             $ticket->lines()->where('sync_status', TicketLine::PENDING)->whereIn('id', $result['refused_lines'])->update(['sync_status' => TicketLine::REFUSED]);
             $ticket->lines()->where('sync_status', TicketLine::PENDING)->update(['sync_status' => TicketLine::SYNCED]);
 

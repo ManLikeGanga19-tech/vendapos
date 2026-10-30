@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Jobs\PrintBillJob;
 use App\Jobs\PushTicketsJob;
+use App\Jobs\ReleaseTicketHoldJob;
 use App\Livewire\Sale;
 use App\Models\DiningTable;
 use App\Models\FloorArea;
@@ -26,6 +27,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Sleep;
 use Illuminate\Support\Str;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Tests\Support\RecordingPrinterConnections;
 
@@ -381,5 +383,84 @@ describe('scan to pay on the bill', function () {
             ->and($order->tenders->map->only(['method', 'amount_cents', 'payment_uuid'])->all())->toBe([
                 ['method' => 'mpesa_push', 'amount_cents' => 70_000, 'payment_uuid' => $ticket->qr_payment_id],
             ]);
+    });
+});
+
+describe('a ticket is paid once', function () {
+    beforeEach(function () {
+        $this->ticket = sendTwoTuskersToTable4();
+        app(TillSession::class)->signIn($this->cashier);
+    });
+
+    function payTicket(Ticket $ticket): Testable
+    {
+        return Livewire::test(Sale::class)->call('showTickets')->call('openTicket', $ticket->id)->call('startPayment');
+    }
+
+    it('asks the server to hold the ticket for this sale before taking payment', function () {
+        $this->ticket->update(['on_server' => true, 'sync_status' => 'synced']);
+        Http::fake([TEST_API_URL.'/api/v1/tickets/*/hold' => Http::response(['status' => 'held'])]);
+
+        payTicket($this->ticket)->assertSet('step', Sale::PAY);
+
+        $saleId = $this->ticket->refresh()->sale_id;
+        Http::assertSent(fn (Request $request) => $request->method() === 'POST'
+            && str_ends_with($request->url(), "/tickets/{$this->ticket->id}/hold")
+            && $request['sale_uuid'] === $saleId);
+    });
+
+    it('refuses a ticket paid on another till, and drops it from this till at once', function () {
+        $this->ticket->update(['on_server' => true, 'sync_status' => 'synced']);
+        Http::fake([TEST_API_URL.'/api/v1/tickets/*/hold' => Http::response(['code' => 'ticket_paid'], 409)]);
+
+        payTicket($this->ticket)
+            ->assertSet('step', Sale::CART)
+            ->assertSet('ticketId', null)
+            ->assertSee(__('terminal.tickets.hold.ticket_paid'));
+
+        expect($this->ticket->refresh()->status)->toBe(Ticket::CLOSED)
+            ->and(Order::query()->count())->toBe(0);
+    });
+
+    it('refuses while another till is taking payment for it', function () {
+        $this->ticket->update(['on_server' => true, 'sync_status' => 'synced']);
+        Http::fake([TEST_API_URL.'/api/v1/tickets/*/hold' => Http::response(['code' => 'ticket_being_paid'], 409)]);
+
+        payTicket($this->ticket)->assertSet('step', Sale::CART)->assertSee(__('terminal.tickets.hold.ticket_being_paid'));
+    });
+
+    it('needs the internet to pay a ticket other tills can see, but not one only this till has', function () {
+        Http::fake(fn () => throw new ConnectionException('Network is unreachable'));
+
+        // Sent from this till and never reached the server: no other till can have paid it.
+        payTicket($this->ticket)->assertSet('step', Sale::PAY);
+
+        $this->ticket->update(['on_server' => true]);
+        payTicket($this->ticket)->assertSet('step', Sale::CART)->assertSee(__('terminal.tickets.hold.needs_internet'));
+    });
+
+    it('sends a ticket the server does not have yet, then holds it', function () {
+        $holds = 0;
+        Http::fake([
+            TEST_API_URL.'/api/v1/tickets/*/hold' => function () use (&$holds) {
+                return ++$holds === 1 ? Http::response(['code' => 'unknown_ticket'], 404) : Http::response(['status' => 'held']);
+            },
+            TEST_API_URL.'/api/v1/tickets/sync' => fn (Request $request) => Http::response(['results' => array_map(
+                fn (array $ticket) => ['uuid' => $ticket['uuid'], 'status' => 'accepted', 'ticket_status' => 'open'],
+                $request['tickets'],
+            )]),
+        ]);
+
+        payTicket($this->ticket)->assertSet('step', Sale::PAY);
+
+        expect($holds)->toBe(2)->and($this->ticket->refresh()->on_server)->toBeTrue();
+    });
+
+    it('lets the hold go when the cashier goes back without taking payment', function () {
+        Http::fake([TEST_API_URL.'/api/v1/tickets/*/hold' => Http::response(['status' => 'held'])]);
+
+        payTicket($this->ticket)->call('backToCart')->assertSet('step', Sale::CART);
+
+        Queue::assertPushed(ReleaseTicketHoldJob::class, fn (ReleaseTicketHoldJob $job) => $job->ticketId === $this->ticket->id && $job->saleId === $this->ticket->refresh()->sale_id);
     });
 });

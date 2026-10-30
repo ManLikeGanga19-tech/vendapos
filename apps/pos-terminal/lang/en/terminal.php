@@ -149,6 +149,11 @@ return [
         'close' => 'Leave this ticket',
         'send_first' => 'Send the new items to the ticket first, then print the bill.',
         'paid_elsewhere' => 'That ticket was paid on another till.',
+        'hold' => [
+            'ticket_paid' => 'This ticket is already paid. It can’t be paid again.',
+            'ticket_being_paid' => 'Another till is taking payment for this ticket right now.',
+            'needs_internet' => 'Other tills can see this ticket, so paying it needs the internet. Try again when the till is online.',
+        ],
         'refused' => [
             'not_allowed' => 'You can’t take orders. Ask a waiter or manager.',
             'empty' => 'Nothing to send yet.',

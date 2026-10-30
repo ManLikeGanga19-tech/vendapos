@@ -282,6 +282,39 @@ final class VendaApi
         ])));
     }
 
+    /**
+     * Asks the server to hold a ticket for this sale before taking payment.
+     * Its refusals are answers, not errors: a 409 says the ticket is paid or
+     * being paid, a 404 that the server does not have the ticket yet.
+     *
+     * @return 'held'|'ticket_paid'|'ticket_being_paid'|'unknown_ticket'
+     *
+     * @throws ApiUnavailable|TillNotAuthorised|ApiNotConfigured
+     */
+    public function holdTicket(string $ticketId, string $saleId): string
+    {
+        try {
+            $response = $this->authorised()->post("tickets/{$ticketId}/hold", ['sale_uuid' => $saleId]);
+        } catch (ConnectionException $e) {
+            throw new ApiUnavailable('The server could not be reached.', previous: $e);
+        }
+
+        $code = $response->json('code');
+
+        return match (true) {
+            $response->successful() => 'held',
+            $response->status() === 409 && in_array($code, ['ticket_paid', 'ticket_being_paid'], true) => $code,
+            $response->status() === 404 => 'unknown_ticket',
+            in_array($response->status(), [401, 403], true) => throw new TillNotAuthorised('The server refused this till.'),
+            default => throw new ApiUnavailable("The server answered {$response->status()}."),
+        };
+    }
+
+    public function releaseTicket(string $ticketId, string $saleId): void
+    {
+        $this->send(fn () => $this->authorised()->delete("tickets/{$ticketId}/hold", ['sale_uuid' => $saleId]));
+    }
+
     /** A scan-to-pay payment for a bill: no phone, the server makes the QR (paybill accounts only). */
     public function requestQrPayment(string $uuid, string $orderUuid, int $amountCents): PaymentState
     {

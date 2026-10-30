@@ -27,6 +27,7 @@ use VendaPOS\Core\Tax\OrderTotals;
  * @property string|null $order_id
  * @property string|null $sale_id the UUID the sale paying it will have, once a bill QR named it
  * @property string|null $qr_payment_id the latest bill's scan-to-pay payment
+ * @property bool $on_server whether the server, and so other tills, have it
  * @property string $sync_status
  * @property string|null $sync_reason
  */
@@ -51,6 +52,7 @@ final class Ticket extends Model
         return [
             'opened_at' => 'datetime',
             'bill_requested_at' => 'datetime',
+            'on_server' => 'boolean',
         ];
     }
 
