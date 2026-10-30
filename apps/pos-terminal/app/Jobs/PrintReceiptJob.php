@@ -24,13 +24,21 @@ final class PrintReceiptJob implements ShouldQueue
 
     public const string LAST_ERROR = 'printer.last_error';
 
+    /**
+     * Receipts and bills have a worker of their own (config/nativephp.php), so
+     * a print never waits behind a sync round held up by a slow connection.
+     */
+    public const string QUEUE = 'printing';
+
     public int $tries = 1;
 
     public function __construct(
         public readonly string $orderId,
         public readonly bool $openDrawer = false,
         public readonly bool $reprint = false,
-    ) {}
+    ) {
+        $this->onQueue(self::QUEUE);
+    }
 
     public function handle(ReceiptPrinter $printer): void
     {

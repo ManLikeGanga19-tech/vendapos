@@ -44,11 +44,19 @@ return [
         ],
     ],
     'queue_workers' => [
+        // Sync with the server: rounds can wait seconds on a slow connection.
         'default' => [
             'queues' => ['default'],
             'memory_limit' => 128,
             'timeout' => 60,
             'sleep' => 3,
+        ],
+        // Receipts and bills only, picked up within half a second (App\Jobs\PrintReceiptJob::QUEUE).
+        'printing' => [
+            'queues' => ['printing'],
+            'memory_limit' => 128,
+            'timeout' => 30,
+            'sleep' => 0.5,
         ],
     ],
     'prebuild' => [],

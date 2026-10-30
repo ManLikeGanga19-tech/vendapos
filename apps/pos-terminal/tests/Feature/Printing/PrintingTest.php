@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Jobs\PrintBillJob;
 use App\Jobs\PrintReceiptJob;
 use App\Livewire\PrinterSetup;
 use App\Livewire\Sale;
@@ -17,6 +18,7 @@ use App\Security\SecretBox;
 use App\Staff\TillSession;
 use App\Sync\SyncStaff;
 use App\Till\Till;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Tests\Support\RecordingPrinterConnections;
@@ -108,6 +110,18 @@ it('keeps the sale when the printer is unplugged, and says so on the screen', fu
         ->and(SyncState::read(PrintReceiptJob::LAST_ERROR))->toBe('Printer not found');
 
     $screen->call('$refresh')->assertSee(__('terminal.sale.done.print_failed', ['reason' => 'Printer not found']));
+});
+
+it('prints on its own queue, so a receipt never waits behind a sync', function () {
+    Queue::fake();
+
+    sellChaiForCash(200);
+    PrintBillJob::dispatch((string) Str::uuid7());
+
+    Queue::assertPushedOn(PrintReceiptJob::QUEUE, PrintReceiptJob::class);
+    Queue::assertPushedOn(PrintReceiptJob::QUEUE, PrintBillJob::class);
+    Queue::assertNotPushed(PrintReceiptJob::class, fn (PrintReceiptJob $job) => $job->queue !== PrintReceiptJob::QUEUE);
+    expect(config('nativephp.queue_workers.printing.queues'))->toBe([PrintReceiptJob::QUEUE]);
 });
 
 it('prints nothing when no printer is set up', function () {

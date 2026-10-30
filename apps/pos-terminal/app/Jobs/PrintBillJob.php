@@ -23,7 +23,10 @@ final class PrintBillJob implements ShouldQueue
 
     public int $tries = 1;
 
-    public function __construct(public readonly string $ticketId) {}
+    public function __construct(public readonly string $ticketId)
+    {
+        $this->onQueue(PrintReceiptJob::QUEUE);
+    }
 
     public function handle(ReceiptPrinter $printer): void
     {
