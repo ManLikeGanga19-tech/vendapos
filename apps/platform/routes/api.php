@@ -14,6 +14,7 @@ use App\Http\Api\V1\Controllers\ShowPayment;
 use App\Http\Api\V1\Controllers\ShowTickets;
 use App\Http\Api\V1\Controllers\ShowTillStaff;
 use App\Http\Api\V1\Controllers\SyncOrders;
+use App\Http\Api\V1\Controllers\SyncReprints;
 use App\Http\Api\V1\Controllers\SyncTickets;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +47,9 @@ Route::prefix('v1')
         Route::post('tickets/sync', SyncTickets::class)
             ->middleware(['ability:orders:sync', 'body.limit'])
             ->name('api.v1.tickets.sync');
+        Route::post('receipts/reprints/sync', SyncReprints::class)
+            ->middleware(['ability:orders:sync', 'body.limit'])
+            ->name('api.v1.receipts.reprints.sync');
         Route::post('payments', RequestPayment::class)
             ->middleware(['ability:payments:initiate', 'tenant.active', 'body.limit'])
             ->name('api.v1.payments.store');

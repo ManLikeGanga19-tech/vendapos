@@ -19,7 +19,7 @@ final class ShowDevice
         $branch = Branch::query()->findOrFail($device->branch_id);
 
         return response()->json([
-            'device' => ['id' => $device->id, 'name' => $device->name],
+            'device' => ['id' => $device->id, 'name' => $device->name, 'till_code' => $device->tillCode()],
             'branch' => [
                 'id' => $branch->id,
                 'name' => $branch->name,

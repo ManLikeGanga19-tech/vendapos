@@ -40,7 +40,7 @@ final class PairDevice
         Log::channel('security')->info('api.device_paired', ['tenant_id' => $tenant->getTenantKey(), 'device_id' => $device->id, 'ip' => $request->ip()]);
 
         return response()->json([
-            'device' => ['id' => $device->id, 'name' => $device->name],
+            'device' => ['id' => $device->id, 'name' => $device->name, 'till_code' => $device->tillCode()],
             'business' => ['name' => (string) $tenant->getAttribute('name')],
             'branch' => [
                 'id' => $branch->id,

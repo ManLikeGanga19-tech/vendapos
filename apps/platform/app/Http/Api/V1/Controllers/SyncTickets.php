@@ -24,7 +24,7 @@ final class SyncTickets
     {
         /** @var Device $device */
         $device = $request->user('sanctum');
-        $context = new DeviceContext($device->tenant_id, $device->branch_id, $device->id);
+        $context = DeviceContext::of($device);
 
         /** @var list<array<string, mixed>> $tickets */
         $tickets = $request->validated('tickets');

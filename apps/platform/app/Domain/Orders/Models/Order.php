@@ -21,6 +21,7 @@ use VendaPOS\Core\ValueObjects\Money;
  * @property string|null $staff_id who made the sale; null only for orders from before tills sent it
  * @property string|null $ticket_id the ticket this sale paid (table service)
  * @property int $sequence_number
+ * @property string|null $receipt_number "T2-000123"; null only for sales from a till the server no longer knows
  * @property OrderStatus $status
  * @property Carbon $placed_at
  * @property PaymentType|null $payment_type
@@ -63,6 +64,12 @@ class Order extends Model
     public function tenders(): HasMany
     {
         return $this->hasMany(OrderTender::class)->orderBy('position');
+    }
+
+    /** @return HasMany<ReceiptReprint, $this> */
+    public function reprints(): HasMany
+    {
+        return $this->hasMany(ReceiptReprint::class);
     }
 
     public function total(): Money

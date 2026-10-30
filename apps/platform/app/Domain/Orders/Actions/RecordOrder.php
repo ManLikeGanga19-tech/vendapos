@@ -11,6 +11,7 @@ use App\Domain\Orders\Events\OrderVoided;
 use App\Domain\Orders\Models\Order;
 use App\Domain\Orders\Models\OrderLine;
 use App\Domain\Orders\Models\OrderTender;
+use App\Domain\Orders\Support\ReceiptNumber;
 use App\Domain\Payments\Actions\FindTenderPayments;
 use App\Domain\Tenancy\Actions\FindUnknownStaff;
 use App\Domain\Tenancy\Data\DeviceContext;
@@ -105,6 +106,7 @@ final class RecordOrder
             'staff_id' => $data->staff_id,
             'ticket_id' => $data->ticket_uuid,
             'sequence_number' => $data->sequence_number,
+            'receipt_number' => ReceiptNumber::format($context->tillNumber, $data->sequence_number),
             'status' => $data->status,
             'placed_at' => Carbon::parse($data->placed_at)->utc(),
             'payment_type' => $data->paymentType(),
@@ -205,6 +207,7 @@ final class RecordOrder
             'staff_id' => $order->staff_id,
             'ticket_id' => $order->ticket_id,
             'sequence_number' => $order->sequence_number,
+            'receipt_number' => $order->receipt_number,
             'status' => $order->status->value,
             'placed_at' => $order->placed_at->toIso8601String(),
             'payment_type' => $order->payment_type?->value,

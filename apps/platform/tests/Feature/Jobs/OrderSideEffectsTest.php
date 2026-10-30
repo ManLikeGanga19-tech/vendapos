@@ -222,7 +222,7 @@ it('queues nothing for an order whose transaction rolled back', function () {
     $sale = saleOf([[$this->nyama, 1]]);
     Queue::fake();
     // tenant_id is varchar(255): an over-long value makes the outbox insert fail mid-transaction.
-    $context = new DeviceContext(str_repeat('x', 300), $this->branch->id, $this->enrolment->device->id);
+    $context = new DeviceContext(str_repeat('x', 300), $this->branch->id, $this->enrolment->device->id, $this->enrolment->device->till_number);
 
     expect(fn () => $this->tenant->run(fn () => app(RecordOrder::class)->handle(OrderData::from($sale), $context)))
         ->toThrow(QueryException::class);

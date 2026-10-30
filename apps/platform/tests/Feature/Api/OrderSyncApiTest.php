@@ -216,7 +216,7 @@ it('keeps each tenant’s orders in its own schema', function () {
 it('commits nothing when the outbox write fails', function () {
     $sale = OrderData::from(saleOf([[$this->nyama, 1]]));
     // tenant_id is varchar(255): an over-long value makes the outbox insert fail mid-transaction.
-    $context = new DeviceContext(str_repeat('x', 300), $this->branch->id, $this->enrolment->device->id);
+    $context = new DeviceContext(str_repeat('x', 300), $this->branch->id, $this->enrolment->device->id, $this->enrolment->device->till_number);
 
     expect(fn () => $this->tenant->run(fn () => app(RecordOrder::class)->handle($sale, $context)))
         ->toThrow(QueryException::class);

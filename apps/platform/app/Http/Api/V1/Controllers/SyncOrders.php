@@ -26,7 +26,7 @@ final class SyncOrders
     {
         /** @var Device $device */
         $device = $request->user('sanctum');
-        $context = new DeviceContext($device->tenant_id, $device->branch_id, $device->id);
+        $context = DeviceContext::of($device);
 
         /** @var list<array<string, mixed>> $orders */
         $orders = $request->validated('orders');

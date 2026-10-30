@@ -29,7 +29,7 @@ final class RequestPayment
         try {
             [$payment, $created] = $requestPayment->handle(
                 PaymentRequestData::from($request->validated()),
-                new DeviceContext($device->tenant_id, $device->branch_id, $device->id),
+                DeviceContext::of($device),
             );
         } catch (PaymentConflict) {
             return response()->json(['message' => 'This payment UUID is already used for a different payment.'], Response::HTTP_CONFLICT);
