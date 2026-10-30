@@ -34,6 +34,11 @@ final class ReconcilePaymentsCommand extends Command
                     ->orWhere(fn (Builder $query) => $query
                         ->whereNull('provider_request_id')
                         ->where('created_at', '<=', now()->subMinutes((int) config('vendapos.payments.reconcile.never_pushed_after_minutes')))))
+                // Safaricom asked us to slow down: wait, unless it is time to give up on the payment.
+                ->where(fn (Builder $query) => $query
+                    ->whereNull('query_backoff_until')
+                    ->orWhere('query_backoff_until', '<=', now())
+                    ->orWhere('initiated_at', '<=', now()->subMinutes((int) config('vendapos.payments.reconcile.give_up_after_minutes'))))
                 ->pluck('id')
                 ->each(function (string $paymentId) use ($tenant, &$queued) {
                     QueryPaymentStatus::dispatch((string) $tenant->getTenantKey(), $paymentId);

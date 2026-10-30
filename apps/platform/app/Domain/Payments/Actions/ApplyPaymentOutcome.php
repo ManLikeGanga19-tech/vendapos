@@ -15,8 +15,11 @@ use VendaPOS\Core\Enums\PaymentStatus;
 /**
  * Applies a provider's answer (from a push, callback or status query) to a
  * payment. Only a pending payment changes, so the first final answer wins and
- * replays are no-ops. A success whose amount differs from what was asked for
- * is never applied: the payment stays pending for a status query to settle.
+ * replays are no-ops, with one exception: we time a payment out when the
+ * provider gives no answer in time, so a later "paid" is still recorded. The
+ * money came in; no sale took it, so the owner is told (unclaimed push).
+ * A success whose amount differs from what was asked for is never applied:
+ * the payment stays pending for a status query to settle.
  */
 final class ApplyPaymentOutcome
 {
@@ -35,7 +38,9 @@ final class ApplyPaymentOutcome
                 return $payment;
             }
 
-            if ($payment->status->isFinal() || $result->status === PaymentStatus::Pending) {
+            $lateSuccess = $payment->status === PaymentStatus::TimedOut && $result->status === PaymentStatus::Succeeded;
+
+            if (($payment->status->isFinal() && ! $lateSuccess) || $result->status === PaymentStatus::Pending) {
                 return $payment;
             }
 

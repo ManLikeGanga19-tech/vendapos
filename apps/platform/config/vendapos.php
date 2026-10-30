@@ -173,6 +173,8 @@ return [
             'never_pushed_after_minutes' => 10,
             // Older pending payments are left for manual review.
             'stop_after_hours' => 24,
+            // After Safaricom answers 429 (too many requests), ask about that payment again only after this.
+            'backoff_seconds' => 180,
         ],
     ],
 

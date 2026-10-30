@@ -36,6 +36,7 @@ use VendaPOS\Core\ValueObjects\Money;
  * @property string|null $failure_reason
  * @property Carbon|null $initiated_at
  * @property Carbon|null $completed_at
+ * @property Carbon|null $query_backoff_until no status query before this (the provider said 429)
  * @property Carbon $created_at
  */
 class Payment extends Model
@@ -59,6 +60,7 @@ class Payment extends Model
             'callback_token' => 'encrypted',
             'initiated_at' => 'datetime',
             'completed_at' => 'datetime',
+            'query_backoff_until' => 'datetime',
         ];
     }
 
