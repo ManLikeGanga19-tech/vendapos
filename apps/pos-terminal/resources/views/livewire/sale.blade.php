@@ -239,6 +239,9 @@
                         <p class="mx-3 mb-2 border border-line px-3 py-2 text-sm text-muted" wire:poll.3s="checkBillQr" role="status">{{ __('terminal.sale.qr.waiting') }}</p>
                     @endif
                     <div class="max-h-[70%] shrink-0 space-y-2 overflow-y-auto border-t border-line p-3">
+                        @if ($mpesaPaid === [])
+                            <button type="button" wire:click="backToCart" class="key h-12 w-full text-base">← {{ __('terminal.sale.back_to_order') }}</button>
+                        @endif
                         <p class="text-sm text-muted">{{ __('terminal.sale.cash') }}</p>
                         <div class="flex items-center justify-between border border-line bg-surface px-3 py-2">
                             <span class="text-muted">{{ __('terminal.sale.given') }}</span>
@@ -282,10 +285,16 @@
                     <div class="space-y-3 border-t border-line p-4 text-center" wire:poll.2s="checkMpesa" role="status">
                         <p class="text-lg font-semibold">{{ __('terminal.sale.mpesa.waiting') }}</p>
                         <p class="font-mono text-3xl">{{ \VendaPOS\Core\ValueObjects\Money::fromCents($waiting['amount_cents'] ?? 0)->format() }}</p>
+                        @if (isset($waiting['phone']))
+                            <p class="font-mono text-base">{{ __('terminal.sale.mpesa.sent_to', ['phone' => \App\Livewire\Sale::maskedPhone($waiting['phone'])]) }}</p>
+                        @endif
                         <p class="text-sm text-muted">{{ __('terminal.sale.mpesa.waiting_help') }}</p>
                         @if ($waitedLongEnough)
                             <p class="text-sm text-danger">{{ __('terminal.sale.mpesa.slow') }}</p>
-                            <button type="button" wire:click="stopWaiting" class="key h-12 w-full text-base">{{ __('terminal.sale.mpesa.stop') }}</button>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button" wire:click="sendAgain" class="key h-12 text-base" @disabled(! $online)>{{ __('terminal.sale.mpesa.send_again') }}</button>
+                                <button type="button" wire:click="stopWaiting" class="key h-12 text-base">{{ __('terminal.sale.mpesa.stop') }}</button>
+                            </div>
                         @endif
                     </div>
                 @endif

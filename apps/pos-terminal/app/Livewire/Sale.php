@@ -74,7 +74,8 @@ final class Sale extends Component
     public const string TABLE = 'table';
 
     /** How long the till waits on the customer's phone before offering to stop. */
-    public const int MPESA_PATIENCE_SECONDS = 120;
+    /** When the cashier may stop waiting or send the prompt again; Safaricom's prompt itself lasts about a minute. */
+    public const int MPESA_PATIENCE_SECONDS = 20;
 
     /** @var array<string, int> item ID => quantity, in the order added */
     public array $cart = [];
@@ -109,7 +110,7 @@ final class Sale extends Component
     /** In whole shillings. */
     public string $codeAmount = '';
 
-    /** @var array{uuid: string, amount_cents: int, started_at: int}|null the push being waited on */
+    /** @var array{uuid: string, amount_cents: int, started_at: int, phone?: string}|null the push being waited on */
     public ?array $waiting = null;
 
     /** Cash handed over, in whole shillings as typed. */
@@ -433,7 +434,7 @@ final class Sale extends Component
             return;
         }
 
-        $this->waiting = ['uuid' => $uuid, 'amount_cents' => $amount, 'started_at' => now()->getTimestamp()];
+        $this->waiting = ['uuid' => $uuid, 'amount_cents' => $amount, 'started_at' => now()->getTimestamp(), 'phone' => $phone];
         $this->step = self::MPESA;
         $this->message = null;
     }
@@ -486,6 +487,33 @@ final class Sale extends Component
             $this->waiting = null;
             $this->message = __('terminal.sale.mpesa.stopped');
         }
+    }
+
+    /**
+     * The customer never saw the prompt: send a new one to the same number for
+     * the same amount. The first stays open on the server; if it is paid after
+     * all, the owner sees money with no sale, as for stopping.
+     */
+    public function sendAgain(VendaApi $api): void
+    {
+        if ($this->step !== self::MPESA || ! $this->waitedLongEnough()) {
+            return;
+        }
+
+        $amount = (int) ($this->waiting['amount_cents'] ?? 0);
+        $this->step = self::PAY;
+        $this->waiting = null;
+        $this->mpesaAmount = (string) intdiv($amount, 100);
+        $this->requestMpesa($api);
+    }
+
+    /** "07•• ••• 957": enough for the cashier to check the number with the customer. */
+    public static function maskedPhone(?string $e164): string
+    {
+        $digits = preg_replace('/\D/', '', (string) $e164) ?? '';
+        $local = str_starts_with($digits, '254') ? '0'.substr($digits, 3) : $digits;
+
+        return strlen($local) < 7 ? $local : substr($local, 0, 2).'•• ••• '.substr($local, -3);
     }
 
     /**

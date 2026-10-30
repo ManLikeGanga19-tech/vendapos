@@ -223,7 +223,7 @@ it('keeps the sale fixed once M-Pesa paid part of it', function () {
         ->assertNoRedirect();
 });
 
-it('keeps waiting through a network blip, and only offers to stop after two minutes', function () {
+it('keeps waiting through a network blip, and offers to stop once the prompt has had time', function () {
     fakePayments(['pending']);
 
     $screen = Livewire::test(Sale::class)
@@ -234,11 +234,12 @@ it('keeps waiting through a network blip, and only offers to stop after two minu
         ->call('stopWaiting')
         ->assertSet('step', Sale::MPESA);
 
-    // The screen polls every 2 seconds; here every 30, through a dropped connection.
+    // The screen polls every 2 seconds; here every 10, through a dropped connection.
     Http::fake(fn () => throw new ConnectionException('Network is unreachable'));
 
-    foreach (range(1, Sale::MPESA_PATIENCE_SECONDS / 30) as $poll) {
-        $this->travel(30)->seconds();
+    for ($waited = 0; $waited < Sale::MPESA_PATIENCE_SECONDS; $waited += 10) {
+        $screen->assertDontSee(__('terminal.sale.mpesa.stop'));
+        $this->travel(10)->seconds();
         $screen->call('checkMpesa')->assertSet('step', Sale::MPESA);
     }
 
@@ -248,6 +249,50 @@ it('keeps waiting through a network blip, and only offers to stop after two minu
         ->assertSet('step', Sale::PAY)
         ->assertSee(__('terminal.sale.mpesa.stopped'));
 });
+
+it('shows where the prompt went, and sends it again to the same number for the same amount', function () {
+    fakePayments(['pending']);
+
+    $screen = Livewire::test(Sale::class)
+        ->call('add', MANDAZI)
+        ->call('startPayment')
+        ->set('phone', '0712 345 957')
+        ->call('requestMpesa')
+        ->assertSee(__('terminal.sale.mpesa.sent_to', ['phone' => '07•• ••• 957']))
+        // Too soon: the first prompt may still reach the customer.
+        ->call('sendAgain')
+        ->assertSet('step', Sale::MPESA);
+
+    $first = $screen->get('waiting')['uuid'];
+    $this->travel(Sale::MPESA_PATIENCE_SECONDS)->seconds();
+
+    $screen->call('$refresh')
+        ->assertSee(__('terminal.sale.mpesa.send_again'))
+        ->call('sendAgain')
+        ->assertSet('step', Sale::MPESA);
+
+    expect($screen->get('waiting')['uuid'])->not->toBe($first);
+    $posts = Http::recorded(fn (Request $request) => $request->method() === 'POST' && str_ends_with($request->url(), '/api/v1/payments'));
+    expect($posts)->toHaveCount(2)
+        ->and($posts->map(fn (array $pair) => [$pair[0]['phone'], $pair[0]['amount_cents'], $pair[0]['order_uuid']])->unique()->count())->toBe(1);
+});
+
+it('offers a clear way back to the order before anything is paid', function () {
+    Livewire::test(Sale::class)
+        ->call('add', MANDAZI)
+        ->call('startPayment')
+        ->assertSee(__('terminal.sale.back_to_order'))
+        ->call('backToCart')
+        ->assertSet('step', Sale::CART);
+});
+
+it('masks a phone number to its first two and last three digits', function (?string $phone, string $masked) {
+    expect(Sale::maskedPhone($phone))->toBe($masked);
+})->with([
+    'kenyan mobile' => ['+254712345957', '07•• ••• 957'],
+    'airtel' => ['+254733000123', '07•• ••• 123'],
+    'nothing' => [null, ''],
+]);
 
 it('takes a typed M-Pesa code offline, with the cents in cash', function () {
     Http::fake(fn () => throw new ConnectionException('Network is unreachable'));
