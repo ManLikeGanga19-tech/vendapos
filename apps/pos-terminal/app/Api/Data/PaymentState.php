@@ -17,6 +17,10 @@ final readonly class PaymentState
         public int $amountCents,
         public ?string $providerReference,
         public ?string $failureReason,
+        // Set while pending too, e.g. qr_failed: Safaricom could not make the QR.
+        public ?string $failureCode = null,
+        // A scan-to-pay payment's QR for the bill; null for a push.
+        public ?BillQr $qr = null,
     ) {}
 
     public function isPending(): bool

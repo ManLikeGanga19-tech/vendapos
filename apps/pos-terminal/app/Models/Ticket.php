@@ -25,6 +25,8 @@ use VendaPOS\Core\Tax\OrderTotals;
  * @property Carbon $opened_at
  * @property Carbon|null $bill_requested_at
  * @property string|null $order_id
+ * @property string|null $sale_id the UUID the sale paying it will have, once a bill QR named it
+ * @property string|null $qr_payment_id the latest bill's scan-to-pay payment
  * @property string $sync_status
  * @property string|null $sync_reason
  */

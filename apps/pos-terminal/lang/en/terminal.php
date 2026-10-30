@@ -72,6 +72,11 @@ return [
         'complete' => 'Complete sale',
         'cash_short' => 'Not enough cash: :amount is still to pay.',
         'paid_in_part' => 'Part of this sale is already paid by M-Pesa, so it can no longer be changed. Take the rest.',
+        'qr' => [
+            'waiting' => 'The bill has an M-Pesa QR. If the customer scans it, the payment shows here by itself.',
+            'paid' => 'M-Pesa QR :reference',
+            'paid_notice' => 'The bill’s QR is paid (:reference). Tap Complete sale.',
+        ],
         'mpesa' => [
             'title' => 'M-Pesa',
             'needs_internet' => 'needs internet',
@@ -161,6 +166,8 @@ return [
         'title' => 'BILL',
         'not_invoice' => 'Not a tax invoice',
         'to_pay' => 'TO PAY',
+        'scan_to_pay' => 'Scan with the M-Pesa app to pay KES :amount',
+        'pay_to' => 'Or pay to paybill :paybill, account :account',
         'footer' => 'Your receipt follows payment.',
     ],
 

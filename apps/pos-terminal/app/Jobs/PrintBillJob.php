@@ -9,13 +9,15 @@ use App\Models\Ticket;
 use App\Printing\PrinterSettings;
 use App\Printing\PrintFailed;
 use App\Printing\ReceiptPrinter;
+use App\Tickets\PrepareBillQr;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Prints a ticket's bill for the guest to check before paying. A failure is
- * kept for the screen to show, as for receipts; the bill can be printed again.
+ * Prints a ticket's bill for the guest to check before paying, with a QR to
+ * scan to pay when the branch takes M-Pesa on a paybill. A failure is kept for
+ * the screen to show, as for receipts; the bill can be printed again.
  */
 final class PrintBillJob implements ShouldQueue
 {
@@ -28,7 +30,7 @@ final class PrintBillJob implements ShouldQueue
         $this->onQueue(PrintReceiptJob::QUEUE);
     }
 
-    public function handle(ReceiptPrinter $printer): void
+    public function handle(ReceiptPrinter $printer, PrepareBillQr $qr): void
     {
         $ticket = Ticket::query()->find($this->ticketId);
 
@@ -37,7 +39,7 @@ final class PrintBillJob implements ShouldQueue
         }
 
         try {
-            $printer->bill($ticket);
+            $printer->bill($ticket, $qr->handle($ticket));
             SyncState::write(PrintReceiptJob::LAST_ERROR, null);
         } catch (PrintFailed $e) {
             SyncState::write(PrintReceiptJob::LAST_ERROR, $e->getMessage());

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api;
 
+use App\Api\Data\BillQr;
 use App\Api\Data\BranchInfo;
 use App\Api\Data\CatalogueSnapshot;
 use App\Api\Data\DeviceStatus;
@@ -281,6 +282,18 @@ final class VendaApi
         ])));
     }
 
+    /** A scan-to-pay payment for a bill: no phone, the server makes the QR (paybill accounts only). */
+    public function requestQrPayment(string $uuid, string $orderUuid, int $amountCents): PaymentState
+    {
+        return self::paymentState($this->send(fn () => $this->authorised()->post('payments', [
+            'uuid' => $uuid,
+            'order_uuid' => $orderUuid,
+            'provider' => 'mpesa_ke',
+            'channel' => 'qr',
+            'amount_cents' => $amountCents,
+        ])));
+    }
+
     public function payment(string $uuid): PaymentState
     {
         return self::paymentState($this->send(fn () => $this->authorised()->get("payments/{$uuid}")));
@@ -377,6 +390,13 @@ final class VendaApi
             amountCents: (int) data_get($json, 'amount_cents'),
             providerReference: self::nullableString($json, 'provider_reference'),
             failureReason: self::nullableString($json, 'failure_reason'),
+            failureCode: self::nullableString($json, 'failure_code'),
+            qr: is_array($json['qr'] ?? null) ? new BillQr(
+                png: self::nullableString($json, 'qr.png'),
+                paybill: self::nullableString($json, 'qr.paybill'),
+                account: self::nullableString($json, 'qr.account'),
+                amountCents: (int) data_get($json, 'amount_cents'),
+            ) : null,
         );
     }
 

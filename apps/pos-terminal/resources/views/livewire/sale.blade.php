@@ -199,7 +199,7 @@
                     <div class="flex justify-between text-muted"><dt>{{ __('terminal.sale.vat') }}</dt><dd class="font-mono">{{ $totals->vat->format() }}</dd></div>
                     @foreach ($mpesaPaid as $index => $paid)
                         <div wire:key="paid-{{ $index }}" class="flex items-center justify-between gap-2 text-ok">
-                            <dt>{{ __($paid['method'] === 'mpesa_code' ? 'terminal.sale.code.paid' : 'terminal.sale.mpesa.paid', ['reference' => $paid['reference'] ?? '']) }}</dt>
+                            <dt>{{ __(match (true) { $paid['method'] === 'mpesa_code' => 'terminal.sale.code.paid', ($paid['via'] ?? null) === 'qr' => 'terminal.sale.qr.paid', default => 'terminal.sale.mpesa.paid' }, ['reference' => $paid['reference'] ?? '']) }}</dt>
                             <dd class="flex items-center gap-2 font-mono">
                                 − {{ \VendaPOS\Core\ValueObjects\Money::fromCents($paid['amount_cents'])->format() }}
                                 @if ($paid['method'] === 'mpesa_code' && $step === 'pay')
@@ -235,6 +235,9 @@
                         <button type="button" wire:click="startPayment" class="key-primary h-16" @disabled($lines === [])>{{ __('terminal.sale.pay') }}</button>
                     </div>
                 @elseif ($step === 'pay')
+                    @if ($waitingOnBillQr)
+                        <p class="mx-3 mb-2 border border-line px-3 py-2 text-sm text-muted" wire:poll.3s="checkBillQr" role="status">{{ __('terminal.sale.qr.waiting') }}</p>
+                    @endif
                     <div class="max-h-[70%] shrink-0 space-y-2 overflow-y-auto border-t border-line p-3">
                         <p class="text-sm text-muted">{{ __('terminal.sale.cash') }}</p>
                         <div class="flex items-center justify-between border border-line bg-surface px-3 py-2">

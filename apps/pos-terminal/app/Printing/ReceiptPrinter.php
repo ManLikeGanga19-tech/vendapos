@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Printing;
 
+use App\Api\Data\BillQr;
 use App\Livewire\StatusBar;
 use App\Models\Order;
 use App\Models\OrderLine;
@@ -11,6 +12,9 @@ use App\Models\OrderTender;
 use App\Models\StaffMember;
 use App\Models\Ticket;
 use App\Till\Till;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Mike42\Escpos\EscposImage;
 use Mike42\Escpos\Printer;
 use Throwable;
 use Transliterator;
@@ -111,11 +115,11 @@ class ReceiptPrinter
      *
      * @throws PrintFailed
      */
-    public function bill(Ticket $ticket): void
+    public function bill(Ticket $ticket, ?BillQr $qr = null): void
     {
         $ticket->loadMissing('lines');
 
-        $this->print(function (Printer $printer, int $columns) use ($ticket) {
+        $this->print(function (Printer $printer, int $columns) use ($ticket, $qr) {
             $this->header($printer);
 
             $printer->selectPrintMode(Printer::MODE_EMPHASIZED);
@@ -145,6 +149,10 @@ class ReceiptPrinter
                 $ticket->totals()->total->cents,
                 $columns,
             );
+
+            if ($qr !== null) {
+                $this->scanToPay($printer, $qr, $columns);
+            }
             $printer->text(str_repeat('-', $columns)."\n");
             $printer->setJustification(Printer::JUSTIFY_CENTER);
             $printer->text(self::ascii(__('terminal.bill.footer'))."\n");
@@ -197,6 +205,55 @@ class ReceiptPrinter
         $printer->text(self::ascii((string) $identity?->business_name)."\n");
         $printer->selectPrintMode();
         $printer->text(self::ascii((string) $identity?->branch_name)."\n");
+    }
+
+    /**
+     * Safaricom's QR, then the paybill and account number for customers who
+     * type them. A QR that will not print leaves the numbers, which still pay.
+     */
+    private function scanToPay(Printer $printer, BillQr $qr, int $columns): void
+    {
+        if ($qr->png === null && ! $qr->canBeTyped()) {
+            return;
+        }
+
+        $printer->text(str_repeat('-', $columns)."\n");
+        $printer->setJustification(Printer::JUSTIFY_CENTER);
+        $printer->setEmphasis(true);
+        $printer->text(self::ascii(__('terminal.bill.scan_to_pay', ['amount' => self::money($qr->amountCents)]))."\n");
+        $printer->setEmphasis(false);
+
+        if ($qr->png !== null) {
+            $this->image($printer, $qr->png);
+        }
+
+        if ($qr->canBeTyped()) {
+            $printer->text(self::ascii(__('terminal.bill.pay_to', ['paybill' => $qr->paybill, 'account' => $qr->account]))."\n");
+        }
+
+        $printer->setJustification(Printer::JUSTIFY_LEFT);
+    }
+
+    /** Prints a base64 PNG (needs PHP's GD, which NativePHP's PHP has); skipped if it will not load. */
+    private function image(Printer $printer, string $base64Png): void
+    {
+        $bytes = base64_decode($base64Png, true);
+
+        if ($bytes === false) {
+            return;
+        }
+
+        // The image library reads the format from the file's extension.
+        $path = sys_get_temp_dir().DIRECTORY_SEPARATOR.'vp-qr-'.Str::random(12).'.png';
+
+        try {
+            file_put_contents($path, $bytes);
+            $printer->bitImage(EscposImage::load($path, false));
+        } catch (Throwable $e) {
+            Log::warning('till.qr_image_failed', ['error' => $e->getMessage()]);
+        } finally {
+            @unlink($path);
+        }
     }
 
     /**

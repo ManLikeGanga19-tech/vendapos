@@ -97,7 +97,7 @@ final class Sale extends Component
      * M-Pesa taken so far: pushes that succeeded, and codes typed from the
      * customer's SMS (accepted offline, confirmed later on the server).
      *
-     * @var list<array{method: string, amount_cents: int, payment_uuid: string|null, reference: string|null}>
+     * @var list<array{method: string, amount_cents: int, payment_uuid: string|null, reference: string|null, via?: string}>
      */
     public array $mpesaPaid = [];
 
@@ -299,9 +299,45 @@ final class Sale extends Component
         }
 
         $this->saleId ??= (string) Str::uuid7();
+
+        // A bill QR names the sale that pays the ticket: pay as that sale, or name this one.
+        if ($ticket !== null && $ticket->sale_id === null) {
+            $ticket->update(['sale_id' => $this->saleId]);
+        } elseif ($ticket !== null && $this->mpesaPaid === []) {
+            $this->saleId = $ticket->sale_id;
+        }
+
         $this->step = self::PAY;
         $this->message = null;
         $this->cashGiven = '';
+        $this->resetAmounts();
+    }
+
+    /**
+     * Polled while paying a ticket whose bill has a QR: once the customer's
+     * scan is confirmed, it counts as paid. The cashier still taps Complete
+     * (Daniel, 2026-10-30), so the receipt prints with the customer there.
+     */
+    public function checkBillQr(VendaApi $api): void
+    {
+        $paymentId = $this->openTicketModel()?->qr_payment_id;
+
+        if ($this->step !== self::PAY || $paymentId === null || in_array($paymentId, array_column($this->mpesaPaid, 'payment_uuid'), true)) {
+            return;
+        }
+
+        try {
+            $payment = $api->payment($paymentId);
+        } catch (ApiRejected|ApiUnavailable|TillNotAuthorised|ApiNotConfigured|KeyringUnavailable) {
+            return;
+        }
+
+        if (! $payment->succeeded() || $payment->amountCents > $this->remainingCents()) {
+            return;
+        }
+
+        $this->mpesaPaid[] = ['method' => 'mpesa_push', 'amount_cents' => $payment->amountCents, 'payment_uuid' => $payment->uuid, 'reference' => $payment->providerReference, 'via' => 'qr'];
+        $this->notice = __('terminal.sale.qr.paid_notice', ['reference' => $payment->providerReference ?? '']);
         $this->resetAmounts();
     }
 
@@ -671,6 +707,9 @@ final class Sale extends Component
             'online' => SyncStatus::current()->connection === SyncStatus::ONLINE,
             'waitedLongEnough' => $this->waitedLongEnough(),
             'printerReady' => PrinterSettings::current()->isSet(),
+            // Paying a ticket whose bill has a QR the customer may scan.
+            'waitingOnBillQr' => $this->step === self::PAY && $ticket?->qr_payment_id !== null
+                && ! in_array($ticket->qr_payment_id, array_column($this->mpesaPaid, 'payment_uuid'), true),
             'printError' => $this->step === self::DONE ? SyncState::read(PrintReceiptJob::LAST_ERROR) : null,
         ]);
     }

@@ -19,9 +19,12 @@ use App\Security\SecretBox;
 use App\Staff\TillSession;
 use App\Sync\SyncStaff;
 use App\Sync\SyncTickets;
+use App\Tickets\PrepareBillQr;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Sleep;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Tests\Support\RecordingPrinterConnections;
@@ -29,6 +32,12 @@ use Tests\Support\RecordingPrinterConnections;
 const TUSKER = '0199b1f2-0000-7000-8000-00000000f001';
 const SODA = '0199b1f2-0000-7000-8000-00000000f002';
 const TABLE_4 = '0199b1f2-0000-7000-8000-00000000f104';
+
+/** An 8×8 PNG, standing in for Safaricom's QR. */
+const TINY_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///8AAABVwtN+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAADklEQVQImWP4wACBUAAALRADwQ6OuycAAAAASUVORK5CYII=';
+
+/** GS v 0: a raster image on ESC/POS. */
+const GS_V_0 = "\x1Dv0";
 
 beforeEach(function () {
     Queue::fake();
@@ -274,5 +283,103 @@ describe('syncing tickets', function () {
 
         expect($ticket->refresh()->only(['sync_status', 'sync_reason']))->toBe(['sync_status' => 'rejected', 'sync_reason' => 'unknown_table'])
             ->and(TicketLine::query()->sole()->sync_status)->toBe('pending');
+    });
+});
+
+describe('scan to pay on the bill', function () {
+    beforeEach(function () {
+        RecordingPrinterConnections::$jobs = [];
+        $this->app->bind(PrinterConnections::class, RecordingPrinterConnections::class);
+        (new PrinterSettings(PrinterSettings::DEVICE, '/dev/usb/lp0', 80))->save();
+        $this->ticket = sendTwoTuskersToTable4();
+    });
+
+    /** The server's answer for a QR payment of the two Tuskers. */
+    function qrAnswer(string $uuid, ?string $png, string $status = 'pending', ?string $reference = null): array
+    {
+        return [
+            'uuid' => $uuid, 'order_uuid' => null, 'provider' => 'mpesa_ke', 'amount_cents' => 70_000, 'currency' => 'KES',
+            'status' => $status, 'provider_reference' => $reference, 'failure_code' => null, 'failure_reason' => null, 'channel' => 'qr',
+            'qr' => ['png' => $png, 'paybill' => '174379', 'account' => 'VPK7M2Q9TR'],
+        ];
+    }
+
+    it('prints the QR and the paybill and account under the total, for this ticket’s sale', function () {
+        Http::fake([TEST_API_URL.'/api/v1/payments' => fn (Request $request) => Http::response(qrAnswer($request['uuid'], TINY_PNG), 202)]);
+
+        app(PrintBillJob::class, ['ticketId' => $this->ticket->id])->handle(app(ReceiptPrinter::class), app(PrepareBillQr::class));
+
+        $ticket = $this->ticket->refresh();
+        expect(RecordingPrinterConnections::$jobs[0])
+            ->toContain('Scan with the M-Pesa app to pay KES 700.00')
+            ->toContain(GS_V_0)
+            ->toContain('Or pay to paybill 174379, account VPK7M2Q9TR')
+            ->and($ticket->sale_id)->not->toBeNull()
+            ->and($ticket->qr_payment_id)->not->toBeNull();
+        Http::assertSent(fn (Request $request) => $request['channel'] === 'qr'
+            && ! isset($request['phone'])
+            && $request['amount_cents'] === 70_000
+            && $request['order_uuid'] === $ticket->sale_id
+            && $request['uuid'] === $ticket->qr_payment_id);
+    });
+
+    it('waits a few seconds for Safaricom’s QR, then prints the numbers alone if it never comes', function () {
+        Sleep::fake();
+        Http::fake([
+            TEST_API_URL.'/api/v1/payments' => fn (Request $request) => Http::response(qrAnswer($request['uuid'], null), 202),
+            TEST_API_URL.'/api/v1/payments/*' => fn (Request $request) => Http::response(qrAnswer(basename($request->url()), null)),
+        ]);
+
+        app(PrintBillJob::class, ['ticketId' => $this->ticket->id])->handle(app(ReceiptPrinter::class), app(PrepareBillQr::class));
+
+        Sleep::assertSleptTimes(PrepareBillQr::WAIT_MILLISECONDS / 500);
+        expect(RecordingPrinterConnections::$jobs[0])->not->toContain(GS_V_0)->toContain('Or pay to paybill 174379, account VPK7M2Q9TR');
+    });
+
+    it('prints the bill as before on a buy goods till or when offline', function (Closure $answer) {
+        Http::fake([TEST_API_URL.'/api/v1/payments' => $answer]);
+
+        app(PrintBillJob::class, ['ticketId' => $this->ticket->id])->handle(app(ReceiptPrinter::class), app(PrepareBillQr::class));
+
+        expect(RecordingPrinterConnections::$jobs[0])->toContain('KES 700.00')->not->toContain('Scan with the M-Pesa app')->not->toContain('paybill');
+    })->with([
+        'buy goods' => [fn () => fn () => Http::response(['message' => 'Scan to pay needs a paybill account.', 'code' => 'qr_needs_paybill'], 422)],
+        'offline' => [fn () => fn () => throw new ConnectionException('Network is unreachable')],
+    ]);
+
+    it('counts the bill’s QR as paid once confirmed, and the cashier completes the sale as that payment’s sale', function () {
+        Http::fake([TEST_API_URL.'/api/v1/payments' => fn (Request $request) => Http::response(qrAnswer($request['uuid'], TINY_PNG), 202)]);
+        app(PrintBillJob::class, ['ticketId' => $this->ticket->id])->handle(app(ReceiptPrinter::class), app(PrepareBillQr::class));
+        $ticket = $this->ticket->refresh();
+        app(TillSession::class)->signIn($this->cashier);
+
+        $screen = Livewire::test(Sale::class)
+            ->call('showTickets')->call('openTicket', $ticket->id)
+            ->call('startPayment')
+            ->assertSee(__('terminal.sale.qr.waiting'));
+
+        // Not paid yet: nothing changes.
+        $paid = false;
+        Http::fake([TEST_API_URL.'/api/v1/payments/*' => function () use (&$paid, $ticket) {
+            return Http::response($paid
+                ? qrAnswer((string) $ticket->qr_payment_id, TINY_PNG, 'succeeded', 'TJL7QW2E9R')
+                : qrAnswer((string) $ticket->qr_payment_id, TINY_PNG));
+        }]);
+        $screen->call('checkBillQr')->assertSet('mpesaPaid', []);
+
+        $paid = true;
+        $screen->call('checkBillQr')
+            ->assertSee(__('terminal.sale.qr.paid_notice', ['reference' => 'TJL7QW2E9R']))
+            ->assertSee(__('terminal.sale.qr.paid', ['reference' => 'TJL7QW2E9R']))
+            // The cashier confirms: the sale is not completed by itself.
+            ->assertSet('step', Sale::PAY)
+            ->call('complete')
+            ->assertSet('step', Sale::DONE);
+
+        $order = Order::query()->with('tenders')->sole();
+        expect($order->id)->toBe($ticket->sale_id)
+            ->and($order->tenders->map->only(['method', 'amount_cents', 'payment_uuid'])->all())->toBe([
+                ['method' => 'mpesa_push', 'amount_cents' => 70_000, 'payment_uuid' => $ticket->qr_payment_id],
+            ]);
     });
 });

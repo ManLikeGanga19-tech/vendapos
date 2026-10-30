@@ -73,6 +73,11 @@ return [
         'complete' => 'Maliza mauzo',
         'cash_short' => 'Pesa haitoshi: bado :amount kulipwa.',
         'paid_in_part' => 'Sehemu ya mauzo haya imeshalipwa kwa M-Pesa, kwa hivyo hayawezi kubadilishwa tena. Pokea kilichobaki.',
+        'qr' => [
+            'waiting' => 'Bili ina QR ya M-Pesa. Mteja akiichanganua, malipo yataonekana hapa yenyewe.',
+            'paid' => 'QR ya M-Pesa :reference',
+            'paid_notice' => 'QR ya bili imelipwa (:reference). Bonyeza Maliza mauzo.',
+        ],
         'mpesa' => [
             'title' => 'M-Pesa',
             'needs_internet' => 'inahitaji intaneti',
@@ -162,6 +167,8 @@ return [
         'title' => 'BILI',
         'not_invoice' => 'Si ankara ya kodi',
         'to_pay' => 'YA KULIPA',
+        'scan_to_pay' => 'Changanua kwa programu ya M-Pesa kulipa KES :amount',
+        'pay_to' => 'Au lipa paybill :paybill, akaunti :account',
         'footer' => 'Risiti yako itafuata malipo.',
     ],
 
