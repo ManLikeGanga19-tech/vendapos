@@ -178,6 +178,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Tickets (table service)
+    |--------------------------------------------------------------------------
+    |
+    | A ticket is paid once (Daniel, 2026-10-30): a till holds it on the server
+    | before taking payment. The hold lapses after this long, so a till that
+    | went away cannot keep the table from paying elsewhere.
+    |
+    */
+
+    'tickets' => [
+        'payment_hold_minutes' => (int) env('VENDAPOS_TICKET_HOLD_MINUTES', 15),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | KRA eTIMS
     |--------------------------------------------------------------------------
     |

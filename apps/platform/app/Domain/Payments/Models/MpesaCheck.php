@@ -44,7 +44,10 @@ class MpesaCheck extends Model
     /** A bill's QR paid again after it was already paid. */
     public const string QR_PAID_TWICE = 'qr_paid_twice';
 
-    public const array KINDS = [self::UNCONFIRMED_CODE, self::AMOUNT_MISMATCH, self::CODE_REUSED, self::UNCLAIMED_PUSH, self::QR_PAID_TWICE];
+    /** Two sales paid one ticket (table service); both stand, one should be refunded. */
+    public const string TICKET_PAID_TWICE = 'ticket_paid_twice';
+
+    public const array KINDS = [self::UNCONFIRMED_CODE, self::AMOUNT_MISMATCH, self::CODE_REUSED, self::UNCLAIMED_PUSH, self::QR_PAID_TWICE, self::TICKET_PAID_TWICE];
 
     public const string OPEN = 'open';
 

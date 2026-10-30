@@ -292,6 +292,7 @@ return [
             'code_reused' => 'Msimbo umetumika mara mbili',
             'unclaimed_push' => 'Imelipwa, hakuna mauzo',
             'qr_paid_twice' => 'Bili imelipwa mara mbili',
+            'ticket_paid_twice' => 'Tiketi imelipwa mara mbili',
         ],
         'details' => [
             'unconfirmed_code' => 'Safaricom haijathibitisha msimbo huu kwa akaunti yako yoyote. Huenda mteja alimlipa mtu mwingine.',
@@ -299,6 +300,7 @@ return [
             'code_reused' => 'Umeandikwa kwa mauzo :count.',
             'unclaimed_push' => 'Mteja alilipa, lakini hakuna mauzo yaliyochukua malipo haya. Huenda keshia aliacha kusubiri.',
             'qr_paid_twice' => 'QR ya bili hii ililipwa tena baada ya kulipwa tayari. Rudisha malipo ya ziada.',
+            'ticket_paid_twice' => 'Mauzo mawili yalilipa tiketi moja. Rudisha moja yao.',
         ],
         'branch' => 'Tawi',
         'code' => 'Msimbo wa M-Pesa',

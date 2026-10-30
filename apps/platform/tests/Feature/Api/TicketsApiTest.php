@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Domain\Catalogue\Models\Item;
+use App\Domain\Orders\Models\Order;
+use App\Domain\Payments\Models\MpesaCheck;
 use App\Domain\Tenancy\Data\DeviceEnrolment;
 use App\Domain\Tenancy\Models\Branch;
 use App\Domain\Tenancy\Models\Tenant;
@@ -251,4 +253,82 @@ it('keeps a table switched off after the ticket was opened: the guests are still
 
     syncTickets([ticketOf([ticketLine($this->tusker)])])->assertJsonPath('results.0.status', 'accepted');
     expect($this->tenant->run(fn () => DiningTable::query()->find($this->table4->id)?->is_active))->toBeFalse();
+});
+
+describe('paid once', function () {
+    function holdTicket(string $ticketId, string $saleId, ?DeviceEnrolment $as = null, string $method = 'POST'): TestResponse
+    {
+        $as ??= test()->enrolment;
+        app('auth')->forgetGuards();
+
+        return test()->withHeaders([
+            'Authorization' => 'Bearer '.$as->plainTextToken,
+            'X-Device-ID' => $as->device->id,
+        ])->json($method, "/api/v1/tickets/{$ticketId}/hold", ['sale_uuid' => $saleId]);
+    }
+
+    beforeEach(function () {
+        $this->ticket = ticketOf([ticketLine($this->tusker, 2)]);
+        syncTickets([$this->ticket])->assertOk();
+        $this->otherTill = enrolFor($this->tenant, $this->branch);
+    });
+
+    it('lets one till at a time take payment for a ticket, and the same sale ask again', function () {
+        $sale = (string) Str::uuid();
+
+        holdTicket($this->ticket['uuid'], $sale)->assertOk()->assertJsonPath('status', 'held');
+        holdTicket($this->ticket['uuid'], $sale)->assertOk();
+        holdTicket($this->ticket['uuid'], (string) Str::uuid(), $this->otherTill)->assertConflict()->assertJsonPath('code', 'ticket_being_paid');
+
+        // The cashier went back: the other till may take it now.
+        holdTicket($this->ticket['uuid'], $sale, method: 'DELETE')->assertOk();
+        holdTicket($this->ticket['uuid'], (string) Str::uuid(), $this->otherTill)->assertOk();
+    });
+
+    it('lets another till take over a hold that lapsed', function () {
+        holdTicket($this->ticket['uuid'], (string) Str::uuid())->assertOk();
+        $this->travel(16)->minutes();
+
+        holdTicket($this->ticket['uuid'], (string) Str::uuid(), $this->otherTill)->assertOk();
+    });
+
+    it('refuses to take payment for a ticket already paid, even by a sale that came before its ticket', function () {
+        $sale = saleOf([[$this->tusker, 2]], overrides: ['ticket_uuid' => $this->ticket['uuid'], 'placed_at' => '2026-10-27T13:50:00+03:00']);
+        sync([$sale])->assertJsonPath('results.0.status', 'accepted');
+
+        holdTicket($this->ticket['uuid'], (string) Str::uuid(), $this->otherTill)->assertConflict()->assertJsonPath('code', 'ticket_paid');
+
+        $early = ticketOf([ticketLine($this->tusker)]);
+        sync([saleOf([[$this->tusker, 1]], 2, ['ticket_uuid' => $early['uuid']])])->assertOk();
+        syncTickets([$early])->assertOk();
+        holdTicket($early['uuid'], (string) Str::uuid())->assertConflict()->assertJsonPath('code', 'ticket_paid');
+    });
+
+    it('says when the server does not have the ticket yet, and never holds another branch’s', function () {
+        holdTicket((string) Str::uuid(), (string) Str::uuid())->assertNotFound()->assertJsonPath('code', 'unknown_ticket');
+
+        $elsewhere = $this->tenant->run(fn () => Branch::create(['name' => 'Westlands', 'business_type' => BusinessType::Restaurant]));
+        holdTicket($this->ticket['uuid'], (string) Str::uuid(), enrolFor($this->tenant, $elsewhere))->assertNotFound();
+
+        [$otherTenant, $otherBranch] = tenantWithBranch(BusinessType::Restaurant);
+        holdTicket($this->ticket['uuid'], (string) Str::uuid(), enrolFor($otherTenant, $otherBranch))->assertNotFound();
+    });
+
+    it('tells the owner when two sales paid the same ticket anyway, keeping both', function () {
+        $first = saleOf([[$this->tusker, 2]], overrides: ['ticket_uuid' => $this->ticket['uuid']]);
+        sync([$first])->assertOk();
+
+        $this->enrolment = $this->otherTill;
+        $second = saleOf([[$this->tusker, 2]], overrides: ['ticket_uuid' => $this->ticket['uuid']]);
+        sync([$second])->assertJsonPath('results.0.status', 'accepted');
+
+        $check = $this->tenant->run(fn () => MpesaCheck::query()->sole());
+        expect($check->kind)->toBe(MpesaCheck::TICKET_PAID_TWICE)
+            ->and($check->details['order_ids'])->toBe([$first['uuid'], $second['uuid']])
+            ->and($this->tenant->run(fn () => Order::query()->count()))->toBe(2);
+    });
+
+    it('needs a sale UUID and nothing else', function () {
+        holdTicket($this->ticket['uuid'], 'not-a-uuid')->assertUnprocessable()->assertJsonValidationErrors('sale_uuid');
+    });
 });

@@ -24,6 +24,9 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $bill_requested_at
  * @property Carbon|null $closed_at
  * @property string|null $order_id
+ * @property string|null $held_for_order_id the sale a till is taking payment with
+ * @property string|null $held_by_device_id
+ * @property Carbon|null $held_until
  */
 class Ticket extends Model
 {
@@ -45,6 +48,7 @@ class Ticket extends Model
             'opened_at' => 'datetime',
             'bill_requested_at' => 'datetime',
             'closed_at' => 'datetime',
+            'held_until' => 'datetime',
         ];
     }
 

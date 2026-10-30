@@ -292,6 +292,7 @@ return [
             'code_reused' => 'Code used twice',
             'unclaimed_push' => 'Paid, no sale',
             'qr_paid_twice' => 'Bill paid twice',
+            'ticket_paid_twice' => 'Ticket paid twice',
         ],
         'details' => [
             'unconfirmed_code' => 'Safaricom has not confirmed this code for any of your accounts. The customer may have paid someone else.',
@@ -299,6 +300,7 @@ return [
             'code_reused' => 'Typed for :count sales.',
             'unclaimed_push' => 'The customer paid, but no sale took this payment. The cashier may have stopped waiting.',
             'qr_paid_twice' => 'The QR on this bill was paid again after it was already paid. Refund the extra payment.',
+            'ticket_paid_twice' => 'Two sales paid the same ticket. Refund one of them.',
         ],
         'branch' => 'Branch',
         'code' => 'M-Pesa code',

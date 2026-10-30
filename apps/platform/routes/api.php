@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Api\V1\Controllers\ChangeStaffPin;
+use App\Http\Api\V1\Controllers\HoldTicket;
 use App\Http\Api\V1\Controllers\PairDevice;
 use App\Http\Api\V1\Controllers\RefreshDeviceToken;
 use App\Http\Api\V1\Controllers\RenewDeviceToken;
@@ -47,6 +48,14 @@ Route::prefix('v1')
         Route::post('tickets/sync', SyncTickets::class)
             ->middleware(['ability:orders:sync', 'body.limit'])
             ->name('api.v1.tickets.sync');
+        Route::post('tickets/{ticketId}/hold', HoldTicket::class)
+            ->middleware(['ability:orders:sync', 'body.limit'])
+            ->whereUuid('ticketId')
+            ->name('api.v1.tickets.hold');
+        Route::delete('tickets/{ticketId}/hold', [HoldTicket::class, 'release'])
+            ->middleware(['ability:orders:sync', 'body.limit'])
+            ->whereUuid('ticketId')
+            ->name('api.v1.tickets.release');
         Route::post('receipts/reprints/sync', SyncReprints::class)
             ->middleware(['ability:orders:sync', 'body.limit'])
             ->name('api.v1.receipts.reprints.sync');

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Console\Commands\ReconcilePaymentsCommand;
+use App\Domain\Catalogue\Models\Item;
 use App\Domain\Payments\Actions\MatchMpesaCodes;
 use App\Domain\Payments\Gateways\FakeGateway;
 use App\Domain\Payments\Jobs\MatchMpesaConfirmation;
@@ -15,12 +16,16 @@ use App\Domain\Tenancy\Models\Tenant;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
+use VendaPOS\Core\Enums\ItemType;
 use VendaPOS\Core\Enums\PaymentChannel;
 use VendaPOS\Core\Enums\PaymentStatus;
+use VendaPOS\Core\Enums\VatCategory;
 
 uses(DatabaseMigrations::class);
 
@@ -222,4 +227,64 @@ it('never asks Safaricom about a QR payment: only its confirmation settles it', 
     $this->artisan(ReconcilePaymentsCommand::class)->assertSuccessful();
 
     Queue::assertNotPushed(QueryPaymentStatus::class);
+});
+
+describe('a paid bill is paid once', function () {
+    beforeEach(function () {
+        $this->chips = $this->tenant->run(fn () => Item::create(['type' => ItemType::Product, 'name' => 'Chips', 'price_cents' => 78_000, 'vat_category' => VatCategory::Standard]));
+        $this->saleId = (string) Str::uuid();
+
+        // The bill was printed twice: two QR codes for the same sale.
+        $this->oldBill = qrPaymentOf(['order_uuid' => $this->saleId]);
+        $this->newBill = qrPaymentOf(['order_uuid' => $this->saleId]);
+        requestPayment($this->oldBill)->assertAccepted();
+        requestPayment($this->newBill)->assertAccepted();
+        $this->oldReference = (string) qrPayment($this->oldBill['uuid'])->reference;
+
+        // The customer pays the new bill's QR, and the till records the sale with it.
+        confirmPaybill((string) qrPayment($this->newBill['uuid'])->reference, 78_000);
+        $sale = saleOf([[$this->chips, 1]], overrides: ['uuid' => $this->saleId]);
+        $sale['tenders'] = [['method' => 'mpesa_push', 'amount_cents' => 78_000, 'payment_uuid' => $this->newBill['uuid']]];
+        sync([$sale])->assertJsonPath('results.0.status', 'accepted');
+    });
+
+    it('closes the older bill’s QR once the sale is paid, and flags a late payment to it', function () {
+        expect(qrPayment($this->oldBill['uuid']))->status->toBe(PaymentStatus::Cancelled)->failure_code->toBe('bill_paid');
+
+        confirmPaybill($this->oldReference, 78_000, 'TLATE12345');
+
+        expect($this->tenant->run(fn () => MpesaCheck::query()->sole()))
+            ->kind->toBe(MpesaCheck::QR_PAID_TWICE)->mpesa_code->toBe('TLATE12345');
+    });
+
+    it('declines at Safaricom a payment to a paid bill, and accepts every other payment', function () {
+        $token = Str::random(48);
+        DB::table('c2b_routes')->insert(['token_hash' => hash('sha256', $token), 'tenant_id' => $this->tenant->id, 'payment_account_id' => $this->account->id, 'created_at' => now()]);
+        $validate = fn (array $body, string $as = '196.201.214.200') => $this->withServerVariables(['REMOTE_ADDR' => $as])
+            ->postJson("/webhooks/c2b/{$token}/validate", ['TransactionType' => 'Pay Bill', 'TransID' => 'TV1', 'TransAmount' => '780.00', 'BusinessShortCode' => '174379', ...$body]);
+
+        $validate(['BillRefNumber' => strtolower($this->oldReference)])->assertOk()->assertExactJson(['ResultCode' => 'C2B00012', 'ResultDesc' => 'Rejected']);
+        $validate(['BillRefNumber' => 'TABLE 4'])->assertExactJson(['ResultCode' => '0', 'ResultDesc' => 'Accepted']);
+        $validate(['BillRefNumber' => ''])->assertExactJson(['ResultCode' => '0', 'ResultDesc' => 'Accepted']);
+        // Never decline on the word of someone who is not Safaricom.
+        $validate(['BillRefNumber' => $this->oldReference], '203.0.113.9')->assertExactJson(['ResultCode' => '0', 'ResultDesc' => 'Accepted']);
+
+        $open = qrPaymentOf();
+        requestPayment($open)->assertAccepted();
+        $validate(['BillRefNumber' => (string) qrPayment($open['uuid'])->reference])->assertExactJson(['ResultCode' => '0', 'ResultDesc' => 'Accepted']);
+
+        $this->postJson('/webhooks/c2b/'.Str::random(48).'/validate', ['BillRefNumber' => $this->oldReference])->assertExactJson(['ResultCode' => '0', 'ResultDesc' => 'Accepted']);
+    });
+});
+
+it('accepts the payment when validation itself fails, so a fault never stops a customer paying', function () {
+    $token = Str::random(48);
+    DB::table('c2b_routes')->insert(['token_hash' => hash('sha256', $token), 'tenant_id' => $this->tenant->id, 'payment_account_id' => $this->account->id, 'created_at' => now()]);
+    // A real fault: the check cannot read the payments.
+    $this->tenant->run(fn () => DB::statement('ALTER TABLE payments RENAME TO payments_away'));
+
+    $this->withServerVariables(['REMOTE_ADDR' => '196.201.214.200'])
+        ->postJson("/webhooks/c2b/{$token}/validate", ['BillRefNumber' => 'VPK7M2Q9TR'])
+        ->assertOk()
+        ->assertExactJson(['ResultCode' => '0', 'ResultDesc' => 'Accepted']);
 });

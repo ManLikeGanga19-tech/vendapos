@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Verticals\Actions;
 
+use App\Domain\Payments\Actions\FlagTicketPaidTwice;
 use App\Domain\Tenancy\Actions\NotifyTills;
 use App\Domain\Verticals\Models\Ticket;
 use App\Infrastructure\Realtime\TillsShouldSync;
@@ -18,7 +19,10 @@ use Illuminate\Support\Facades\Log;
  */
 final class CloseTicket
 {
-    public function __construct(private readonly NotifyTills $notifyTills) {}
+    public function __construct(
+        private readonly NotifyTills $notifyTills,
+        private readonly FlagTicketPaidTwice $flagPaidTwice,
+    ) {}
 
     public function paidBy(string $ticketId, string $orderId, string $branchId, Carbon $paidAt): void
     {
@@ -32,8 +36,10 @@ final class CloseTicket
         $first = DB::table('ticket_closures')->where('ticket_id', $ticketId)->value('order_id');
 
         if ($recorded === 0 && $first !== $orderId) {
-            // Two sales for one ticket, e.g. two tills paid it while offline. Both sales stand.
+            // Two sales for one ticket, which the payment hold should make impossible. The money
+            // was taken twice, so both sales stand and the owner is told to refund one.
             Log::warning('tickets.paid_twice', ['ticket_id' => $ticketId, 'order_id' => $orderId, 'first_order_id' => $first]);
+            $this->flagPaidTwice->handle($ticketId, $branchId, [(string) $first, $orderId]);
 
             return;
         }
@@ -42,7 +48,15 @@ final class CloseTicket
             ->whereKey($ticketId)
             ->where('branch_id', $branchId)
             ->where('status', '!=', Ticket::CLOSED)
-            ->update(['status' => Ticket::CLOSED, 'order_id' => $orderId, 'closed_at' => $paidAt->utc(), 'updated_at' => now()]);
+            ->update([
+                'status' => Ticket::CLOSED,
+                'order_id' => $orderId,
+                'closed_at' => $paidAt->utc(),
+                'held_for_order_id' => null,
+                'held_by_device_id' => null,
+                'held_until' => null,
+                'updated_at' => now(),
+            ]);
 
         $tenantId = tenant('id');
 
