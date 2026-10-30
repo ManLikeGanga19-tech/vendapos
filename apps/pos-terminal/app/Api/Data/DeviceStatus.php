@@ -18,5 +18,6 @@ final readonly class DeviceStatus
         /** "active" or "suspended": suspended still sells and syncs, but offers cash instead of M-Pesa. */
         public string $accountStatus,
         public ?array $realtime = null,
+        public ?string $tillCode = null,
     ) {}
 }

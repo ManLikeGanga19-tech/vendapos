@@ -5,11 +5,13 @@ declare(strict_types=1);
 use App\Jobs\PushOrdersJob;
 use App\Models\Item;
 use App\Models\Order;
+use App\Models\ReceiptReprint;
 use App\Models\StaffMember;
 use App\Sales\RecordSale;
 use App\Sales\SaleRefused;
 use App\Security\SecretBox;
 use App\Sync\SyncOrders;
+use App\Sync\SyncReprints;
 use App\Sync\SyncStaff;
 use App\Sync\SyncTill;
 use App\Till\Till;
@@ -57,6 +59,17 @@ function sell(array $cart, array $tenders): Order
 {
     return app(RecordSale::class)->handle(test()->cashier, $cart, $tenders);
 }
+
+it('fixes each sale’s receipt number at the sale, from the till code it had then', function () {
+    $first = sell([['item_id' => SODA, 'quantity' => 1]], [cash(7_000)]);
+    app(Till::class)->identity()?->update(['till_code' => 'T9']);
+    $second = sell([['item_id' => SODA, 'quantity' => 1]], [cash(7_000)]);
+
+    expect($first->fresh()?->receipt_number)->toBe('T1-000001')
+        ->and($second->receipt_number)->toBe('T9-000002')
+        // The number is not sent: the server works out the same one from this till.
+        ->and($second->toSyncPayload())->not->toHaveKey('receipt_number');
+});
 
 it('records a cash sale locally with core’s totals, numbered and pending', function () {
     $order = sell([['item_id' => NYAMA, 'quantity' => 1], ['item_id' => SODA, 'quantity' => 2]], [cash(199_000, 200_000)]);
@@ -178,6 +191,34 @@ describe('sync', function () {
             ->and($second->fresh()?->sync_errors)->toBe(['staff_id' => 'No one at this business has this ID.']);
         // The rejected sale is not resent by itself.
         Http::assertSentCount(1);
+    });
+
+    it('sends reprints once the server has their sale, and keeps a refused one with its reason', function () {
+        $synced = sell([['item_id' => SODA, 'quantity' => 1]], [cash(7_000)]);
+        $waiting = sell([['item_id' => SODA, 'quantity' => 1]], [cash(7_000)]);
+        $synced->update(['sync_status' => Order::SYNCED]);
+
+        $reprint = fn (Order $order) => ReceiptReprint::query()->create(['id' => (string) Str::uuid7(), 'order_id' => $order->id, 'staff_id' => $this->cashier->id, 'reprinted_at' => now()]);
+        $sent = $reprint($synced);
+        $refused = $reprint($synced);
+        $held = $reprint($waiting);
+
+        Http::fake([TEST_API_URL.'/api/v1/receipts/reprints/sync' => fn (Request $request) => Http::response(['results' => array_map(
+            fn (array $r) => $r['uuid'] === $refused->id ? ['uuid' => $r['uuid'], 'status' => 'rejected', 'reason' => 'unknown_staff'] : ['uuid' => $r['uuid'], 'status' => 'accepted'],
+            $request['reprints'],
+        )])]);
+
+        app(SyncReprints::class)->handle();
+
+        expect($sent->fresh()?->sync_status)->toBe('synced')
+            ->and($refused->fresh())->sync_status->toBe('rejected')->sync_reason->toBe('unknown_staff')
+            ->and($held->fresh()?->sync_status)->toBe('pending');
+        Http::assertSent(fn (Request $request) => $request['reprints'][0] === [
+            'uuid' => $sent->id,
+            'order_uuid' => $synced->id,
+            'staff_id' => $this->cashier->id,
+            'reprinted_at' => $sent->reprinted_at->toIso8601String(),
+        ] && count($request['reprints']) === 2);
     });
 
     it('keeps every sale pending while offline, and sends them first in the next round', function () {

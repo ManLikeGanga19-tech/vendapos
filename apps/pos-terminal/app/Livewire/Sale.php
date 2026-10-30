@@ -16,6 +16,7 @@ use App\Livewire\Concerns\PicksLanguage;
 use App\Models\Category;
 use App\Models\FloorArea;
 use App\Models\Item;
+use App\Models\ReceiptReprint;
 use App\Models\StaffMember;
 use App\Models\SyncState;
 use App\Models\Ticket;
@@ -119,7 +120,7 @@ final class Sale extends Component
 
     public ?string $message = null;
 
-    /** @var array{order_id: string, total_cents: int, change_cents: int, sequence: int}|null */
+    /** @var array{order_id: string, total_cents: int, change_cents: int, number: string}|null */
     public ?array $done = null;
 
     public function add(string $itemId): void
@@ -522,7 +523,7 @@ final class Sale extends Component
             'order_id' => $order->id,
             'total_cents' => $order->total_cents,
             'change_cents' => $remaining > 0 ? $given - $remaining : 0,
-            'sequence' => $order->sequence_number,
+            'number' => $order->receipt_number ?? (string) $order->sequence_number,
         ];
         $this->step = self::DONE;
         $this->message = null;
@@ -532,14 +533,23 @@ final class Sale extends Component
         PrintReceiptJob::dispatch($order->id, openDrawer: $remaining > 0);
     }
 
-    /** Prints the last sale's receipt again (no drawer). */
+    /** Prints the last sale's receipt again (no drawer), marked as a reprint and kept for the owner's audit. */
     public function reprint(TillSession $session): void
     {
-        if ($this->step !== self::DONE || $this->done === null || ! $session->can(StaffMember::REPRINT_RECEIPTS)) {
+        $staff = $session->staff();
+
+        if ($this->step !== self::DONE || $this->done === null || $staff === null || ! $staff->can(StaffMember::REPRINT_RECEIPTS)) {
             return;
         }
 
-        PrintReceiptJob::dispatch($this->done['order_id']);
+        ReceiptReprint::query()->create([
+            'id' => (string) Str::uuid7(),
+            'order_id' => $this->done['order_id'],
+            'staff_id' => $staff->id,
+            'reprinted_at' => now()->utc(),
+        ]);
+
+        PrintReceiptJob::dispatch($this->done['order_id'], reprint: true);
     }
 
     public function newSale(): void

@@ -29,6 +29,7 @@ final class PrintReceiptJob implements ShouldQueue
     public function __construct(
         public readonly string $orderId,
         public readonly bool $openDrawer = false,
+        public readonly bool $reprint = false,
     ) {}
 
     public function handle(ReceiptPrinter $printer): void
@@ -40,7 +41,7 @@ final class PrintReceiptJob implements ShouldQueue
         }
 
         try {
-            $printer->receipt($order, $this->openDrawer);
+            $printer->receipt($order, $this->openDrawer, $this->reprint);
             SyncState::write(self::LAST_ERROR, null);
         } catch (PrintFailed $e) {
             SyncState::write(self::LAST_ERROR, $e->getMessage());

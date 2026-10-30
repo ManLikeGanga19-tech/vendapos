@@ -139,7 +139,9 @@ it('prints the bill, not a tax invoice, and marks the ticket billed', function (
         ->toContain('Not a tax invoice')
         ->toContain('Table 4')
         ->toContain('2 x Tusker')
-        ->toContain('KES 700.00')
+        ->toContain(ReceiptPrinter::row('Total excl. VAT', '603.45', 48))
+        ->toContain(ReceiptPrinter::row('VAT 16% on 603.45', '96.55', 48))
+        ->toContain(ReceiptPrinter::row('TO PAY', 'KES 700.00', 48))
         ->not->toContain('PIN');
 });
 
@@ -165,7 +167,17 @@ it('lets the cashier pay a ticket at its sent prices, closing it and naming it o
         ->and($order->lines->pluck('unit_price_cents', 'name')->all())->toBe(['Tusker' => 35_000, 'Soda' => 8_000])
         ->and($order->toSyncPayload()['ticket_uuid'])->toBe($ticket->id)
         ->and($ticket->refresh()->only(['status', 'order_id']))->toBe(['status' => 'closed', 'order_id' => $order->id])
-        ->and(Ticket::query()->unpaid()->count())->toBe(0);
+        ->and(Ticket::query()->unpaid()->count())->toBe(0)
+        ->and($order->only(['receipt_number', 'table_name']))->toBe(['receipt_number' => 'T1-000001', 'table_name' => '4']);
+
+    // The receipt names the table, even once the ticket itself is gone from the till.
+    RecordingPrinterConnections::$jobs = [];
+    $this->app->bind(PrinterConnections::class, RecordingPrinterConnections::class);
+    (new PrinterSettings(PrinterSettings::DEVICE, '/dev/usb/lp0', 80))->save();
+    Ticket::query()->delete();
+
+    app(ReceiptPrinter::class)->receipt($order->refresh());
+    expect(RecordingPrinterConnections::$jobs[0])->toContain('Receipt No. T1-000001')->toContain('Table 4');
 });
 
 it('sends a quick sale with no ticket on it', function () {

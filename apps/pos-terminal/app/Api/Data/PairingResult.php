@@ -12,5 +12,7 @@ final readonly class PairingResult
         public string $businessName,
         public BranchInfo $branch,
         public IssuedToken $token,
+        // "T2": this till's code in its business, the start of its receipt numbers.
+        public ?string $tillCode = null,
     ) {}
 }

@@ -20,6 +20,7 @@ function pairingResult(string $token = 'device-token-1', ?CarbonImmutable $expir
         businessName: 'Danamo Restaurant',
         branch: new BranchInfo($branchId, 'Nyali', 'restaurant', 'table_service'),
         token: new IssuedToken($token, $expiresAt ?? CarbonImmutable::now()->addHours(12)),
+        tillCode: 'T1',
     );
 }
 

@@ -24,7 +24,7 @@ beforeEach(fn () => Queue::fake());
 function pairAnswer(): array
 {
     return [
-        'device' => ['id' => TEST_DEVICE_ID, 'name' => 'Till 1'],
+        'device' => ['id' => TEST_DEVICE_ID, 'name' => 'Till 1', 'till_code' => 'T3'],
         'business' => ['name' => 'Danamo Restaurant'],
         'branch' => ['id' => '0199b1f2-0000-7000-8000-000000000001', 'name' => 'Nyali', 'business_type' => 'restaurant', 'terminal_mode' => 'table_service'],
         'token' => 'paired-token',
@@ -74,6 +74,8 @@ describe('pairing', function () {
         expect($downloaded)->toBeTrue()
             ->and(app(Till::class)->isPaired())->toBeTrue()
             ->and(app(Till::class)->credentials()['token'])->toBe('paired-token')
+            // The start of every receipt number from now on.
+            ->and(app(Till::class)->identity()?->till_code)->toBe('T3')
             ->and(StaffMember::query()->count())->toBe(1)
             ->and(Item::query()->count())->toBe(1)
             // Where to listen comes with it, so live updates work from the first screen.

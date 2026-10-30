@@ -44,6 +44,7 @@ final class VendaApi
             businessName: self::string($json, 'business.name'),
             branch: self::branch($json),
             token: new IssuedToken(self::string($json, 'token'), self::date($json, 'token_expires_at')),
+            tillCode: self::nullableString($json, 'device.till_code'),
         );
     }
 
@@ -57,6 +58,7 @@ final class VendaApi
             tokenExpiresAt: self::date($json, 'token_expires_at'),
             accountStatus: self::string($json, 'account_status'),
             realtime: self::realtime($json),
+            tillCode: self::nullableString($json, 'device.till_code'),
         );
     }
 
@@ -204,6 +206,21 @@ final class VendaApi
             'status' => self::string($result, 'status'),
             'reason' => self::nullableString($result, 'reason'),
             'errors' => (array) data_get($result, 'errors', []),
+        ], self::list($json, 'results'));
+    }
+
+    /**
+     * @param  list<array<string, string>>  $reprints  up to 50, as ReceiptReprint::toSyncPayload()
+     * @return list<array{uuid: string|null, status: string, reason: string|null}>
+     */
+    public function syncReprints(array $reprints): array
+    {
+        $json = $this->send(fn () => $this->authorised()->post('receipts/reprints/sync', ['reprints' => $reprints]));
+
+        return array_map(fn (array $result): array => [
+            'uuid' => self::nullableString($result, 'uuid'),
+            'status' => self::string($result, 'status'),
+            'reason' => self::nullableString($result, 'reason'),
         ], self::list($json, 'results'));
     }
 

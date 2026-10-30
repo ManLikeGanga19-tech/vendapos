@@ -188,6 +188,19 @@ describe('token', function () {
 });
 
 describe('a sync round', function () {
+    it('learns the till code from the server, and keeps it when an older server sends none', function () {
+        pairTill();
+        $answer = deviceResponse();
+        $answer['device']['till_code'] = 'T4';
+        fakeServer(['device' => Http::sequence()->push($answer)->push(deviceResponse())]);
+
+        app(SyncTill::class)->handle();
+        expect(app(Till::class)->identity()?->till_code)->toBe('T4');
+
+        app(SyncTill::class)->handle();
+        expect(app(Till::class)->identity()?->till_code)->toBe('T4');
+    });
+
     it('notes success and the account status', function () {
         pairTill();
         fakeServer(['device' => Http::response(deviceResponse('suspended'))]);

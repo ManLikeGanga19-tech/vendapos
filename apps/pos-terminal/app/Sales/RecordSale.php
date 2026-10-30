@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\StaffMember;
 use App\Models\Ticket;
 use App\Models\TicketLine;
+use App\Till\Till;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use VendaPOS\Core\Data\OrderLineData;
@@ -26,6 +27,8 @@ use VendaPOS\Core\Tax\OrderTotals;
  */
 final class RecordSale
 {
+    public function __construct(private readonly Till $till) {}
+
     /**
      * @param  list<array{item_id: string, quantity: int}>  $cart
      * @param  list<TenderData>  $tenders
@@ -63,9 +66,12 @@ final class RecordSale
             // One writer (this till), so the next number is simply the highest plus one.
             $sequence = (int) Order::query()->max('sequence_number') + 1;
 
+            $tillCode = $this->till->identity()?->till_code;
+
             $order = Order::query()->create([
                 'id' => $orderId ?? (string) Str::uuid7(),
                 'sequence_number' => $sequence,
+                'receipt_number' => $tillCode !== null ? ReceiptNumber::format($tillCode, $sequence) : null,
                 'staff_id' => $staff->id,
                 'status' => OrderStatus::Completed->value,
                 'placed_at' => now()->utc(),
@@ -74,6 +80,8 @@ final class RecordSale
                 'total_cents' => $totals->total->cents,
                 'sync_status' => Order::PENDING,
                 'ticket_id' => $ticket?->id,
+                'table_name' => $ticket?->table_name,
+                'ticket_label' => $ticket?->label,
             ]);
 
             $order->lines()->createMany(array_map(fn (OrderLineData $line, int $index) => [

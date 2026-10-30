@@ -7,6 +7,7 @@ use App\Livewire\PrinterSetup;
 use App\Livewire\Sale;
 use App\Models\Item;
 use App\Models\Order;
+use App\Models\ReceiptReprint;
 use App\Models\StaffMember;
 use App\Models\SyncState;
 use App\Printing\PrinterConnections;
@@ -15,11 +16,16 @@ use App\Printing\ReceiptPrinter;
 use App\Security\SecretBox;
 use App\Staff\TillSession;
 use App\Sync\SyncStaff;
+use App\Till\Till;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Tests\Support\RecordingPrinterConnections;
 
 const PRINT_CHAI = '0199b1f2-0000-7000-8000-00000000e001';
+
+const PRINT_WATER = '0199b1f2-0000-7000-8000-00000000e002';
+
+const PRINT_BREAD = '0199b1f2-0000-7000-8000-00000000e003';
 
 /** ESC p: the pulse that opens a cash drawer wired to the printer. */
 const DRAWER_PULSE = "\x1bp";
@@ -66,10 +72,14 @@ it('prints the receipt after a cash sale and opens the drawer', function () {
 
     expect(RecordingPrinterConnections::$jobs)->toHaveCount(1)
         ->and($job)->toContain('Nyali')
-        ->toContain('Sale 1   26/10/2026 14:05')
+        ->toContain(ReceiptPrinter::row('Receipt No. T1-000001', '26/10/2026 14:05', 48))
         ->toContain('Served by Cashier Njeri')
         ->toContain('2 x Chai ya tangawizi')
-        ->toContain('101.00')
+        // VAT is inside the price: the amount before VAT and the VAT add up to the total.
+        ->toContain(ReceiptPrinter::row('Total excl. VAT', '87.07', 48))
+        ->toContain(ReceiptPrinter::row('VAT 16% on 87.07', '13.93', 48))
+        ->toContain(ReceiptPrinter::row('TOTAL', 'KES 101.00', 48))
+        ->not->toContain('REPRINT')
         ->toContain('Change')
         ->toContain('99.00')
         ->toContain(DRAWER_PULSE)
@@ -106,8 +116,29 @@ it('prints nothing when no printer is set up', function () {
     expect(RecordingPrinterConnections::$jobs)->toBe([]);
 });
 
-it('reprints without opening the drawer', function () {
+it('reprints without opening the drawer, marked as a reprint and kept for the owner', function () {
     (new PrinterSettings(PrinterSettings::WINDOWS, 'POS-80', 80))->save();
+
+    Livewire::test(Sale::class)
+        ->call('add', PRINT_CHAI)
+        ->call('startPayment')
+        ->call('quickCash', 100)
+        ->call('complete')
+        ->assertSee(__('terminal.sale.done.title', ['number' => 'T1-000001']))
+        ->call('reprint');
+
+    $reprint = ReceiptReprint::query()->sole();
+
+    expect(RecordingPrinterConnections::$jobs)->toHaveCount(2)
+        ->and(RecordingPrinterConnections::$jobs[1])->not->toContain(DRAWER_PULSE)->toContain('*** REPRINT ***')->toContain('Receipt No. T1-000001')
+        ->and($reprint->order_id)->toBe(Order::query()->sole()->id)
+        ->and($reprint->staff_id)->toBe($this->cashier->id)
+        ->and($reprint->sync_status)->toBe('pending');
+});
+
+it('lets only staff allowed to reprint do it, and records nothing otherwise', function () {
+    (new PrinterSettings(PrinterSettings::WINDOWS, 'POS-80', 80))->save();
+    app(TillSession::class)->signIn(($this->staffMember)('cashier', ['orders.take', 'payments.take']));
 
     Livewire::test(Sale::class)
         ->call('add', PRINT_CHAI)
@@ -116,8 +147,40 @@ it('reprints without opening the drawer', function () {
         ->call('complete')
         ->call('reprint');
 
-    expect(RecordingPrinterConnections::$jobs)->toHaveCount(2)
-        ->and(RecordingPrinterConnections::$jobs[1])->not->toContain(DRAWER_PULSE);
+    expect(RecordingPrinterConnections::$jobs)->toHaveCount(1)
+        ->and(ReceiptReprint::query()->count())->toBe(0);
+});
+
+it('shows each VAT rate a sale has, with zero-rated and exempt lines only when sold', function () {
+    (new PrinterSettings(PrinterSettings::WINDOWS, 'POS-80', 80))->save();
+    Item::query()->insert([
+        ['id' => PRINT_WATER, 'category_id' => null, 'type' => 'product', 'name' => 'Water', 'sku' => null, 'barcode' => null, 'price_cents' => 5_000, 'vat_category' => 'zero_rated', 'is_active' => true],
+        ['id' => PRINT_BREAD, 'category_id' => null, 'type' => 'product', 'name' => 'Bread', 'sku' => null, 'barcode' => null, 'price_cents' => 6_000, 'vat_category' => 'exempt', 'is_active' => true],
+    ]);
+
+    Livewire::test(Sale::class)
+        ->call('add', PRINT_CHAI)->call('add', PRINT_WATER)->call('add', PRINT_BREAD)
+        ->call('startPayment')
+        ->call('quickCash', 200)
+        ->call('complete');
+
+    // Chai 50.50 carries 6.97 VAT; water and bread carry none.
+    expect(RecordingPrinterConnections::$jobs[0])
+        ->toContain(ReceiptPrinter::row('Total excl. VAT', '153.53', 48))
+        ->toContain(ReceiptPrinter::row('VAT 16% on 43.53', '6.97', 48))
+        ->toContain(ReceiptPrinter::row('VAT 0% on 50.00', '0.00', 48))
+        ->toContain(ReceiptPrinter::row('VAT exempt on 60.00', '0.00', 48))
+        ->toContain(ReceiptPrinter::row('TOTAL', 'KES 160.50', 48));
+});
+
+it('falls back to the sale number until the till knows its code', function () {
+    (new PrinterSettings(PrinterSettings::WINDOWS, 'POS-80', 80))->save();
+    app(Till::class)->identity()?->update(['till_code' => null]);
+
+    $order = sellChaiForCash(200);
+
+    expect($order->receipt_number)->toBeNull()
+        ->and(RecordingPrinterConnections::$jobs[0])->toContain('Sale 1');
 });
 
 it('lets managers set up the printer and print a test page, and keeps cashiers out', function () {

@@ -224,10 +224,14 @@ return [
     ],
 
     'receipt' => [
-        'sale' => 'Sale :number   :time',
+        'number' => 'Receipt No. :number',
+        'sale' => 'Sale :number',
+        'reprint' => '*** REPRINT ***',
         'served_by' => 'Served by :name',
+        'net' => 'Total excl. VAT',
+        'vat_rate' => 'VAT :rate% on :amount',
+        'vat_exempt' => 'VAT exempt on :amount',
         'total' => 'TOTAL',
-        'vat' => 'Of which VAT',
         'cash' => 'Cash',
         'change' => 'Change',
         'thanks' => 'Thank you. Asante!',

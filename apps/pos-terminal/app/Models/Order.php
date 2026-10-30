@@ -28,6 +28,9 @@ use Illuminate\Support\Carbon;
  * @property array<string, mixed>|null $sync_errors
  * @property Carbon|null $synced_at
  * @property string|null $ticket_id the ticket this sale paid (table service)
+ * @property string|null $receipt_number "T2-000123", fixed at the sale; null if the till had no code yet
+ * @property string|null $table_name the table of the ticket it paid, as it was then
+ * @property string|null $ticket_label the takeaway name of the ticket it paid
  */
 #[Table(name: 'orders', keyType: 'string', incrementing: false, timestamps: false)]
 #[Unguarded]
@@ -56,6 +59,12 @@ final class Order extends Model
     public function lines(): HasMany
     {
         return $this->hasMany(OrderLine::class)->orderBy('position');
+    }
+
+    /** @return HasMany<ReceiptReprint, $this> */
+    public function reprints(): HasMany
+    {
+        return $this->hasMany(ReceiptReprint::class);
     }
 
     /** @return HasMany<OrderTender, $this> */

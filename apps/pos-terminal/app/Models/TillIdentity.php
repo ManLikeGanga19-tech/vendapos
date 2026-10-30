@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property string $device_id
  * @property string $device_name
+ * @property string|null $till_code "T2", from the server; null until it has said
  * @property string $business_name
  * @property string $branch_id
  * @property string $branch_name

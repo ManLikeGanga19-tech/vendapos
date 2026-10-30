@@ -79,7 +79,7 @@
         <aside class="flex min-h-0 flex-col bg-panel">
             @if ($step === 'done' && $done)
                 <div class="flex flex-1 flex-col items-center justify-center gap-6 p-6 text-center" role="status" @if ($printerReady) wire:poll.5s @endif>
-                    <p class="text-sm tracking-widest text-ok uppercase">{{ __('terminal.sale.done.title', ['number' => $done['sequence']]) }}</p>
+                    <p class="text-sm tracking-widest text-ok uppercase">{{ __('terminal.sale.done.title', ['number' => $done['number']]) }}</p>
                     <p class="text-muted">{{ __('terminal.sale.done.total', ['amount' => \VendaPOS\Core\ValueObjects\Money::fromCents($done['total_cents'])->format()]) }}</p>
                     @if ($done['change_cents'] > 0)
                         <div>

@@ -14,6 +14,9 @@ use App\Till\Till;
 use Mike42\Escpos\Printer;
 use Throwable;
 use Transliterator;
+use VendaPOS\Core\Data\OrderLineData;
+use VendaPOS\Core\Enums\VatCategory;
+use VendaPOS\Core\Tax\VatBreakdown;
 
 /**
  * Prints on the till's ESC/POS receipt printer. Text stays plain ASCII,
@@ -27,23 +30,42 @@ class ReceiptPrinter
         private readonly Till $till,
     ) {}
 
-    /** @throws PrintFailed */
-    public function receipt(Order $order, bool $openDrawer = false): void
+    /**
+     * A reprint says so at the top, so a copy can't pass as a second sale.
+     *
+     * @throws PrintFailed
+     */
+    public function receipt(Order $order, bool $openDrawer = false, bool $reprint = false): void
     {
         $order->loadMissing(['lines', 'tenders']);
 
-        $this->print(function (Printer $printer, int $columns) use ($order, $openDrawer) {
+        $this->print(function (Printer $printer, int $columns) use ($order, $openDrawer, $reprint) {
             $this->header($printer);
 
+            if ($reprint) {
+                $printer->setEmphasis(true);
+                $printer->text(self::ascii(__('terminal.receipt.reprint'))."\n");
+                $printer->setEmphasis(false);
+            }
+
             $printer->setJustification(Printer::JUSTIFY_LEFT);
-            $printer->text(self::ascii(__('terminal.receipt.sale', [
-                'number' => $order->sequence_number,
-                'time' => $order->placed_at->setTimezone(StatusBar::TIMEZONE)->format('d/m/Y H:i'),
-            ]))."\n");
+            $printer->text(self::row(
+                $order->receipt_number !== null
+                    ? __('terminal.receipt.number', ['number' => $order->receipt_number])
+                    : __('terminal.receipt.sale', ['number' => $order->sequence_number]),
+                $order->placed_at->setTimezone(StatusBar::TIMEZONE)->format('d/m/Y H:i'),
+                $columns,
+            ));
             $staff = StaffMember::query()->find($order->staff_id);
 
             if ($staff !== null) {
                 $printer->text(self::ascii(__('terminal.receipt.served_by', ['name' => $staff->name]))."\n");
+            }
+
+            if ($order->ticket_id !== null) {
+                // The same words as on the bill: "Table 4", or the takeaway and its name.
+                $ticket = new Ticket(['table_name' => $order->table_name, 'label' => $order->ticket_label]);
+                $printer->text(self::ascii($ticket->title())."\n");
             }
 
             $printer->text(str_repeat('-', $columns)."\n");
@@ -54,10 +76,13 @@ class ReceiptPrinter
             }
 
             $printer->text(str_repeat('-', $columns)."\n");
-            $printer->setEmphasis(true);
-            $printer->text(self::row(__('terminal.receipt.total'), 'KES '.self::money($order->total_cents), $columns));
-            $printer->setEmphasis(false);
-            $printer->text(self::row(__('terminal.receipt.vat'), self::money($order->vat_cents), $columns));
+            $this->vatAndTotal(
+                $printer,
+                array_values($order->lines->map(fn (OrderLine $line) => $line->toOrderLine())->all()),
+                __('terminal.receipt.total'),
+                $order->total_cents,
+                $columns,
+            );
 
             foreach ($order->tenders as $tender) {
                 /** @var OrderTender $tender */
@@ -112,12 +137,14 @@ class ReceiptPrinter
                 $printer->text(self::row("{$line->quantity} x {$line->name}", self::money($line->unit_price_cents * $line->quantity), $columns));
             }
 
-            $totals = $ticket->totals();
             $printer->text(str_repeat('-', $columns)."\n");
-            $printer->setEmphasis(true);
-            $printer->text(self::row(__('terminal.bill.to_pay'), 'KES '.self::money($totals->total->cents), $columns));
-            $printer->setEmphasis(false);
-            $printer->text(self::row(__('terminal.receipt.vat'), self::money($totals->vat->cents), $columns));
+            $this->vatAndTotal(
+                $printer,
+                array_map(fn ($line) => $line->toOrderLine(), $ticket->billedLines()),
+                __('terminal.bill.to_pay'),
+                $ticket->totals()->total->cents,
+                $columns,
+            );
             $printer->text(str_repeat('-', $columns)."\n");
             $printer->setJustification(Printer::JUSTIFY_CENTER);
             $printer->text(self::ascii(__('terminal.bill.footer'))."\n");
@@ -170,6 +197,32 @@ class ReceiptPrinter
         $printer->text(self::ascii((string) $identity?->business_name)."\n");
         $printer->selectPrintMode();
         $printer->text(self::ascii((string) $identity?->branch_name)."\n");
+    }
+
+    /**
+     * Prices include VAT, so the total comes last and the lines above it show
+     * what it is made of: the amount before VAT, then the VAT of each rate
+     * the sale has. Zero-rated and exempt lines appear only when sold.
+     *
+     * @param  list<OrderLineData>  $lines
+     */
+    private function vatAndTotal(Printer $printer, array $lines, string $totalLabel, int $totalCents, int $columns): void
+    {
+        $bands = VatBreakdown::fromLines($lines);
+        $vatCents = array_sum(array_map(fn ($band) => $band->vat->cents, $bands));
+
+        $printer->text(self::row(__('terminal.receipt.net'), self::money($totalCents - $vatCents), $columns));
+
+        foreach ($bands as $band) {
+            $label = $band->category === VatCategory::Exempt
+                ? __('terminal.receipt.vat_exempt', ['amount' => self::money($band->net()->cents)])
+                : __('terminal.receipt.vat_rate', ['rate' => $band->category->rate() / 100, 'amount' => self::money($band->net()->cents)]);
+            $printer->text(self::row($label, self::money($band->vat->cents), $columns));
+        }
+
+        $printer->setEmphasis(true);
+        $printer->text(self::row($totalLabel, 'KES '.self::money($totalCents), $columns));
+        $printer->setEmphasis(false);
     }
 
     /** "2 x Chai ............ 101.00", wrapping a long name onto its own lines. */

@@ -74,6 +74,7 @@ final class Till
             return TillIdentity::query()->updateOrCreate(['id' => TillIdentity::ROW_ID], [
                 'device_id' => $result->deviceId,
                 'device_name' => $result->deviceName,
+                'till_code' => $result->tillCode,
                 'business_name' => $result->businessName,
                 'branch_id' => $result->branch->id,
                 'branch_name' => $result->branch->name,

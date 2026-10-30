@@ -225,10 +225,14 @@ return [
     ],
 
     'receipt' => [
-        'sale' => 'Mauzo :number   :time',
+        'number' => 'Risiti Na. :number',
+        'sale' => 'Mauzo :number',
+        'reprint' => '*** NAKALA ***',
         'served_by' => 'Amehudumiwa na :name',
+        'net' => 'Jumla bila VAT',
+        'vat_rate' => 'VAT :rate% kwa :amount',
+        'vat_exempt' => 'Bila VAT (msamaha) kwa :amount',
         'total' => 'JUMLA',
-        'vat' => 'Kati yake VAT',
         'cash' => 'Pesa taslimu',
         'change' => 'Chenji',
         'thanks' => 'Asante sana. Karibu tena!',
