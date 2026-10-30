@@ -1,10 +1,7 @@
 # Daraja Dynamic QR: what we know and what we still check
 
-Scan-to-pay on the bill (slice Q) uses Safaricom's Dynamic QR API. Safaricom's own
-page for it (developer.safaricom.co.ke) would not load when this was written
-(2026-10-30), so the facts below come from copies of the Daraja documentation and
-community guides. Confirm each point on the official portal, or with a real call,
-before going live.
+Scan-to-pay on the bill (slice Q) uses Safaricom's Dynamic QR API. The field list below
+matches Safaricom's own Daraja page (checked by Daniel on the portal, 2026-10-30).
 
 ## The call
 
@@ -36,12 +33,22 @@ till number as text, and the cashier takes the M-Pesa code as today.
 
 ## Still to confirm with a real call
 
-1. `QRCode` really is a base64 PNG, not the raw QR text.
+1. ~~`QRCode` is a base64 PNG~~ Confirmed 2026-10-30: the sandbox returns a 300×300 PNG
+   with the merchant name above the code and the paybill below.
 2. A scanned `PB` payment reaches our C2B confirmation URL with `BillRefNumber` equal
-   to `RefNo`.
+   to `RefNo`. Only a live paybill can show this (see 4).
 3. The limits on `RefNo` (length, characters) and on `Size`.
-4. Whether the sandbox lets a scan be simulated, or only a production paybill can show it.
+4. The sandbox does **not** encode what we send: for `CPI` 600584 it returned its
+   sample code for paybill 174379, the same image every time, with only `MerchantName`
+   changed. A sandbox QR proves the call and the printing, not the payment. Never pay
+   a sandbox QR from a real M-Pesa app.
 5. What a live paybill needs from Safaricom (Go Live, Dynamic QR approval).
+
+## Sandbox set-up (dev)
+
+The sandbox app "vendapos" uses 174379 for the STK push and **600584** for C2B; the
+default account keeps 600584 as `c2b_shortcode`. Its confirmation URL registered with
+Safaricom on 2026-10-30 (through the dev tunnel).
 
 ## How VendaPOS uses it
 
