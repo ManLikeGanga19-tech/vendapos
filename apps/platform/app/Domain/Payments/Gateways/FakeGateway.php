@@ -17,8 +17,8 @@ final class FakeGateway extends MobileMoneyGateway
         return GatewayResult::accepted('fake-'.$payment->id);
     }
 
-    /** A 1×1 white PNG: enough for the till to print and the tests to check. */
-    public const string QR_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGP4DwABAQEAWk1v8QAAAABJRU5ErkJggg==';
+    /** An 8×8 PNG: enough for the till to print and the tests to check. */
+    public const string QR_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///8AAABVwtN+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAADklEQVQImWP4wACBUAAALRADwQ6OuycAAAAASUVORK5CYII=';
 
     public function generateQr(Payment $payment, string $merchantName): string
     {
