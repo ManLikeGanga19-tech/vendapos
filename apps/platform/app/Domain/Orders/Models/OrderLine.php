@@ -6,6 +6,7 @@ namespace App\Domain\Orders\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use VendaPOS\Core\Data\OrderLineData;
 use VendaPOS\Core\Enums\VatCategory;
 
 /**
@@ -40,5 +41,17 @@ class OrderLine extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function toOrderLineData(): OrderLineData
+    {
+        return new OrderLineData(
+            item_id: $this->item_id,
+            name: $this->name,
+            quantity: $this->quantity,
+            unit_price_cents: $this->unit_price_cents,
+            vat_category: $this->vat_category,
+            line_total_cents: $this->line_total_cents,
+        );
     }
 }
