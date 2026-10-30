@@ -25,6 +25,11 @@ final class StatusEndpointDownGateway extends MobileMoneyGateway
         return GatewayResult::accepted('down-'.$payment->id);
     }
 
+    public function generateQr(Payment $payment, string $merchantName): string
+    {
+        throw new RuntimeException('No QR from this gateway');
+    }
+
     public function query(Payment $payment): GatewayResult
     {
         throw new RuntimeException('503 Service Unavailable');

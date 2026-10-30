@@ -42,3 +42,18 @@ till number as text, and the cashier takes the M-Pesa code as today.
 3. The limits on `RefNo` (length, characters) and on `Size`.
 4. Whether the sandbox lets a scan be simulated, or only a production paybill can show it.
 5. What a live paybill needs from Safaricom (Go Live, Dynamic QR approval).
+
+## How VendaPOS uses it
+
+- The till asks for a QR payment (`POST /api/v1/payments` with `"channel": "qr"` and no
+  phone) when it prints a bill. The server refuses with `qr_needs_paybill` unless the
+  branch's account is a paybill.
+- The payment gets a reference such as `VPK7M2Q9TR` (no 0/O, 1/I/L or U). It is the
+  `RefNo` in the QR and the account number printed under it.
+- A C2B confirmation on the same account whose `BillRefNumber` is the reference (any
+  case) pays it if the amount matches. A different amount leaves it pending and opens an
+  "Amount differs" check; a second payment of a paid bill opens "Bill paid twice".
+- If Safaricom cannot make the QR, the payment stays pending: the bill prints the
+  paybill and account number, and a customer who types them still pays it.
+- QR payments are never status-queried (`payments:reconcile` skips them); only the
+  confirmation settles them.

@@ -17,6 +17,14 @@ final class FakeGateway extends MobileMoneyGateway
         return GatewayResult::accepted('fake-'.$payment->id);
     }
 
+    /** A 1×1 white PNG: enough for the till to print and the tests to check. */
+    public const string QR_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGP4DwABAQEAWk1v8QAAAABJRU5ErkJggg==';
+
+    public function generateQr(Payment $payment, string $merchantName): string
+    {
+        return self::QR_PNG;
+    }
+
     public function query(Payment $payment): GatewayResult
     {
         return match (config('vendapos.payments.fake_outcome')) {

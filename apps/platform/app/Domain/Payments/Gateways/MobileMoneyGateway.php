@@ -24,6 +24,16 @@ abstract class MobileMoneyGateway
     /** Pushes the payment request to the customer's phone. Never retried automatically. */
     abstract public function initiate(Payment $payment): GatewayResult;
 
+    /**
+     * Asks the provider for a QR code the customer scans to pay the payment's
+     * account, with the payment's reference as the account number.
+     *
+     * @return string the QR image, base64 PNG
+     *
+     * @throws ProviderUnreachable|\RuntimeException when no QR could be made
+     */
+    abstract public function generateQr(Payment $payment, string $merchantName): string;
+
     /** Asks the provider for the payment's current state (late or missing callbacks). */
     abstract public function query(Payment $payment): GatewayResult;
 

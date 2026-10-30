@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Validator;
 use VendaPOS\Core\Data\PaymentRequestData;
 use VendaPOS\Core\Enums\MobileMoneyProvider;
+use VendaPOS\Core\Enums\PaymentChannel;
 
 /** @return array<string, mixed> */
 function paymentPayload(array $overrides = []): array
@@ -42,4 +43,19 @@ it('carries no tenant, branch or device', function () {
     $properties = array_map(fn (ReflectionProperty $p) => $p->getName(), (new ReflectionClass(PaymentRequestData::class))->getProperties());
 
     expect($properties)->not->toContain('tenant_id')->not->toContain('branch_id')->not->toContain('device_id');
+});
+
+it('is a push to a phone unless it asks for a QR code', function () {
+    expect(PaymentRequestData::from(paymentPayload())->channel)->toBe(PaymentChannel::Push)
+        ->and(Validator::make(paymentPayload(['phone' => null]), PaymentRequestData::rules())->errors()->keys())->toContain('phone');
+});
+
+it('takes a QR payment with no phone, and refuses one with a phone', function () {
+    $qr = paymentPayload(['channel' => 'qr']);
+    unset($qr['phone']);
+
+    expect(Validator::make($qr, PaymentRequestData::rules())->passes())->toBeTrue()
+        ->and(PaymentRequestData::from($qr))->channel->toBe(PaymentChannel::Qr)->phone->toBeNull()
+        ->and(Validator::make(paymentPayload(['channel' => 'qr']), PaymentRequestData::rules())->errors()->keys())->toContain('phone')
+        ->and(Validator::make(paymentPayload(['channel' => 'sms']), PaymentRequestData::rules())->errors()->keys())->toContain('channel');
 });

@@ -12,6 +12,7 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
+use VendaPOS\Core\Enums\PaymentChannel;
 use VendaPOS\Core\Enums\PaymentStatus;
 
 #[Signature('payments:reconcile')]
@@ -25,6 +26,8 @@ final class ReconcilePaymentsCommand extends Command
         tenancy()->runForMultiple(LiveTenants::all(), function (Tenant $tenant) use (&$queued) {
             Payment::query()
                 ->where('status', PaymentStatus::Pending)
+                // QR payments have no request to ask about: their C2B confirmation settles them.
+                ->where('channel', PaymentChannel::Push)
                 ->where('created_at', '>=', now()->subHours((int) config('vendapos.payments.reconcile.stop_after_hours')))
                 ->where(fn (Builder $query) => $query
                     ->where('initiated_at', '<=', now()->subSeconds((int) config('vendapos.payments.reconcile.first_query_after_seconds')))

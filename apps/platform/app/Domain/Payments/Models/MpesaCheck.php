@@ -41,7 +41,10 @@ class MpesaCheck extends Model
     /** A push the customer paid that no synced sale claims (e.g. the cashier stopped waiting). */
     public const string UNCLAIMED_PUSH = 'unclaimed_push';
 
-    public const array KINDS = [self::UNCONFIRMED_CODE, self::AMOUNT_MISMATCH, self::CODE_REUSED, self::UNCLAIMED_PUSH];
+    /** A bill's QR paid again after it was already paid. */
+    public const string QR_PAID_TWICE = 'qr_paid_twice';
+
+    public const array KINDS = [self::UNCONFIRMED_CODE, self::AMOUNT_MISMATCH, self::CODE_REUSED, self::UNCLAIMED_PUSH, self::QR_PAID_TWICE];
 
     public const string OPEN = 'open';
 

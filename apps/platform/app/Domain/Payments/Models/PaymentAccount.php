@@ -89,6 +89,18 @@ class PaymentAccount extends Model
         return $this->c2b_token === null ? null : rtrim((string) config('vendapos.payments.callback_base_url'), '/')."/webhooks/c2b/{$this->c2b_token}/validate";
     }
 
+    /** Paybill rather than buy goods (till): only a paybill payment carries our account reference back. */
+    public function isPaybill(): bool
+    {
+        return ($this->credentials['transaction_type'] ?? null) === 'CustomerPayBillOnline';
+    }
+
+    /** The number customers pay into: where C2B confirmations come from. */
+    public function payInNumber(): string
+    {
+        return (string) ($this->credentials['c2b_shortcode'] ?? $this->credentials['shortcode'] ?? '');
+    }
+
     /** "•••• 1234": enough to recognise a key, never enough to use it. */
     public function hint(string $field): ?string
     {

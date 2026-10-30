@@ -14,6 +14,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use LogicException;
+use RuntimeException;
 use VendaPOS\Core\Enums\MobileMoneyProvider;
 use VendaPOS\Core\Enums\PaymentStatus;
 
@@ -45,6 +46,9 @@ final class DarajaGateway extends MobileMoneyGateway
         PaymentAccount::PRODUCTION => 'https://api.safaricom.co.ke',
     ];
 
+    /** Width of the QR image in pixels: about half of the 576 dots across 80 mm paper. */
+    private const int QR_SIZE = 300;
+
     /** STK query error while the customer has not answered yet. */
     private const string STILL_PROCESSING = '500.001.1001';
 
@@ -52,7 +56,7 @@ final class DarajaGateway extends MobileMoneyGateway
     {
         $credentials = $this->credentials($payment);
         $timestamp = $this->timestamp();
-        $phone = ltrim($payment->phone, '+');
+        $phone = ltrim((string) $payment->phone, '+');
 
         $response = $this->client($credentials)->post('/mpesa/stkpush/v1/processrequest', [
             'BusinessShortCode' => $credentials['shortcode'],
@@ -85,6 +89,39 @@ final class DarajaGateway extends MobileMoneyGateway
             (string) ($body['errorCode'] ?? $body['ResponseCode'] ?? $response->status()),
             (string) ($body['errorMessage'] ?? $body['ResponseDescription'] ?? 'The STK push was refused.'),
         );
+    }
+
+    /**
+     * Dynamic QR (docs/DARAJA-DYNAMIC-QR.md): a paybill (PB) QR for the
+     * payment's amount, with its reference as the account number, so the
+     * customer's payment comes back on the C2B confirmation with it.
+     */
+    public function generateQr(Payment $payment, string $merchantName): string
+    {
+        $account = ($payment->payment_account_id !== null ? PaymentAccount::query()->find($payment->payment_account_id) : null)
+            ?? throw new LogicException("Payment {$payment->id} has no account.");
+
+        try {
+            $response = $this->client([...$account->credentials, 'environment' => $account->environment])->post('/mpesa/qrcode/v1/generate', [
+                'MerchantName' => mb_substr($merchantName, 0, 30),
+                'RefNo' => $payment->reference,
+                'Amount' => $payment->amount()->toWholeShillings(),
+                'TrxCode' => 'PB',
+                'CPI' => $account->payInNumber(),
+                'Size' => (string) self::QR_SIZE,
+            ]);
+        } catch (ConnectionException) {
+            throw new ProviderUnreachable('Safaricom could not be reached.');
+        }
+
+        $body = (array) $response->json();
+        $png = $body['QRCode'] ?? null;
+
+        if (! $response->successful() || ! is_string($png) || $png === '') {
+            throw new RuntimeException((string) ($body['errorMessage'] ?? $body['ResponseDescription'] ?? "Safaricom answered {$response->status()}."));
+        }
+
+        return $png;
     }
 
     public function query(Payment $payment): GatewayResult

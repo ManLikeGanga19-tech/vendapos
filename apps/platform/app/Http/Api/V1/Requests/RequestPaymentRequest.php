@@ -30,8 +30,8 @@ final class RequestPaymentRequest extends ApiRequest
                     $validator->errors()->add('provider', "{$provider->value} is not available yet.");
                 }
 
-                // An M-Pesa Kenya push can only go to a Kenyan number, and so on.
-                if ($provider !== null && ! $validator->errors()->has('phone') && ! str_starts_with($phone, '+'.$provider->dialCode())) {
+                // An M-Pesa Kenya push can only go to a Kenyan number, and so on. A QR payment has no phone.
+                if ($provider !== null && $this->input('phone') !== null && ! $validator->errors()->has('phone') && ! str_starts_with($phone, '+'.$provider->dialCode())) {
                     $validator->errors()->add('phone', "The phone must be a +{$provider->dialCode()} number for {$provider->value}.");
                 }
             },

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Domain\Payments\Actions;
 
+use App\Domain\Payments\Data\GatewayResult;
 use App\Domain\Payments\Models\MpesaCheck;
 use App\Domain\Payments\Models\MpesaCodeClaim;
 use App\Domain\Payments\Models\MpesaConfirmation;
 use App\Domain\Payments\Models\Payment;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use VendaPOS\Core\Enums\PaymentChannel;
 use VendaPOS\Core\Enums\PaymentStatus;
 
 /**
@@ -39,9 +41,11 @@ final class MatchMpesaCodes
         }
     }
 
-    /** A confirmation arrived: settle every claim waiting on its code. */
+    /** A confirmation arrived: pay the bill whose QR it was for, and settle every claim waiting on its code. */
     public function confirmationArrived(MpesaConfirmation $confirmation): void
     {
+        $this->settleQr($confirmation);
+
         MpesaCodeClaim::query()
             ->where('mpesa_code', $confirmation->trans_id)
             ->whereIn('status', [MpesaCodeClaim::PENDING, MpesaCodeClaim::UNCONFIRMED])
@@ -83,6 +87,55 @@ final class MatchMpesaCodes
                 'payment_id' => $payment->id,
                 'amount_cents' => $payment->amount_cents,
             ]));
+    }
+
+    /**
+     * The account number the customer paid to is a QR payment's reference, on
+     * the same account. The right amount pays it, and the till sees it as a paid
+     * push; anything else leaves it pending and opens a check for the owner.
+     */
+    private function settleQr(MpesaConfirmation $confirmation): void
+    {
+        if ($confirmation->bill_ref === null) {
+            return;
+        }
+
+        $payment = Payment::query()
+            ->where('channel', PaymentChannel::Qr)
+            ->where('reference', strtoupper(trim($confirmation->bill_ref)))
+            ->where('payment_account_id', $confirmation->payment_account_id)
+            ->lockForUpdate()
+            ->first();
+
+        if ($payment === null || $payment->provider_reference === $confirmation->trans_id) {
+            return;
+        }
+
+        $check = [
+            'branch_id' => $payment->branch_id,
+            'order_id' => $payment->order_id,
+            'mpesa_code' => $confirmation->trans_id,
+            'payment_id' => $payment->id,
+            'amount_cents' => $payment->amount_cents,
+        ];
+
+        if ($payment->status !== PaymentStatus::Pending) {
+            // Paid already (or given up on): this is a second payment of the same bill.
+            MpesaCheck::open(MpesaCheck::QR_PAID_TWICE, "{$payment->id}:{$confirmation->trans_id}", [...$check, 'amount_cents' => $confirmation->amount_cents]);
+
+            return;
+        }
+
+        if ($confirmation->amount_cents !== $payment->amount_cents) {
+            MpesaCheck::open(MpesaCheck::AMOUNT_MISMATCH, "{$payment->id}:{$confirmation->trans_id}", [
+                ...$check,
+                'details' => ['confirmed_cents' => $confirmation->amount_cents, 'paid_at' => Carbon::parse($confirmation->paid_at)->toIso8601String()],
+            ]);
+
+            return;
+        }
+
+        app(ApplyPaymentOutcome::class)->handle($payment->id, GatewayResult::succeeded($confirmation->trans_id, $confirmation->amount_cents));
     }
 
     private function claimPush(string $paymentId): void
