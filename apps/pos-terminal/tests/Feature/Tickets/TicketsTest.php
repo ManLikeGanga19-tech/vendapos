@@ -32,7 +32,7 @@ use Livewire\Livewire;
 use Tests\Support\RecordingPrinterConnections;
 
 const TUSKER = '0199b1f2-0000-7000-8000-00000000f001';
-const SODA = '0199b1f2-0000-7000-8000-00000000f002';
+const TICKET_SODA = '0199b1f2-0000-7000-8000-00000000f002';
 const TABLE_4 = '0199b1f2-0000-7000-8000-00000000f104';
 
 /** An 8×8 PNG, standing in for Safaricom's QR. */
@@ -49,7 +49,7 @@ beforeEach(function () {
 
     Item::query()->insert([
         ['id' => TUSKER, 'category_id' => null, 'type' => 'product', 'name' => 'Tusker', 'sku' => null, 'barcode' => null, 'price_cents' => 35_000, 'vat_category' => 'standard', 'is_active' => true],
-        ['id' => SODA, 'category_id' => null, 'type' => 'product', 'name' => 'Soda', 'sku' => null, 'barcode' => null, 'price_cents' => 8_000, 'vat_category' => 'standard', 'is_active' => true],
+        ['id' => TICKET_SODA, 'category_id' => null, 'type' => 'product', 'name' => 'Soda', 'sku' => null, 'barcode' => null, 'price_cents' => 8_000, 'vat_category' => 'standard', 'is_active' => true],
     ]);
     FloorArea::query()->create(['id' => '0199b1f2-0000-7000-8000-00000000f100', 'name' => 'Main hall', 'sort_order' => 1]);
     DiningTable::query()->create(['id' => TABLE_4, 'floor_area_id' => '0199b1f2-0000-7000-8000-00000000f100', 'name' => '4', 'seats' => 4, 'sort_order' => 1]);
@@ -94,7 +94,7 @@ it('lets a waiter send an order to a table, written on the till first and pushed
 
 it('takes a takeaway order with an optional name', function () {
     Livewire::test(Sale::class)
-        ->call('add', SODA)
+        ->call('add', TICKET_SODA)
         ->call('sendOrder')
         ->set('takeawayName', '  Achieng ')
         ->call('sendTo')
@@ -112,7 +112,7 @@ it('keeps sent lines locked at the price they were sent at, and adds the next ro
         ->assertSee(__('terminal.tickets.table', ['name' => '4']))
         ->call('openTicket', $ticket->id)
         ->assertSee(__('terminal.tickets.sent_line'))
-        ->call('add', SODA)
+        ->call('add', TICKET_SODA)
         ->assertSee('KES 780.00') // 2 × 350 sent + 80 new
         ->call('sendOrder');
 
@@ -164,7 +164,7 @@ it('lets the cashier pay a ticket at its sent prices, closing it and naming it o
 
     Livewire::test(Sale::class)
         ->call('showTickets')->call('openTicket', $ticket->id)
-        ->call('add', SODA) // one more round, sent with the payment
+        ->call('add', TICKET_SODA) // one more round, sent with the payment
         ->call('startPayment')
         ->assertSet('step', Sale::PAY)
         ->assertSee('KES 780.00')
@@ -195,7 +195,7 @@ it('lets the cashier pay a ticket at its sent prices, closing it and naming it o
 it('sends a quick sale with no ticket on it', function () {
     app(TillSession::class)->signIn($this->cashier);
 
-    Livewire::test(Sale::class)->call('add', SODA)->call('startPayment')->call('quickCash', 80)->call('complete')->assertSet('step', Sale::DONE);
+    Livewire::test(Sale::class)->call('add', TICKET_SODA)->call('startPayment')->call('quickCash', 80)->call('complete')->assertSet('step', Sale::DONE);
 
     expect(Order::query()->sole()->toSyncPayload())->not->toHaveKey('ticket_uuid');
 });
