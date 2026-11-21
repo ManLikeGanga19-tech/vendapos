@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Printing;
 
 use App\Api\Data\BillQr;
+use App\CashUp\ShiftReport;
 use App\Livewire\StatusBar;
+use App\Models\CashMovement;
 use App\Models\Order;
 use App\Models\OrderLine;
 use App\Models\OrderTender;
@@ -14,6 +16,7 @@ use App\Models\Ticket;
 use App\Sales\VoidedSale;
 use App\Tickets\VoidedTicketLine;
 use App\Till\Till;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Mike42\Escpos\EscposImage;
@@ -23,6 +26,7 @@ use Transliterator;
 use VendaPOS\Core\Data\OrderLineData;
 use VendaPOS\Core\Enums\VatCategory;
 use VendaPOS\Core\Tax\VatBreakdown;
+use VendaPOS\Core\ValueObjects\Money;
 
 /**
  * Prints on the till's ESC/POS receipt printer. Text stays plain ASCII,
@@ -257,6 +261,131 @@ class ReceiptPrinter
             $printer->text(self::wrap(__('terminal.void_slip.voided_by', ['name' => $line->voidedBy]), $columns));
             $printer->text(self::wrap(__('terminal.void_slip.approved_by', ['name' => $line->approvedBy]), $columns));
         });
+    }
+
+    /**
+     * Proof of a pay-out or drop for the drawer and the owner: how much left,
+     * what for, who took it and whose PIN approved it. Opens the drawer.
+     *
+     * @throws PrintFailed
+     */
+    public function cashSlip(CashMovement $movement, string $shiftLabel): void
+    {
+        $names = StaffMember::query()->whereKey(array_filter([$movement->staff_id, $movement->approved_by]))->pluck('name', 'id');
+
+        $this->print(function (Printer $printer, int $columns) use ($movement, $shiftLabel, $names) {
+            $this->header($printer);
+
+            $printer->selectPrintMode(Printer::MODE_DOUBLE_WIDTH | Printer::MODE_EMPHASIZED);
+            $printer->text(self::ascii(__("terminal.cash_slip.title.{$movement->kind->value}"))."\n");
+            $printer->selectPrintMode();
+
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printer->text(self::row($shiftLabel, $movement->moved_at->setTimezone(StatusBar::TIMEZONE)->format('d/m/Y H:i'), $columns));
+            $printer->text(str_repeat('-', $columns)."\n");
+            $printer->setEmphasis(true);
+            $printer->text(self::row(__('terminal.cash_slip.amount'), 'KES '.self::money($movement->amount_cents), $columns));
+            $printer->setEmphasis(false);
+
+            if ($movement->reason !== null) {
+                $printer->text(self::wrap(__('terminal.cash_slip.reason', ['reason' => $movement->reason]), $columns));
+            }
+
+            $printer->text(str_repeat('-', $columns)."\n");
+            $printer->text(self::wrap(__('terminal.cash_slip.taken_by', ['name' => $names[$movement->staff_id] ?? '-']), $columns));
+            $printer->text(self::wrap(__('terminal.cash_slip.approved_by', ['name' => $names[$movement->approved_by] ?? '-']), $columns));
+            $printer->feed();
+            $printer->text(self::ascii(__('terminal.cash_slip.signature'))."\n");
+
+            $printer->pulse();
+        });
+    }
+
+    /**
+     * An X report (the open shift so far; the drawer stays shut) or a Z report
+     * (a closed shift: the count, the difference and who approved it).
+     *
+     * @throws PrintFailed
+     */
+    public function shiftReport(ShiftReport $report): void
+    {
+        $this->print(function (Printer $printer, int $columns) use ($report) {
+            $at = fn (CarbonImmutable $time): string => $time->setTimezone(StatusBar::TIMEZONE)->format('d/m/Y H:i');
+            // Money::format-like but plain: a minus for money going out, never lost below one shilling.
+            $amount = fn (Money $money): string => ($money->cents < 0 ? '-' : '').self::money(abs($money->cents));
+            $line = function (string $label, Money $money) use ($printer, $columns, $amount): void {
+                $printer->text(self::row($label, $amount($money), $columns));
+            };
+
+            $this->header($printer);
+            $printer->selectPrintMode(Printer::MODE_DOUBLE_WIDTH | Printer::MODE_EMPHASIZED);
+            $printer->text(self::ascii(__($report->final ? 'terminal.shift_report.z' : 'terminal.shift_report.x'))."\n");
+            $printer->selectPrintMode();
+            $printer->text(self::ascii($report->number)."\n");
+
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printer->text(self::wrap(__('terminal.shift_report.opened', ['time' => $at($report->openedAt), 'name' => $report->openedBy]), $columns));
+            $printer->text(self::wrap($report->closedAt !== null
+                ? __('terminal.shift_report.closed', ['time' => $at($report->closedAt), 'name' => (string) $report->closedBy])
+                : __('terminal.shift_report.printed', ['time' => $at(CarbonImmutable::now())]), $columns));
+
+            $printer->text(str_repeat('-', $columns)."\n");
+            $line(__('terminal.shift_report.float'), $report->float);
+            $line(__('terminal.shift_report.cash_taken'), $report->cashTaken);
+            $line(__('terminal.shift_report.pay_outs'), $report->payOuts->multiply(-1));
+            $line(__('terminal.shift_report.drops'), $report->drops->multiply(-1));
+            $line(__('terminal.shift_report.void_refunds'), $report->voidRefunds->multiply(-1));
+            $printer->setEmphasis(true);
+            $line(__('terminal.shift_report.expected'), $report->expected);
+            $printer->setEmphasis(false);
+
+            if ($report->counted !== null && $report->variance !== null) {
+                $line(__('terminal.shift_report.counted'), $report->counted);
+                $printer->setEmphasis(true);
+                $printer->text(self::row(__('terminal.shift_report.'.self::varianceWord($report->variance)), 'KES '.self::money(abs($report->variance->cents)), $columns));
+                $printer->setEmphasis(false);
+            }
+
+            $printer->text(str_repeat('-', $columns)."\n");
+            $line(__('terminal.shift_report.mpesa'), $report->mpesaTaken);
+            $printer->text(self::row(__('terminal.shift_report.sales'), (string) $report->sales, $columns));
+            $printer->text(self::row(__('terminal.shift_report.voided'), (string) $report->voided, $columns));
+
+            if ($report->movements !== []) {
+                $printer->text(str_repeat('-', $columns)."\n");
+                $printer->text(self::ascii(__('terminal.shift_report.cash_out'))."\n");
+
+                foreach ($report->movements as $movement) {
+                    $label = $movement['at']->setTimezone(StatusBar::TIMEZONE)->format('H:i').' '.__("terminal.cash_up.kinds.{$movement['kind']}");
+                    $printer->text(self::row($movement['reason'] !== null ? "{$label}: {$movement['reason']}" : $label, self::money($movement['amount']->cents), $columns));
+                }
+            }
+
+            if ($report->closingCounts !== null) {
+                $printer->text(str_repeat('-', $columns)."\n");
+                $printer->text(self::ascii(__('terminal.shift_report.count'))."\n");
+
+                foreach ($report->closingCounts as $shillings => $count) {
+                    $printer->text(self::row("{$count} x {$shillings}", self::money($shillings * $count * 100), $columns));
+                }
+            }
+
+            if ($report->approvedBy !== null) {
+                $printer->text(str_repeat('-', $columns)."\n");
+                $printer->text(self::wrap(__('terminal.shift_report.approved_by', ['name' => $report->approvedBy]), $columns));
+                $printer->text(self::wrap(__('terminal.shift_report.note', ['note' => (string) $report->note]), $columns));
+            }
+        });
+    }
+
+    /** "short", "over" or "exact": the key for a count's difference. */
+    public static function varianceWord(Money $variance): string
+    {
+        return match (true) {
+            $variance->cents < 0 => 'short',
+            $variance->cents > 0 => 'over',
+            default => 'exact',
+        };
     }
 
     /** A short page to check the printer, the paper width and the cutter. @throws PrintFailed */

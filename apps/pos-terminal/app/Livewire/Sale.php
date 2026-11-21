@@ -9,6 +9,7 @@ use App\Api\Exceptions\ApiRejected;
 use App\Api\Exceptions\ApiUnavailable;
 use App\Api\Exceptions\TillNotAuthorised;
 use App\Api\VendaApi;
+use App\CashUp\Drawer;
 use App\Jobs\PrintReceiptJob;
 use App\Jobs\ReleaseTicketHoldJob;
 use App\Livewire\Concerns\FollowsTillLanguage;
@@ -291,7 +292,7 @@ final class Sale extends Component
         $this->notice = __('terminal.tickets.bill_printed', ['ticket' => $ticket->title()]);
     }
 
-    public function startPayment(TillSession $session, SendOrder $sendOrder, HoldForPayment $hold): void
+    public function startPayment(TillSession $session, SendOrder $sendOrder, HoldForPayment $hold, Drawer $drawer): void
     {
         $ticket = $this->openTicketModel();
 
@@ -301,6 +302,13 @@ final class Sale extends Component
 
         if (! $session->can(StaffMember::TAKE_PAYMENTS)) {
             $this->message = __('terminal.sale.refused.not_allowed');
+
+            return;
+        }
+
+        // Nothing is paid into a drawer nobody counted: a shift is opened first (cash-up).
+        if (! $drawer->isOpen()) {
+            $this->message = __('terminal.sale.refused.no_shift');
 
             return;
         }
@@ -737,7 +745,7 @@ final class Sale extends Component
         $this->redirectRoute('sign-in');
     }
 
-    public function render(Till $till, TillSession $session): View
+    public function render(Till $till, TillSession $session, Drawer $drawer): View
     {
         $lines = $this->lines();
         $ticket = $this->openTicketModel();
@@ -759,6 +767,7 @@ final class Sale extends Component
             'openTicketCount' => Ticket::query()->unpaid()->count(),
             'areas' => $this->step === self::TABLE ? FloorArea::query()->orderBy('sort_order')->orderBy('name')->get() : collect(),
             'staff' => $session->staff(),
+            'shiftOpen' => $drawer->isOpen(),
             'categories' => Category::query()->orderBy('sort_order')->orderBy('name')->get(),
             'items' => Item::query()->where('is_active', true)
                 ->when($this->category !== null, fn ($query) => $query->where('category_id', $this->category))

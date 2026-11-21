@@ -41,8 +41,10 @@
             @if ($staff?->can(\App\Models\StaffMember::TAKE_PAYMENTS))
                 @if (in_array($step, ['pay', 'mpesa'], true))
                     <span class="key h-12 px-4 text-sm opacity-50" aria-disabled="true">{{ __('terminal.sales.title') }}</span>
+                    <span class="key h-12 px-4 text-sm opacity-50" aria-disabled="true">{{ __('terminal.cash_up.title') }}</span>
                 @else
                     <a href="{{ route('sales') }}" class="key h-12 px-4 text-sm">{{ __('terminal.sales.title') }}</a>
+                    <a href="{{ route('cash-up') }}" @class(['key h-12 px-4 text-sm', 'border-primary text-primary' => ! $shiftOpen])>{{ __('terminal.cash_up.title') }}</a>
                 @endif
             @endif
             <x-language-picker />
@@ -241,6 +243,10 @@
                 @if ($notice)
                     <p class="mx-3 mb-2 border border-ok px-3 py-2 text-sm text-ok" role="status">{{ $notice }}</p>
                 @endif
+                {{-- Cash-up: payments wait for a counted float. Orders can still go to the kitchen. --}}
+                @if (! $shiftOpen && $step === 'cart' && $staff?->can(\App\Models\StaffMember::TAKE_PAYMENTS))
+                    <a href="{{ route('cash-up') }}" class="mx-3 mb-2 block border border-primary px-3 py-2 text-sm text-primary">{{ __('terminal.cash_up.open_to_sell') }}</a>
+                @endif
 
                 @if ($step === 'cart' && $tableService)
                     <div class="grid grid-cols-2 gap-2 p-3">
@@ -250,13 +256,13 @@
                             <button type="button" wire:click="printBill" class="key h-14 text-base" @disabled(! $printerReady || $sent === [])>{{ __('terminal.tickets.print_bill') }}</button>
                         @endif
                         @if ($staff?->can(\App\Models\StaffMember::TAKE_PAYMENTS))
-                            <button type="button" wire:click="startPayment" @class(['key-primary h-14', 'col-span-2' => ! $ticket]) @disabled($lines === [] && $sent === [])>{{ __('terminal.sale.pay') }}</button>
+                            <button type="button" wire:click="startPayment" @class(['key-primary h-14', 'col-span-2' => ! $ticket]) @disabled(($lines === [] && $sent === []) || ! $shiftOpen)>{{ __('terminal.sale.pay') }}</button>
                         @endif
                     </div>
                 @elseif ($step === 'cart')
                     <div class="grid grid-cols-[auto_1fr] gap-2 p-3">
                         <button type="button" wire:click="clearCart" class="key h-16 px-4 text-base" @disabled($lines === [])>{{ __('terminal.sale.clear') }}</button>
-                        <button type="button" wire:click="startPayment" class="key-primary h-16" @disabled($lines === [])>{{ __('terminal.sale.pay') }}</button>
+                        <button type="button" wire:click="startPayment" class="key-primary h-16" @disabled($lines === [] || ! $shiftOpen)>{{ __('terminal.sale.pay') }}</button>
                     </div>
                 @elseif ($step === 'pay')
                     @if ($waitingOnBillQr)

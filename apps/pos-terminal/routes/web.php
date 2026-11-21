@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\AuthoriseRealtimeChannel;
 use App\Http\Middleware\EnsureStaffSignedIn;
+use App\Livewire\CashUp;
 use App\Livewire\ChangePin;
 use App\Livewire\PairTill;
 use App\Livewire\PrinterSetup;
@@ -34,5 +35,6 @@ Route::middleware(EnsureStaffSignedIn::class)->group(function () {
     Route::livewire('/pin', ChangePin::class)->name('pin');
     Route::livewire('/printer', PrinterSetup::class)->name('printer');
     Route::livewire('/sales', SalesToday::class)->name('sales');
+    Route::livewire('/cash-up', CashUp::class)->name('cash-up');
     Route::livewire('/tickets/{ticketId}/lines/{lineId}/take-off', TakeLineOff::class)->whereUuid(['ticketId', 'lineId'])->name('tickets.take-off');
 });
