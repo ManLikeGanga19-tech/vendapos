@@ -44,6 +44,7 @@ const GS_V_0 = "\x1Dv0";
 beforeEach(function () {
     Queue::fake();
     pairTill(); // a table-service branch
+    openTestShift(); // selling needs an open drawer shift (cash-up)
     $this->travelTo('2026-10-27T10:05:00Z'); // 13:05 in Nairobi
 
     Item::query()->insert([

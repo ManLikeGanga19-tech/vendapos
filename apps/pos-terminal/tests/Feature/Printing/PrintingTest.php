@@ -45,6 +45,7 @@ beforeEach(function () {
     $this->travelTo('2026-10-26T11:05:00Z'); // 14:05 in Nairobi
 
     pairTill();
+    openTestShift(); // selling needs an open drawer shift (cash-up)
     Item::query()->insert(['id' => PRINT_CHAI, 'category_id' => null, 'type' => 'product', 'name' => 'Chai ya tangawizi', 'sku' => null, 'barcode' => null, 'price_cents' => 5_050, 'vat_category' => 'standard', 'is_active' => true]);
 
     $this->staffMember = fn (string $role, array $permissions) => StaffMember::query()->create(SyncStaff::row(

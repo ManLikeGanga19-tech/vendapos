@@ -61,6 +61,8 @@ final class VendaApi
             accountStatus: self::string($json, 'account_status'),
             realtime: self::realtime($json),
             tillCode: self::nullableString($json, 'device.till_code'),
+            cashVarianceAllowedCents: self::nullableInt($json, 'cash_up.variance_allowed_cents'),
+            lastShiftNumber: self::nullableInt($json, 'cash_up.last_shift_number'),
         );
     }
 
@@ -202,6 +204,25 @@ final class VendaApi
     public function syncOrders(array $orders): array
     {
         $json = $this->send(fn () => $this->authorised()->post('orders/sync', ['orders' => $orders]));
+
+        return array_map(fn (array $result): array => [
+            'uuid' => self::nullableString($result, 'uuid'),
+            'status' => self::string($result, 'status'),
+            'reason' => self::nullableString($result, 'reason'),
+            'errors' => (array) data_get($result, 'errors', []),
+        ], self::list($json, 'results'));
+    }
+
+    /**
+     * Send up to 50 drawer shifts, each with only its movements the server
+     * does not have yet. One answer per shift, in the order sent.
+     *
+     * @param  list<array<string, mixed>>  $shifts  as Shift::toSyncPayload()
+     * @return list<array{uuid: string|null, status: string, reason: string|null, errors: array<mixed>}>
+     */
+    public function syncShifts(array $shifts): array
+    {
+        $json = $this->send(fn () => $this->authorised()->post('shifts/sync', ['shifts' => $shifts]));
 
         return array_map(fn (array $result): array => [
             'uuid' => self::nullableString($result, 'uuid'),
@@ -500,6 +521,14 @@ final class VendaApi
         $value = data_get($json, $key);
 
         return is_string($value) ? $value : throw new ApiUnavailable("The server's answer had no {$key}.");
+    }
+
+    /** @param  array<mixed>  $json */
+    private static function nullableInt(array $json, string $key): ?int
+    {
+        $value = data_get($json, $key);
+
+        return is_int($value) ? $value : null;
     }
 
     /** @param  array<mixed>  $json */

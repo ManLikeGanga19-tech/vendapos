@@ -10,15 +10,17 @@ use App\Api\Exceptions\ApiUnavailable;
 use App\Api\Exceptions\TillNotAuthorised;
 use App\Security\KeyringUnavailable;
 use App\Sync\SyncOrders;
+use App\Sync\SyncShifts;
 use App\Till\Till;
 use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
 /**
- * Sends new sales right after they are made. Failing quietly is fine: the
- * sales stay pending and the minute round (SyncTillJob) sends them, and
- * handles an expired token too.
+ * Sends new drawer shifts and cash movements, then new sales, right after
+ * they are made: shifts first, so a sale never names one the server lacks.
+ * Failing quietly is fine: everything stays pending and the minute round
+ * (SyncTillJob) sends it, and handles an expired token too.
  */
 final class PushOrdersJob implements ShouldBeUniqueUntilProcessing, ShouldQueue
 {
@@ -26,13 +28,14 @@ final class PushOrdersJob implements ShouldBeUniqueUntilProcessing, ShouldQueue
 
     public int $tries = 1;
 
-    public function handle(SyncOrders $orders, Till $till): void
+    public function handle(SyncShifts $shifts, SyncOrders $orders, Till $till): void
     {
         if (! $till->isPaired()) {
             return;
         }
 
         try {
+            $shifts->handle();
             $orders->handle();
         } catch (ApiUnavailable|ApiRejected|TillNotAuthorised|ApiNotConfigured|KeyringUnavailable) {
             // Offline or token trouble: SyncTill deals with it on its next round.

@@ -31,6 +31,7 @@ beforeEach(function () {
     Queue::fake();
     $this->travelTo('2026-10-26T11:05:00Z'); // 14:05 in Nairobi
     pairTill();
+    openTestShift(); // selling needs an open drawer shift (cash-up)
     Item::query()->insert(['id' => VOID_CHAI, 'category_id' => null, 'type' => 'product', 'name' => 'Chai', 'sku' => null, 'barcode' => null, 'price_cents' => 5_000, 'vat_category' => 'standard', 'is_active' => true]);
 
     $member = fn (string $id, string $name, string $role, array $permissions, string $pinHash, int $pinLength) => StaffMember::query()->create(SyncStaff::row(

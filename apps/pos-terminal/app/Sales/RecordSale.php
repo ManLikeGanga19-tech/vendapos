@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Sales;
 
+use App\CashUp\Drawer;
 use App\Jobs\PushOrdersJob;
 use App\Models\Item;
 use App\Models\Order;
@@ -27,7 +28,10 @@ use VendaPOS\Core\Tax\OrderTotals;
  */
 final class RecordSale
 {
-    public function __construct(private readonly Till $till) {}
+    public function __construct(
+        private readonly Till $till,
+        private readonly Drawer $drawer,
+    ) {}
 
     /**
      * @param  list<array{item_id: string, quantity: int}>  $cart
@@ -45,6 +49,11 @@ final class RecordSale
 
         if ($ticket !== null && $ticket->status === Ticket::CLOSED) {
             throw new SaleRefused('ticket_paid');
+        }
+
+        // Every sale's cash goes into a counted drawer (cash-up): no open shift, no selling.
+        if (! $this->drawer->isOpen()) {
+            throw new SaleRefused('no_shift');
         }
 
         $lines = $ticket !== null
@@ -67,6 +76,7 @@ final class RecordSale
             $sequence = (int) Order::query()->max('sequence_number') + 1;
 
             $tillCode = $this->till->identity()?->till_code;
+            $shift = $this->drawer->current() ?? throw new SaleRefused('no_shift');
 
             $order = Order::query()->create([
                 'id' => $orderId ?? (string) Str::uuid7(),
@@ -82,6 +92,7 @@ final class RecordSale
                 'ticket_id' => $ticket?->id,
                 'table_name' => $ticket?->table_name,
                 'ticket_label' => $ticket?->label,
+                'shift_id' => $shift->id,
             ]);
 
             $order->lines()->createMany(array_map(fn (OrderLineData $line, int $index) => [

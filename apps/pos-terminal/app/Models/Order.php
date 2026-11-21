@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use VendaPOS\Core\Data\TenderData;
 
 /**
  * A sale made on this till, kept here until the server has it (and after,
@@ -36,6 +37,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $approved_by whose PIN approved the void
  * @property string|null $void_reason VendaPOS\Core\Enums\VoidReason
  * @property string|null $void_note
+ * @property string|null $shift_id the drawer shift its cash went into
  */
 #[Table(name: 'orders', keyType: 'string', incrementing: false, timestamps: false)]
 #[Unguarded]
@@ -79,6 +81,23 @@ final class Order extends Model
         return $this->hasMany(OrderTender::class)->orderBy('position');
     }
 
+    /**
+     * How it was paid, as packages/core takes it.
+     *
+     * @return list<TenderData>
+     */
+    public function tenderData(): array
+    {
+        return array_values($this->tenders->map(fn (OrderTender $tender) => TenderData::from(array_filter([
+            'method' => $tender->method,
+            'amount_cents' => $tender->amount_cents,
+            'tendered_cents' => $tender->tendered_cents,
+            'change_cents' => $tender->change_cents,
+            'payment_uuid' => $tender->payment_uuid,
+            'mpesa_reference' => $tender->mpesa_reference,
+        ], fn (mixed $value) => $value !== null)))->all());
+    }
+
     /** @param Builder<self> $query */
     public function scopeAwaitingSync(Builder $query): void
     {
@@ -118,6 +137,8 @@ final class Order extends Model
             'subtotal_cents' => $this->subtotal_cents,
             'vat_cents' => $this->vat_cents,
             'total_cents' => $this->total_cents,
+            // The drawer shift its cash went into; none for a sale from before shifts.
+            ...($this->shift_id !== null ? ['shift_id' => $this->shift_id] : []),
             // Only when it paid a ticket; a quick sale sends none.
             ...($this->ticket_id !== null ? ['ticket_uuid' => $this->ticket_id] : []),
             // Only once voided: who, who approved it and why (VendaPOS\Core\Data\VoidData).

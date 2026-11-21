@@ -30,6 +30,7 @@ const SODA = '0199b1f2-0000-7000-8000-00000000a002';
 beforeEach(function () {
     Queue::fake();
     pairTill();
+    openTestShift(); // selling needs an open drawer shift (cash-up)
 
     Item::query()->insert([
         ['id' => NYAMA, 'category_id' => null, 'type' => 'product', 'name' => 'Nyama choma', 'sku' => null, 'barcode' => null, 'price_cents' => 185_000, 'vat_category' => 'standard', 'is_active' => true],
@@ -226,7 +227,7 @@ describe('sync', function () {
         Http::fake(fn () => throw new ConnectionException('Network is unreachable'));
 
         app(SyncTill::class)->handle();
-        app(PushOrdersJob::class)->handle(app(SyncOrders::class), app(Till::class));
+        app()->call([app(PushOrdersJob::class), 'handle']);
 
         expect($order->fresh()?->sync_status)->toBe(Order::PENDING);
     });

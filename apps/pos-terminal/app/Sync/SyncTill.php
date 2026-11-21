@@ -10,6 +10,7 @@ use App\Api\Exceptions\ApiUnavailable;
 use App\Api\Exceptions\TillNotAuthorised;
 use App\Api\Exceptions\TokenStillValid;
 use App\Api\VendaApi;
+use App\CashUp\Drawer;
 use App\Models\SyncState;
 use App\Security\KeyringUnavailable;
 use App\Till\Till;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Log;
 use VendaPOS\Core\Enums\TerminalMode;
 
 /**
- * One background round: keep the token fresh, send unsynced sales and reprints, then
+ * One background round: keep the token fresh, send drawer shifts, unsynced sales and reprints, then
  * pull device status, staff, menu, floor plan and open tickets. Offline is normal and only noted. The till is marked removed only
  * when the server refuses to renew its token, never on a single 401.
  */
@@ -38,6 +39,7 @@ final class SyncTill
         private readonly KeepTokenFresh $token,
         private readonly SyncStaff $staff,
         private readonly SyncCatalogue $catalogue,
+        private readonly SyncShifts $shifts,
         private readonly SyncOrders $orders,
         private readonly SyncFloor $floor,
         private readonly SyncTickets $tickets,
@@ -68,7 +70,8 @@ final class SyncTill
     {
         $this->token->handle();
 
-        // Sales first: they are the one thing only this till has.
+        // What only this till has goes first: drawer shifts, then the sales that name them.
+        $this->shifts->handle();
         $this->orders->handle();
         $this->reprints->handle();
 
@@ -82,6 +85,13 @@ final class SyncTill
         ]);
         SyncState::write(self::ACCOUNT_STATUS, $device->accountStatus);
         SyncState::write(self::REALTIME, $device->realtime === null ? null : (string) json_encode($device->realtime));
+        // Kept when an older server sends none: the till falls back to the default allowance.
+        if ($device->cashVarianceAllowedCents !== null) {
+            SyncState::write(Drawer::ALLOWANCE, (string) $device->cashVarianceAllowedCents);
+        }
+        if ($device->lastShiftNumber !== null) {
+            SyncState::write(Drawer::LAST_NUMBER, (string) $device->lastShiftNumber);
+        }
 
         $this->staff->handle();
         $this->catalogue->handle();

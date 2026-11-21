@@ -19,5 +19,9 @@ final readonly class DeviceStatus
         public string $accountStatus,
         public ?array $realtime = null,
         public ?string $tillCode = null,
+        // Cash-up: how far a count may be off before a manager is needed; null from an older server.
+        public ?int $cashVarianceAllowedCents = null,
+        // The highest shift number the server has from this till.
+        public ?int $lastShiftNumber = null,
     ) {}
 }

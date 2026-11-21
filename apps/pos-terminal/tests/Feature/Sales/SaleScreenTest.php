@@ -21,6 +21,7 @@ const MANDAZI = '0199b1f2-0000-7000-8000-00000000c002';
 beforeEach(function () {
     Queue::fake();
     pairTill();
+    openTestShift(); // selling needs an open drawer shift (cash-up)
 
     Item::query()->insert([
         ['id' => CHAI, 'category_id' => null, 'type' => 'product', 'name' => 'Chai', 'sku' => null, 'barcode' => '6161100000017', 'price_cents' => 5_050, 'vat_category' => 'standard', 'is_active' => true],
