@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Sync;
 
 use App\Api\Exceptions\ApiUnavailable;
+use App\Models\Shift;
 use App\Models\SyncState;
 use Carbon\CarbonImmutable;
 
@@ -21,6 +22,8 @@ final readonly class SyncStatus
         public string $connection,
         public ?CarbonImmutable $lastSuccessAt,
         public bool $accountSuspended,
+        // Drawer shifts the server refused: they need the owner, and are never resent on their own.
+        public int $refusedShifts = 0,
     ) {}
 
     public static function current(): self
@@ -43,6 +46,7 @@ final readonly class SyncStatus
             connection: $connection,
             lastSuccessAt: $lastSuccessAt,
             accountSuspended: SyncState::read(SyncTill::ACCOUNT_STATUS) === 'suspended',
+            refusedShifts: Shift::query()->where('sync_status', Shift::REJECTED)->count(),
         );
     }
 }

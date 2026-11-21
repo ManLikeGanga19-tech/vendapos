@@ -9,6 +9,7 @@ use App\CashUp\Drawer;
 use App\CashUp\OpenShift;
 use App\CashUp\TakeCashOut;
 use App\Jobs\PushOrdersJob;
+use App\Livewire\StatusBar;
 use App\Models\CashMovement;
 use App\Models\Item;
 use App\Models\Order;
@@ -28,6 +29,7 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
+use Livewire\Livewire;
 use VendaPOS\Core\Data\TenderData;
 use VendaPOS\Core\Enums\CashMovementKind;
 use VendaPOS\Core\Enums\KesDenomination;
@@ -322,6 +324,9 @@ describe('sync', function () {
 
         expect($shift->fresh()?->only(['sync_status', 'sync_reason']))->toBe(['sync_status' => Shift::REJECTED, 'sync_reason' => 'number_conflict'])
             ->and(shiftsSent())->toHaveCount(1);
+
+        // Said on every screen, so it is not only in a log nobody reads.
+        Livewire::test(StatusBar::class)->assertSee(trans_choice('terminal.status.shifts_refused', 1, ['count' => 1]));
     });
 
     it('keeps the allowance and the last shift number the server sends', function () {

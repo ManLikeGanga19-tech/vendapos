@@ -229,6 +229,7 @@ return [
         'never' => 'Not synced yet',
         'last_sync' => 'synced :time',
         'suspended' => 'Account suspended: M-Pesa is paused, take cash.',
+        'shifts_refused' => '{1} The server refused 1 drawer shift from this till. Tell the owner; selling carries on.|[2,*] The server refused :count drawer shifts from this till. Tell the owner; selling carries on.',
     ],
 
     'printer' => [

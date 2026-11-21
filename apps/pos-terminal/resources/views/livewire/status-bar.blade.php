@@ -20,5 +20,8 @@
         @if ($status->accountSuspended)
             <p class="border-b border-danger px-6 py-2 text-sm text-danger" role="alert">{{ __('terminal.status.suspended') }}</p>
         @endif
+        @if ($status->refusedShifts > 0)
+            <p class="border-b border-danger px-6 py-2 text-sm text-danger" role="alert">{{ trans_choice('terminal.status.shifts_refused', $status->refusedShifts, ['count' => $status->refusedShifts]) }}</p>
+        @endif
     @endif
 </div>

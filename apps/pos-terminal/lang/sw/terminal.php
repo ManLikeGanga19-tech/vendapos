@@ -230,6 +230,7 @@ return [
         'never' => 'Bado haijasawazishwa',
         'last_sync' => 'imesawazishwa :time',
         'suspended' => 'Akaunti imesimamishwa: M-Pesa imesitishwa, pokea pesa taslimu.',
+        'shifts_refused' => '{1} Seva imekataa zamu 1 ya droo kutoka till hii. Mwambie mmiliki; mauzo yanaendelea.|[2,*] Seva imekataa zamu :count za droo kutoka till hii. Mwambie mmiliki; mauzo yanaendelea.',
     ],
 
     'printer' => [
