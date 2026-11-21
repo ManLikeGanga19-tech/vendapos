@@ -1,8 +1,8 @@
 name: Terminal release
 
 # Builds the Linux till (AppImage + .deb). A tag terminal-vX.Y.Z builds that
-# version and uploads it to the R2 bucket tills update from; a manual run
-# builds without publishing, to try a build on a test PC first.
+# version and uploads it to the updates folder on our server, where tills
+# update from; a manual run only builds, to try it on a test PC first.
 
 on:
   push:
@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: terminal-release-${{ github.ref }}
+  group: terminal-release
   cancel-in-progress: false
 
 jobs:
@@ -25,6 +25,7 @@ jobs:
 
     env:
       PUBLISH: ${{ startsWith(github.ref, 'refs/tags/terminal-v') }}
+      DIST: apps/pos-terminal/vendor/nativephp/desktop/resources/electron/dist
 
     steps:
       - uses: actions/checkout@v4
@@ -42,18 +43,18 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Check the publishing settings
+      - name: Check the release settings
         if: env.PUBLISH == 'true'
         env:
-          HAS_KEY: ${{ secrets.R2_ACCESS_KEY_ID != '' && secrets.R2_SECRET_ACCESS_KEY != '' }}
-          ENDPOINT: ${{ vars.R2_ENDPOINT }}
-          BUCKET: ${{ vars.R2_BUCKET }}
+          HAS_KEY: ${{ secrets.UPDATES_SSH_KEY != '' && secrets.UPDATES_SSH_KNOWN_HOSTS != '' }}
+          SSH_HOST: ${{ vars.UPDATES_SSH_HOST }}
+          SSH_USER: ${{ vars.UPDATES_SSH_USER }}
           UPDATES_URL: ${{ vars.VENDAPOS_UPDATES_URL }}
           API_URL: ${{ vars.VENDAPOS_API_URL }}
         run: |
           missing=""
-          [ "$HAS_KEY" = "true" ] || missing="$missing R2_ACCESS_KEY_ID/R2_SECRET_ACCESS_KEY (secrets)"
-          for name in ENDPOINT BUCKET UPDATES_URL API_URL; do
+          [ "$HAS_KEY" = "true" ] || missing="$missing UPDATES_SSH_KEY/UPDATES_SSH_KNOWN_HOSTS (secrets)"
+          for name in SSH_HOST SSH_USER UPDATES_URL API_URL; do
             [ -n "${!name}" ] || missing="$missing $name (variable)"
           done
           if [ -n "$missing" ]; then echo "::error::Missing:$missing"; exit 1; fi
@@ -82,8 +83,7 @@ jobs:
           npm ci
           npm run build
 
-      # The .env that ships inside the app. No secrets: the R2 key is passed to the
-      # build step only, and the build strips AWS_* from the bundle anyway.
+      # The .env that ships inside the app. It holds no secret.
       - name: Write the till's .env
         working-directory: apps/pos-terminal
         env:
@@ -105,31 +105,40 @@ jobs:
           set_env NATIVEPHP_UPDATER_ENABLED "$PUBLISH"
           php artisan key:generate --force
 
-      - name: Build (and publish on a tag)
+      - name: Build
         working-directory: apps/pos-terminal
         env:
           NATIVEPHP_APP_VERSION: ${{ steps.version.outputs.version }}
           NATIVEPHP_UPDATER_ENABLED: ${{ env.PUBLISH }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: auto
-          AWS_ENDPOINT: ${{ vars.R2_ENDPOINT }}
-          AWS_BUCKET: ${{ vars.R2_BUCKET }}
           VENDAPOS_UPDATES_URL: ${{ vars.VENDAPOS_UPDATES_URL }}
-        run: |
-          if [ "$PUBLISH" = "true" ]; then
-            php artisan native:build linux x64 --publish --no-interaction
-          else
-            php artisan native:build linux x64 --no-interaction
-          fi
+        run: php artisan native:build linux x64 --no-interaction
 
       - name: Keep the build
         uses: actions/upload-artifact@v4
         with:
           name: vendapos-terminal-${{ steps.version.outputs.version }}-linux
           path: |
-            apps/pos-terminal/vendor/nativephp/desktop/resources/electron/dist/*.AppImage
-            apps/pos-terminal/vendor/nativephp/desktop/resources/electron/dist/*.deb
-            apps/pos-terminal/vendor/nativephp/desktop/resources/electron/dist/latest-linux.yml
+            ${{ env.DIST }}/*.AppImage
+            ${{ env.DIST }}/*.deb
+            ${{ env.DIST }}/latest-linux.yml
           if-no-files-found: error
           retention-days: 30
+
+      # The server's key only lets this user write into the updates folder (rrsync).
+      - name: Upload to the updates folder
+        if: env.PUBLISH == 'true'
+        env:
+          SSH_KEY: ${{ secrets.UPDATES_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.UPDATES_SSH_KNOWN_HOSTS }}
+          SSH_HOST: ${{ vars.UPDATES_SSH_HOST }}
+          SSH_USER: ${{ vars.UPDATES_SSH_USER }}
+          SSH_PORT: ${{ vars.UPDATES_SSH_PORT || '22' }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/updates && chmod 600 ~/.ssh/updates
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh_cmd="ssh -i $HOME/.ssh/updates -p $SSH_PORT -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
+          # The AppImage first, the file that announces it last: a till never sees a version that is not there yet.
+          rsync -e "$ssh_cmd" --chmod=F644 "$DIST"/*.AppImage "$SSH_USER@$SSH_HOST:"
+          rsync -e "$ssh_cmd" --chmod=F644 "$DIST"/latest-linux.yml "$SSH_USER@$SSH_HOST:"
+          rm -f ~/.ssh/updates

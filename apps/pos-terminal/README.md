@@ -62,5 +62,5 @@ refuse to store the device token unless a secret service (gnome-keyring) is
 running; launch the app with `--password-store=gnome-libsecret` so Electron
 uses it.
 
-Builds, releases, self-updates from Cloudflare R2 and the Ubuntu 24.04 kiosk
-setup are in [docs/TERMINAL-LINUX.md](../../docs/TERMINAL-LINUX.md).
+Builds, releases, self-updates from our VPS and the Ubuntu 24.04 kiosk setup
+are in [docs/TERMINAL-LINUX.md](../../docs/TERMINAL-LINUX.md).

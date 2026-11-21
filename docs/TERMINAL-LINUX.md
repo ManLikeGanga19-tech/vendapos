@@ -1,40 +1,65 @@
 # The Linux till: releases, updates and the pilot PC
 
 The till ships as a Linux AppImage (and a .deb), built by GitHub Actions
-(`.github/workflows/terminal-release.yml`). Tills update themselves from a
-Cloudflare R2 bucket. The pilot PC runs Ubuntu 24.04 LTS as a kiosk: it logs in
-by itself and opens VendaPOS full screen.
+(`.github/workflows/terminal-release.yml`). Tills update themselves from an
+updates folder on our Contabo VPS. The pilot PC runs Ubuntu 24.04 LTS as a
+locked-down kiosk that starts by itself.
 
-## 1. One-time setup: the update bucket (Cloudflare R2)
+## 1. One-time setup: the updates folder on the VPS
 
-1. Cloudflare dashboard → **R2** → **Create bucket**, e.g. `vendapos-updates`.
-2. The bucket → **Settings** → **Public access** → connect a custom domain such
-   as `updates.<your-domain>` (the `r2.dev` address is rate-limited; use it only
-   to try things out).
-3. **R2** → **Manage API tokens** → **Create API token**: permission
-   *Object Read & Write*, limited to this bucket. Note the access key ID, the
-   secret and the S3 endpoint (`https://<account-id>.r2.cloudflarestorage.com`).
-4. GitHub → the repository → **Settings** → **Secrets and variables** → **Actions**:
+Tills download two kinds of file over HTTPS: `latest-linux.yml` (which version
+is newest) and the AppImage it names. CI uploads them over SSH with a key that
+can only write into that folder; tills only read, and hold no key.
 
-   | Kind | Name | Value |
-   |---|---|---|
-   | Secret | `R2_ACCESS_KEY_ID` | from step 3 |
-   | Secret | `R2_SECRET_ACCESS_KEY` | from step 3 |
-   | Variable | `R2_ENDPOINT` | `https://<account-id>.r2.cloudflarestorage.com` |
-   | Variable | `R2_BUCKET` | `vendapos-updates` |
-   | Variable | `VENDAPOS_UPDATES_URL` | `https://updates.<your-domain>/terminal/linux` |
-   | Variable | `VENDAPOS_API_URL` | the platform's address, e.g. `https://api.<your-domain>` |
+On the VPS, as root:
 
-The R2 key exists only in GitHub. Tills download from the public address and
-never hold a key; the build also strips every `AWS_*` and `GITHUB_*` setting from
-the app it packages.
+```bash
+adduser --system --group --home /srv/vendapos-updates --shell /bin/sh vendapos-updates
+install -d -o vendapos-updates -g vendapos-updates -m 755 /srv/vendapos-updates/terminal/linux
+install -d -o vendapos-updates -g vendapos-updates -m 700 /srv/vendapos-updates/.ssh
+```
+
+On your own computer, make the upload key (no passphrase; it lives only in
+GitHub secrets):
+
+```bash
+ssh-keygen -t ed25519 -N '' -C 'vendapos updates upload' -f vendapos-updates
+```
+
+Back on the VPS, allow that key to do one thing only: write into the folder
+(`rrsync` comes with rsync; on Ubuntu it is `/usr/bin/rrsync`):
+
+```bash
+echo 'command="/usr/bin/rrsync -wo /srv/vendapos-updates/terminal/linux",restrict <contents of vendapos-updates.pub>' \
+  > /srv/vendapos-updates/.ssh/authorized_keys
+chown vendapos-updates: /srv/vendapos-updates/.ssh/authorized_keys
+chmod 600 /srv/vendapos-updates/.ssh/authorized_keys
+```
+
+Serve `/srv/vendapos-updates` read-only at `https://updates.<your-domain>/` from
+the VPS's web server (static files, no PHP). Through Cloudflare, add a cache
+rule so `latest-linux.yml` is never cached (the AppImages may be: each version
+has its own file name).
+
+GitHub → the repository → **Settings** → **Secrets and variables** → **Actions**:
+
+| Kind | Name | Value |
+|---|---|---|
+| Secret | `UPDATES_SSH_KEY` | the private key file `vendapos-updates` |
+| Secret | `UPDATES_SSH_KNOWN_HOSTS` | output of `ssh-keyscan -p <port> <vps-host>` |
+| Variable | `UPDATES_SSH_HOST` | the VPS address |
+| Variable | `UPDATES_SSH_USER` | `vendapos-updates` |
+| Variable | `UPDATES_SSH_PORT` | only if SSH is not on 22 |
+| Variable | `VENDAPOS_UPDATES_URL` | `https://updates.<your-domain>/terminal/linux` |
+| Variable | `VENDAPOS_API_URL` | the platform's address, e.g. `https://api.<your-domain>` |
+
+Then delete the key files from your computer.
 
 ## 2. Making a release
 
 - **Try a build:** GitHub → **Actions** → **Terminal release** → **Run workflow**.
-  It builds without publishing; download the AppImage from the run's
-  **Artifacts** (kept 30 days). Its version is `0.0.0-test.<run>`, so it never
-  replaces a real release on a till.
+  It only builds; download the AppImage from the run's **Artifacts** (kept 30
+  days). Its version is `0.0.0-test.<run>` and it never updates itself.
 - **Release:** tag the commit and push the tag:
 
   ```bash
@@ -42,62 +67,77 @@ the app it packages.
   git push origin terminal-v0.1.0
   ```
 
-  The build uploads the AppImage and `latest-linux.yml` to
-  `terminal/linux/` in the bucket. Versions only ever go up: a till installs a
+  CI builds, uploads the AppImage, then `latest-linux.yml`. A till installs a
   version newer than its own.
 
-A till checks for an update each time it starts, downloads it in the
-background and installs it the next time it starts. Restart tills after
-closing time (or reboot them nightly, see 3.8) so updates are not left waiting.
+A till checks for an update each time it starts, downloads it in the background
+and installs it the next time it starts. Restart tills after closing time (3.9)
+so updates do not wait.
 
 ## 3. Setting up a pilot till (Ubuntu 24.04 LTS)
 
-You need: an x64 touch PC, a USB 80 mm ESC/POS receipt printer (the cash drawer
+You need: an x64 touch PC **with a TPM 2.0 chip** (most PCs from 2018 on; check
+the firmware settings), a USB 80 mm ESC/POS receipt printer (the cash drawer
 plugs into the printer), and internet for pairing.
 
-### 3.1 Install Ubuntu
+### How the till's secrets stay safe with automatic login
 
-Install **Ubuntu 24.04 LTS Desktop** with two accounts:
+The till keeps its device token in the GNOME keyring. With automatic login no
+one types a password, so the keyring must open without one. That is only safe
+because of what is around it:
 
-- an **administrator** for you (with a password, used for maintenance);
-- a standard account **`till`** for the counter.
+1. **The whole disk is encrypted**, and the TPM unlocks it only in this PC with
+   its boot settings unchanged (3.2). A disk taken out or copied is unreadable.
+2. **The firmware is locked** (3.1): a firmware password, Secure Boot on, boot
+   only from the internal disk. Without this, someone could boot a USB stick in
+   the same PC and ask the TPM for the disk key.
+3. **The counter account can do nothing else** (3.6): a kiosk session that runs
+   only VendaPOS, with no desktop, app launcher or terminal, and no admin rights.
+4. **A lost or stolen till is revoked** in the Owner panel → **Tills**: its token
+   stops working everywhere at once. Staff still need their PINs to sell.
 
-Then Settings → **Users** → `till` → turn on **Automatic Login**.
+### 3.1 Firmware
 
-### 3.2 Packages
+In the PC's firmware (UEFI) settings: set an administrator password, turn
+**Secure Boot** on, turn the **TPM** on, and allow booting only from the internal
+disk (no USB or network boot). Keep the firmware password with the recovery
+passphrase (3.2).
+
+### 3.2 Install Ubuntu with full-disk encryption
+
+Install **Ubuntu 24.04 LTS Desktop**. At **Disk setup** choose
+**Advanced features** → **Use LVM and encryption**. The passphrase you set there
+is the **recovery passphrase**: store it safely off the till; it is needed only
+if the TPM refuses (firmware changed, Secure Boot turned off, disk moved).
+
+Create two accounts: an **administrator** for you (with a password), and a
+standard account **`till`** (not an administrator).
+
+Then, as the administrator, let the TPM unlock the disk at boot:
 
 ```bash
-sudo apt update
-sudo apt install -y libfuse2t64 gnome-keyring
+sudo apt install -y clevis clevis-luks clevis-tpm2 clevis-initramfs
+lsblk -f                                   # the partition marked crypto_LUKS, e.g. /dev/nvme0n1p3
+sudo clevis luks bind -d /dev/nvme0n1p3 tpm2 '{"pcr_bank":"sha256","pcr_ids":"7"}'
+sudo update-initramfs -u -k all
 ```
 
-`libfuse2t64` lets AppImages run on 24.04. `gnome-keyring` keeps the till's
-device token encrypted; the till refuses to store it without a keyring.
+Reboot: the till should start without asking for the passphrase. PCR 7 ties
+the key to the Secure Boot state, so it still unlocks after normal Ubuntu
+updates. **Test this on the pilot PC before relying on it.**
 
-### 3.3 The keyring at automatic login
-
-With automatic login nobody types a password, so the login keyring stays locked
-and the till would wait on an "unlock keyring" prompt. Sign in as `till` once,
-open **Passwords and Keys**, right-click **Login** → **Change Password**, enter
-the current password and leave the new one empty.
-
-This stores the keyring unencrypted on the disk. If a till is lost or stolen,
-**revoke it at once** in the Owner panel → **Tills**: its token stops working
-everywhere. (Full-disk encryption would protect it at rest, but someone would
-have to type the disk passphrase every time the till starts.)
-
-### 3.4 The printer
+### 3.3 Packages and the printer
 
 ```bash
+sudo apt install -y libfuse2t64 gnome-keyring gnome-kiosk-script-session
 ls /dev/usb/lp*                    # the printer shows as /dev/usb/lp0
 sudo usermod -aG lp till           # let the till account write to it
 ```
 
-Sign `till` out and in again. In VendaPOS → **Printer**, choose
-**Device file**, `/dev/usb/lp0`, 80 mm, and print a test page; the drawer opens
-on the first cash sale.
+`libfuse2t64` lets AppImages run on 24.04; `gnome-keyring` holds the device
+token (the till refuses to store it without one).
 
-### 3.5 Install VendaPOS
+### 3.4 Install VendaPOS
 
 As `till`:
 
@@ -109,34 +149,53 @@ chmod +x ~/Applications/VendaPOS.AppImage
 
 Keep the name `VendaPOS.AppImage`: updates replace that file in place.
 
-### 3.6 Start it at login
+### 3.5 The keyring opens by itself
 
-Create `~/.config/autostart/vendapos.desktop`:
+Still signed in as `till` in the normal desktop: open **Passwords and Keys**,
+right-click **Login** → **Change Password**, enter the current password and
+leave the new one empty. The keyring is now protected by the disk encryption
+instead of a password.
 
-```ini
-[Desktop Entry]
-Type=Application
-Name=VendaPOS
-Exec=/home/till/Applications/VendaPOS.AppImage --password-store=gnome-libsecret
-X-GNOME-Autostart-enabled=true
-```
+### 3.6 The kiosk session
 
-`--password-store=gnome-libsecret` makes the app use the keyring from 3.3.
-The till opens full screen with nothing to close.
-
-### 3.7 Keep the screen on, add the screen keyboard
-
-As `till`:
+Create `~/.local/bin/gnome-kiosk-script` (make it executable with `chmod +x`):
 
 ```bash
-gsettings set org.gnome.desktop.session idle-delay 0
-gsettings set org.gnome.desktop.screensaver lock-enabled false
-gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
-gsettings set org.gnome.desktop.notifications show-banners false
-gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled true
+#!/bin/sh
+# VendaPOS is the only thing this session runs; if it ever stops, start it again.
+while true; do
+  "$HOME/Applications/VendaPOS.AppImage" --password-store=gnome-libsecret
+  sleep 2
+done
 ```
 
-### 3.8 Restart after closing (optional)
+As the administrator, make `till` log in automatically into that session:
+
+```bash
+ls /usr/share/wayland-sessions/      # note the kiosk script session's name, e.g. gnome-kiosk-script-wayland
+sudo tee /etc/gdm3/custom.conf >/dev/null <<'EOF'
+[daemon]
+AutomaticLoginEnable=true
+AutomaticLogin=till
+EOF
+printf '[User]\nSession=gnome-kiosk-script-wayland\n' | sudo tee /var/lib/AccountsService/users/till
+```
+
+Reboot: the till goes straight into VendaPOS, full screen. The kiosk session
+has no on-screen keyboard; keep a small USB keyboard at the counter for typing
+notes and names (an on-screen keyboard inside VendaPOS can come later).
+
+### 3.7 Pair
+
+Owner panel → **Tills** → **Pair a till**, then type the 8-character code on the
+till. Staff sign in with their PINs.
+
+### 3.8 Printer setup
+
+In VendaPOS → **Printer**, choose **Device file**, `/dev/usb/lp0`, 80 mm, and
+print a test page; the drawer opens on the first cash sale.
+
+### 3.9 Restart after closing (optional)
 
 So updates install overnight, as the administrator run `sudo crontab -e` and add
 a reboot after the business closes, e.g. 04:30 for a bar open late:
@@ -145,12 +204,9 @@ a reboot after the business closes, e.g. 04:30 for a bar open late:
 30 4 * * * /sbin/shutdown -r now
 ```
 
-### 3.9 Pair
-
-Owner panel → **Tills** → **Pair a till**, then type the 8-character code on the
-till. Staff sign in with their PINs.
-
 ### Maintenance
 
-The kiosk window cannot be closed. To reach the desktop, press the **Super**
-(Windows) key, or switch to the administrator account.
+With a USB keyboard, press **Ctrl+Alt+F3** for a text login and sign in as the
+administrator (**Ctrl+Alt+F1** goes back to the till). For the desktop, set
+`AutomaticLoginEnable=false` in `/etc/gdm3/custom.conf` and reboot; set it back
+to `true` when done.
