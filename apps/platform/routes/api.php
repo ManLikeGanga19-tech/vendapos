@@ -54,17 +54,17 @@ Route::prefix('v1')
             ->name('api.v1.orders.void');
         // Tickets are sales not yet paid, so they share the orders:sync ability.
         Route::get('tickets', ShowTickets::class)
-            ->middleware('ability:orders:sync')
+            ->middleware(['ability:orders:sync', 'table.service'])
             ->name('api.v1.tickets');
         Route::post('tickets/sync', SyncTickets::class)
-            ->middleware(['ability:orders:sync', 'body.limit'])
+            ->middleware(['ability:orders:sync', 'table.service', 'body.limit'])
             ->name('api.v1.tickets.sync');
         Route::post('tickets/{ticketId}/hold', HoldTicket::class)
-            ->middleware(['ability:orders:sync', 'body.limit'])
+            ->middleware(['ability:orders:sync', 'table.service', 'body.limit'])
             ->whereUuid('ticketId')
             ->name('api.v1.tickets.hold');
         Route::delete('tickets/{ticketId}/hold', [HoldTicket::class, 'release'])
-            ->middleware(['ability:orders:sync', 'body.limit'])
+            ->middleware(['ability:orders:sync', 'table.service', 'body.limit'])
             ->whereUuid('ticketId')
             ->name('api.v1.tickets.release');
         Route::post('receipts/reprints/sync', SyncReprints::class)

@@ -218,7 +218,7 @@ it('never shows or changes a ticket across branches or businesses', function () 
     syncTickets([$ticket])->assertOk();
 
     // Another branch of the same business: the same UUID is refused, and its list is empty.
-    $bar = $this->tenant->run(fn () => Branch::create(['name' => 'Bar', 'business_type' => BusinessType::Bar]));
+    $bar = $this->tenant->run(fn () => Branch::create(['name' => 'Upstairs', 'business_type' => BusinessType::Restaurant]));
     $barTill = enrolFor($this->tenant, $bar);
     syncTickets([ticketOf([ticketLine($this->water)], ['uuid' => $ticket['uuid'], 'table_id' => null])], $barTill)->assertJsonPath('results.0.reason', 'uuid_conflict');
     openTickets($barTill)->assertJsonCount(0, 'tickets');
@@ -254,6 +254,23 @@ it('keeps a table switched off after the ticket was opened: the guests are still
 
     syncTickets([ticketOf([ticketLine($this->tusker)])])->assertJsonPath('results.0.status', 'accepted');
     expect($this->tenant->run(fn () => DiningTable::query()->find($this->table4->id)?->is_active))->toBeFalse();
+});
+
+it('keeps tickets to tills of a branch that runs table service', function () {
+    $duka = $this->tenant->run(fn () => Branch::create(['name' => 'Duka', 'business_type' => BusinessType::Shop]));
+    $shopTill = enrolFor($this->tenant, $duka);
+    $ticket = ticketOf([ticketLine($this->tusker)]);
+    $ticketId = (string) $ticket['uuid'];
+
+    $refused = fn (TestResponse $response) => $response->assertForbidden()->assertJsonPath('code', 'not_table_service');
+
+    $refused(openTickets($shopTill));
+    $refused(syncTickets([$ticket], $shopTill));
+    $refused(deviceRequest('POST', "/api/v1/tickets/{$ticketId}/hold", $shopTill->plainTextToken, $shopTill->device->id));
+    $refused(deviceRequest('DELETE', "/api/v1/tickets/{$ticketId}/hold", $shopTill->plainTextToken, $shopTill->device->id));
+
+    expect($this->tenant->run(fn () => Ticket::query()->count()))->toBe(0);
+    openTickets()->assertOk();
 });
 
 describe('paid once', function () {
