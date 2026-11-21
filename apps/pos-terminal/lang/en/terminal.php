@@ -163,6 +163,27 @@ return [
             'paid' => 'This ticket is already paid. Start a new one.',
             'unknown_table' => 'That table is no longer in use. Pick another.',
             'unknown_item' => 'An item is no longer on the menu. Remove it and try again.',
+            'approver_not_allowed' => 'That person cannot approve taking items off.',
+            'note_needed' => 'Say what happened (up to 200 characters).',
+            'unknown_line' => 'That item is no longer on this ticket.',
+            'too_many' => 'That is more than is left on the ticket.',
+        ],
+        // Taking a sent item off a ticket (T5c).
+        'void' => [
+            'tap' => 'Tap a sent item to take it off',
+            'title' => 'Take off :name',
+            'how_many' => 'How many :name come off? :left on the ticket.',
+            'less' => 'One less',
+            'more' => 'One more',
+            'why' => 'Why is :name coming off?',
+            'note' => 'What happened?',
+            'next' => 'Next',
+            'who_approves' => 'A manager or owner approves this with their PIN.',
+            'no_approvers' => 'No manager or owner can sign in on this till yet.',
+            'approve_pin' => ':name, enter your PIN to take :quantity × :item off.',
+            'taken_off' => ':quantity × :item taken off :ticket. The VOID slip is printing. Print a fresh bill.',
+            'voided_count' => ':count taken off',
+            'not_taken_off' => 'Not taken off: :quantity × :item. The ticket was paid, or being paid, on another till. Tell a manager.',
         ],
         'rejected' => [
             'lines_after_payment' => 'Items were added after this ticket was paid. They are not paid: tell a manager.',
@@ -308,5 +329,8 @@ return [
         'note' => 'Note: :note',
         'voided_by' => 'Voided by: :name',
         'approved_by' => 'Approved by: :name',
+        // The kitchen or bar slip when an item comes off a ticket.
+        'line_off' => ':quantity x :name OFF',
+        'line_left' => 'Still to make: :quantity',
     ],
 ];

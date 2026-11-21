@@ -12,6 +12,7 @@ use App\Models\OrderTender;
 use App\Models\StaffMember;
 use App\Models\Ticket;
 use App\Sales\VoidedSale;
+use App\Tickets\VoidedTicketLine;
 use App\Till\Till;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -138,8 +139,10 @@ class ReceiptPrinter
 
             $printer->text(str_repeat('-', $columns)."\n");
 
+            // What is left of each line once voids are taken off.
             foreach ($ticket->billedLines() as $line) {
-                $printer->text(self::row("{$line->quantity} x {$line->name}", self::money($line->unit_price_cents * $line->quantity), $columns));
+                $orderLine = $line->toOrderLine();
+                $printer->text(self::row("{$orderLine->quantity} x {$line->name}", self::money($orderLine->line_total_cents), $columns));
             }
 
             $printer->text(str_repeat('-', $columns)."\n");
@@ -216,6 +219,42 @@ class ReceiptPrinter
             if ($openDrawer) {
                 $printer->pulse();
             }
+        });
+    }
+
+    /**
+     * The VOID slip for the kitchen or bar: what came off which ticket, how
+     * many are still to make, why, and who approved it.
+     *
+     * @throws PrintFailed
+     */
+    public function ticketVoidSlip(VoidedTicketLine $line): void
+    {
+        $this->print(function (Printer $printer, int $columns) use ($line) {
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->selectPrintMode(Printer::MODE_DOUBLE_WIDTH | Printer::MODE_EMPHASIZED);
+            $printer->text(self::ascii(__('terminal.void_slip.title'))."\n");
+            $printer->text(self::ascii($line->ticketTitle)."\n");
+            $printer->selectPrintMode();
+
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printer->text(self::row(__('terminal.void_slip.voided'), $line->voidedAt->setTimezone(StatusBar::TIMEZONE)->format('d/m/Y H:i'), $columns));
+            $printer->text(str_repeat('-', $columns)."\n");
+
+            $printer->selectPrintMode(Printer::MODE_DOUBLE_HEIGHT | Printer::MODE_EMPHASIZED);
+            $printer->text(self::ascii(__('terminal.void_slip.line_off', ['quantity' => $line->quantity, 'name' => $line->name]))."\n");
+            $printer->selectPrintMode();
+            $printer->text(self::ascii(__('terminal.void_slip.line_left', ['quantity' => $line->left]))."\n");
+
+            $printer->text(str_repeat('-', $columns)."\n");
+            $printer->text(self::ascii(__('terminal.void_slip.reason', ['reason' => __("terminal.void_reasons.{$line->reason}")]))."\n");
+
+            if ($line->note !== null) {
+                $printer->text(self::ascii(__('terminal.void_slip.note', ['note' => $line->note]))."\n");
+            }
+
+            $printer->text(self::ascii(__('terminal.void_slip.voided_by', ['name' => $line->voidedBy]))."\n");
+            $printer->text(self::ascii(__('terminal.void_slip.approved_by', ['name' => $line->approvedBy]))."\n");
         });
     }
 

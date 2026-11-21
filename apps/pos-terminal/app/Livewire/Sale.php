@@ -183,6 +183,19 @@ final class Sale extends Component
     }
 
     /** The branch's unpaid tickets, to pick one to add to, bill or pay. */
+    /** Back from taking an item off (?ticket=…): the same ticket, open again, and what happened. */
+    public function mount(): void
+    {
+        $ticketId = request()->query('ticket');
+
+        if (is_string($ticketId) && Ticket::query()->unpaid()->whereKey($ticketId)->exists()) {
+            $this->ticketId = $ticketId;
+        }
+
+        $notice = session('notice');
+        $this->notice = is_string($notice) ? $notice : null;
+    }
+
     public function showTickets(): void
     {
         if (in_array($this->step, [self::CART, self::TABLE], true)) {

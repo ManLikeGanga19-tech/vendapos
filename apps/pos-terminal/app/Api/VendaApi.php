@@ -229,7 +229,9 @@ final class VendaApi
     /**
      * This branch's tickets not yet paid, in full (table service).
      *
-     * @return list<array{id: string, status: string, table_id: string|null, table_name: string|null, label: string|null, staff_id: string, opened_at: string, bill_requested_at: string|null, lines: list<array<string, mixed>>}>
+     * Voids are what a manager took off its lines (T5c).
+     *
+     * @return list<array{id: string, status: string, table_id: string|null, table_name: string|null, label: string|null, staff_id: string, opened_at: string, bill_requested_at: string|null, lines: list<array<string, mixed>>, voids: list<array<string, mixed>>}>
      */
     public function tickets(): array
     {
@@ -245,6 +247,7 @@ final class VendaApi
             'opened_at' => self::string($ticket, 'opened_at'),
             'bill_requested_at' => self::nullableString($ticket, 'bill_requested_at'),
             'lines' => self::list($ticket, 'lines'),
+            'voids' => self::list($ticket, 'voids'),
         ], self::list($json, 'tickets'));
     }
 
@@ -252,7 +255,7 @@ final class VendaApi
      * Send tickets this till opened or added to; one result per ticket.
      *
      * @param  list<array<string, mixed>>  $tickets
-     * @return list<array{uuid: string|null, status: string, ticket_status: string|null, refused_lines: list<string>, reason: string|null}>
+     * @return list<array{uuid: string|null, status: string, ticket_status: string|null, refused_lines: list<string>, refused_voids: list<string>, reason: string|null}>
      */
     public function syncTickets(array $tickets): array
     {
@@ -263,6 +266,7 @@ final class VendaApi
             'status' => self::string($result, 'status'),
             'ticket_status' => self::nullableString($result, 'ticket_status'),
             'refused_lines' => array_values(array_filter((array) data_get($result, 'refused_lines', []), is_string(...))),
+            'refused_voids' => array_values(array_filter((array) data_get($result, 'refused_voids', []), is_string(...))),
             'reason' => self::nullableString($result, 'reason'),
         ], self::list($json, 'results'));
     }

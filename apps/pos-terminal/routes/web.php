@@ -10,6 +10,7 @@ use App\Livewire\PrinterSetup;
 use App\Livewire\Sale;
 use App\Livewire\SalesToday;
 use App\Livewire\SignIn;
+use App\Livewire\TakeLineOff;
 use App\Staff\TillSession;
 use App\Till\Till;
 use Illuminate\Support\Facades\Route;
@@ -33,4 +34,5 @@ Route::middleware(EnsureStaffSignedIn::class)->group(function () {
     Route::livewire('/pin', ChangePin::class)->name('pin');
     Route::livewire('/printer', PrinterSetup::class)->name('printer');
     Route::livewire('/sales', SalesToday::class)->name('sales');
+    Route::livewire('/tickets/{ticketId}/lines/{lineId}/take-off', TakeLineOff::class)->whereUuid(['ticketId', 'lineId'])->name('tickets.take-off');
 });

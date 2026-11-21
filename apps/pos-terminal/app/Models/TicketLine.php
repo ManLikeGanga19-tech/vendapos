@@ -7,12 +7,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use VendaPOS\Core\Data\OrderLineData;
 
 /**
- * One sent line of a ticket, locked once sent: a waiter cannot take it off
- * (a manager void does, T5) and its price never changes.
+ * One sent line of a ticket, locked once sent: its quantity and price never
+ * change. Taking some or all of it off is a manager void (TicketLineVoid).
  *
  * @property string $id
  * @property string $ticket_id
@@ -45,15 +46,36 @@ final class TicketLine extends Model
         ];
     }
 
+    /** @return HasMany<TicketLineVoid, $this> */
+    public function voids(): HasMany
+    {
+        return $this->hasMany(TicketLineVoid::class);
+    }
+
+    /** How many were taken off; a void the server refused takes nothing off. */
+    public function voidedQuantity(): int
+    {
+        return (int) $this->voids->where('sync_status', '!=', TicketLineVoid::REFUSED)->sum('quantity');
+    }
+
+    /** What is left to pay for. */
+    public function remainingQuantity(): int
+    {
+        return max(0, $this->quantity - $this->voidedQuantity());
+    }
+
+    /** As a sale line, for what is left of it. */
     public function toOrderLine(): OrderLineData
     {
+        $quantity = $this->remainingQuantity();
+
         return OrderLineData::from([
             'item_id' => $this->item_id,
             'name' => $this->name,
-            'quantity' => $this->quantity,
+            'quantity' => $quantity,
             'unit_price_cents' => $this->unit_price_cents,
             'vat_category' => $this->vat_category,
-            'line_total_cents' => $this->unit_price_cents * $this->quantity,
+            'line_total_cents' => $this->unit_price_cents * $quantity,
         ]);
     }
 

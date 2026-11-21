@@ -59,7 +59,13 @@ final class Ticket extends Model
     /** @return HasMany<TicketLine, $this> */
     public function lines(): HasMany
     {
-        return $this->hasMany(TicketLine::class)->orderBy('sent_at')->orderBy('id');
+        return $this->hasMany(TicketLine::class)->with('voids')->orderBy('sent_at')->orderBy('id');
+    }
+
+    /** @return HasMany<TicketLineVoid, $this> */
+    public function voids(): HasMany
+    {
+        return $this->hasMany(TicketLineVoid::class)->orderBy('voided_at')->orderBy('id');
     }
 
     /** @param Builder<self> $query */
@@ -79,13 +85,17 @@ final class Ticket extends Model
     }
 
     /**
-     * Lines the bill is for: everything sent, except lines refused because they came after payment.
+     * Lines the bill is for: everything sent and not taken off, except lines
+     * refused because they came after payment. Quantities are what is left.
      *
      * @return list<TicketLine>
      */
     public function billedLines(): array
     {
-        return array_values($this->lines->where('sync_status', '!=', TicketLine::REFUSED)->all());
+        return array_values($this->lines
+            ->where('sync_status', '!=', TicketLine::REFUSED)
+            ->filter(fn (TicketLine $line) => $line->remainingQuantity() > 0)
+            ->all());
     }
 
     public function totals(): OrderTotals
@@ -109,6 +119,7 @@ final class Ticket extends Model
             'label' => $this->label,
             'lines' => $this->lines->where('sync_status', TicketLine::PENDING)->map(fn (TicketLine $line) => $line->toSyncPayload())->values()->all(),
             'bill_requested_at' => $this->bill_requested_at?->toIso8601String(),
+            'voids' => $this->voids->where('sync_status', TicketLineVoid::PENDING)->map(fn (TicketLineVoid $void) => $void->toSyncPayload())->values()->all(),
         ];
     }
 }

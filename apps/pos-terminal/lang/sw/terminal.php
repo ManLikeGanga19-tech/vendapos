@@ -164,6 +164,27 @@ return [
             'paid' => 'Tiketi hii imeshalipwa. Anza mpya.',
             'unknown_table' => 'Meza hiyo haitumiki tena. Chagua nyingine.',
             'unknown_item' => 'Bidhaa moja haipo tena kwenye menyu. Iondoe kisha ujaribu tena.',
+            'approver_not_allowed' => 'Mtu huyo hawezi kuidhinisha kuondoa bidhaa.',
+            'note_needed' => 'Eleza kilichotokea (hadi herufi 200).',
+            'unknown_line' => 'Bidhaa hiyo haipo tena kwenye tiketi hii.',
+            'too_many' => 'Hiyo ni zaidi ya kilichobaki kwenye tiketi.',
+        ],
+        // Kuondoa bidhaa iliyotumwa kwenye tiketi (T5c).
+        'void' => [
+            'tap' => 'Gusa bidhaa iliyotumwa ili kuiondoa',
+            'title' => 'Ondoa :name',
+            'how_many' => ':name ngapi ziondolewe? Zipo :left kwenye tiketi.',
+            'less' => 'Punguza moja',
+            'more' => 'Ongeza moja',
+            'why' => 'Kwa nini :name inaondolewa?',
+            'note' => 'Nini kilitokea?',
+            'next' => 'Endelea',
+            'who_approves' => 'Meneja au mmiliki anaidhinisha kwa PIN yake.',
+            'no_approvers' => 'Bado hakuna meneja au mmiliki anayeweza kuingia kwenye till hii.',
+            'approve_pin' => ':name, weka PIN yako ili kuondoa :quantity × :item.',
+            'taken_off' => ':quantity × :item imeondolewa kwenye :ticket. Karatasi ya IMEFUTWA inachapishwa. Chapisha bili mpya.',
+            'voided_count' => ':count zimeondolewa',
+            'not_taken_off' => 'Haijaondolewa: :quantity × :item. Tiketi ililipwa, au inalipwa, kwenye till nyingine. Mwambie meneja.',
         ],
         'rejected' => [
             'lines_after_payment' => 'Bidhaa ziliongezwa baada ya tiketi hii kulipwa. Hazijalipwa: mwambie meneja.',
@@ -309,5 +330,8 @@ return [
         'note' => 'Maelezo: :note',
         'voided_by' => 'Imefutwa na: :name',
         'approved_by' => 'Imeidhinishwa na: :name',
+        // Karatasi ya jikoni au baa bidhaa inapoondolewa kwenye tiketi.
+        'line_off' => ':quantity x :name IMEONDOLEWA',
+        'line_left' => 'Bado kuandaa: :quantity',
     ],
 ];

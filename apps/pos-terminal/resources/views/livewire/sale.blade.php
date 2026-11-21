@@ -173,14 +173,31 @@
                     </div>
                 @endif
                 <ul class="min-h-0 flex-1 divide-y divide-line overflow-y-auto" aria-label="{{ __('terminal.sale.cart') }}">
-                    {{-- Sent lines are locked: taking one off is a manager void. --}}
+                    {{-- Refused by the server: those items count in full again. --}}
+                    @foreach ($ticket?->voids->where('sync_status', \App\Models\TicketLineVoid::REFUSED) ?? [] as $refusedVoid)
+                        <li wire:key="refused-void-{{ $refusedVoid->id }}" class="px-3 py-2 text-sm text-danger" role="alert">
+                            {{ __('terminal.tickets.void.not_taken_off', ['quantity' => $refusedVoid->quantity, 'item' => $ticket->lines->firstWhere('id', $refusedVoid->ticket_line_id)?->name ?? '—']) }}
+                        </li>
+                    @endforeach
+                    {{-- Sent lines are locked: taking one off is a manager void, on its own screen. --}}
+                    @php $canTakeOff = $step === 'cart' && $staff?->can(\App\Models\StaffMember::TAKE_ORDERS); @endphp
+                    @if ($canTakeOff && $sent !== [])
+                        <li class="px-3 pt-2 text-xs text-muted">{{ __('terminal.tickets.void.tap') }}</li>
+                    @endif
                     @foreach ($sent as $sentLine)
-                        <li wire:key="sent-{{ $sentLine->id }}" class="flex items-center gap-2 px-3 py-2 text-muted">
-                            <div class="min-w-0 flex-1">
-                                <p class="truncate">{{ $sentLine->name }}</p>
-                                <p class="font-mono text-sm">{{ $sentLine->quantity }} × {{ \VendaPOS\Core\ValueObjects\Money::fromCents($sentLine->unit_price_cents)->format() }} · {{ __('terminal.tickets.sent_line') }}</p>
-                            </div>
-                            <p class="font-mono">{{ \VendaPOS\Core\ValueObjects\Money::fromCents($sentLine->unit_price_cents * $sentLine->quantity)->format() }}</p>
+                        @php $orderLine = $sentLine->toOrderLine(); @endphp
+                        <li wire:key="sent-{{ $sentLine->id }}" class="text-muted">
+                            <a @if ($canTakeOff) href="{{ route('tickets.take-off', ['ticketId' => $ticket->id, 'lineId' => $sentLine->id]) }}" @endif
+                                @class(['flex items-center gap-2 px-3 py-2', 'hover:bg-panel' => $canTakeOff])>
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate">{{ $sentLine->name }}</p>
+                                    <p class="font-mono text-sm">
+                                        {{ $orderLine->quantity }} × {{ \VendaPOS\Core\ValueObjects\Money::fromCents($sentLine->unit_price_cents)->format() }} · {{ __('terminal.tickets.sent_line') }}
+                                        @if ($sentLine->voidedQuantity() > 0) · <span class="text-danger">{{ __('terminal.tickets.void.voided_count', ['count' => $sentLine->voidedQuantity()]) }}</span>@endif
+                                    </p>
+                                </div>
+                                <p class="font-mono">{{ \VendaPOS\Core\ValueObjects\Money::fromCents($orderLine->line_total_cents)->format() }}</p>
+                            </a>
                         </li>
                     @endforeach
                     @forelse ($lines as $line)
