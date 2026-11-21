@@ -74,4 +74,18 @@ return [
         ],
         'where' => 'Open "Voids to check" in the owner panel to see each one and mark it checked.',
     ],
+
+    'cash_checks' => [
+        'sms' => '{1} VendaPOS: 1 cash-up at :business needs checking. Open "Cash to check" in the owner panel.|[2,*] VendaPOS: :count cash-ups at :business need checking. Open "Cash to check" in the owner panel.',
+        'subject' => '{1} :business: 1 cash-up to check|[2,*] :business: :count cash-ups to check',
+        'intro' => 'Some till drawers need a second look:',
+        'kinds' => [
+            'variance_over_limit' => '{1} 1 drawer off by more than you allow|[2,*] :count drawers off by more than you allow',
+            'figures_differ' => '{1} 1 shift where the till and the server count differently|[2,*] :count shifts where the till and the server count differently',
+            'approver_not_allowed' => '{1} 1 approval by someone who may not close shifts|[2,*] :count approvals by someone who may not close shifts',
+            'open_too_long' => '{1} 1 shift left open for over a day|[2,*] :count shifts left open for over a day',
+            'sale_outside_shift' => '{1} 1 sale made outside a shift|[2,*] :count sales made outside a shift',
+        ],
+        'where' => 'Open "Cash to check" in the owner panel to see each one and mark it checked.',
+    ],
 ];

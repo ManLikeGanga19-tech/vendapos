@@ -18,6 +18,8 @@ Schedule::command('payments:check-mpesa')->everyFiveMinutes()->withoutOverlappin
 // late still count; then one owner digest per half hour.
 Schedule::command('orders:void-rates')->hourlyAt(10)->withoutOverlapping()->onOneServer();
 Schedule::command('orders:check-voids')->everyFiveMinutes()->withoutOverlapping()->onOneServer();
+// Cash-up: shifts left open and lost shifts, then one owner digest of new cash checks per half hour.
+Schedule::command('cash-up:check')->everyFiveMinutes()->withoutOverlapping()->onOneServer();
 
 // Resends eTIMS documents whose retry is due (30 s, 60 s, 120 s, then hourly).
 Schedule::command('etims:retry')->everyMinute()->withoutOverlapping()->onOneServer();

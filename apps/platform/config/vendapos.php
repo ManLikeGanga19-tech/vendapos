@@ -302,6 +302,16 @@ return [
         'check_digest_minutes' => (int) env('VENDAPOS_VOID_CHECK_DIGEST_MINUTES', 30),
     ],
 
+    // Till drawer shifts (cash-up). The allowance for a count is per business, on the tenant.
+    'cash_up' => [
+        // A shift still open this long after it opened is flagged: a till left running, lost or broken.
+        'open_too_long_hours' => (int) env('VENDAPOS_CASH_UP_OPEN_TOO_LONG_HOURS', 24),
+        // Tills send shifts before sales, so a sale naming a shift still unknown after this is flagged.
+        'missing_shift_grace_minutes' => (int) env('VENDAPOS_CASH_UP_MISSING_SHIFT_GRACE_MINUTES', 60),
+        // cash-up:check tells the owner in one digest at most this often.
+        'check_digest_minutes' => (int) env('VENDAPOS_CASH_UP_CHECK_DIGEST_MINUTES', 30),
+    ],
+
     // Business days are counted here; storage stays UTC (CLAUDE.md §4).
     'business_timezone' => 'Africa/Nairobi',
 

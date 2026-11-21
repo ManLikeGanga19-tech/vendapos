@@ -74,4 +74,18 @@ return [
         ],
         'where' => 'Fungua "Ufutaji wa kukagua" kwenye paneli ya mmiliki kuona kila mmoja na kuuweka kama umekaguliwa.',
     ],
+
+    'cash_checks' => [
+        'sms' => '{1} VendaPOS: hesabu 1 ya droo katika :business inahitaji kukaguliwa. Fungua "Pesa za kukagua" kwenye paneli ya mmiliki.|[2,*] VendaPOS: hesabu :count za droo katika :business zinahitaji kukaguliwa. Fungua "Pesa za kukagua" kwenye paneli ya mmiliki.',
+        'subject' => '{1} :business: hesabu 1 ya droo ya kukagua|[2,*] :business: hesabu :count za droo za kukagua',
+        'intro' => 'Baadhi ya droo za till zinahitaji kuangaliwa tena:',
+        'kinds' => [
+            'variance_over_limit' => '{1} droo 1 ina tofauti zaidi ya unayoruhusu|[2,*] droo :count zina tofauti zaidi ya unayoruhusu',
+            'figures_differ' => '{1} zamu 1 ambapo till na seva zinahesabu tofauti|[2,*] zamu :count ambapo till na seva zinahesabu tofauti',
+            'approver_not_allowed' => '{1} idhini 1 ya mtu asiye na ruhusa ya kufunga zamu|[2,*] idhini :count za mtu asiye na ruhusa ya kufunga zamu',
+            'open_too_long' => '{1} zamu 1 imeachwa wazi zaidi ya siku moja|[2,*] zamu :count zimeachwa wazi zaidi ya siku moja',
+            'sale_outside_shift' => '{1} mauzo 1 yamefanywa nje ya zamu|[2,*] mauzo :count yamefanywa nje ya zamu',
+        ],
+        'where' => 'Fungua "Pesa za kukagua" kwenye paneli ya mmiliki kuona kila moja na kuliwekea alama limekaguliwa.',
+    ],
 ];
