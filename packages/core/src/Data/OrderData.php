@@ -44,6 +44,8 @@ final class OrderData extends Data
         public int $total_cents,
         // The ticket this sale pays (table service); null for a quick sale.
         public ?string $ticket_uuid = null,
+        // Who voided it, who approved it and why: sent with a voided order, and only then.
+        public ?VoidData $void = null,
     ) {}
 
     /** @return list<TenderData> */
@@ -88,6 +90,7 @@ final class OrderData extends Data
             'vat_cents' => ['required', 'integer', 'min:0'],
             'total_cents' => ['required', 'integer', 'min:0'],
             'ticket_uuid' => ['sometimes', 'nullable', 'string', 'uuid'],
+            'void' => ['required_if:status,'.OrderStatus::Voided->value, 'prohibited_unless:status,'.OrderStatus::Voided->value, 'array'],
         ];
     }
 
@@ -106,6 +109,11 @@ final class OrderData extends Data
 
         foreach (TenderData::rules() as $field => $tenderRules) {
             $rules["tenders.*.{$field}"] = $tenderRules;
+        }
+
+        // Checked only on a voided order; on any other, "void" itself is refused above.
+        foreach (VoidData::rules('void.') as $field => $voidRules) {
+            $rules[$field] = ['exclude_unless:status,'.OrderStatus::Voided->value, ...$voidRules];
         }
 
         return $rules;

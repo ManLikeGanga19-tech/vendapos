@@ -122,7 +122,7 @@ it('puts stock back and takes the sale out of the day’s figures when an order 
     $sale = saleOf([[$this->nyama, 2]]);
 
     sync([$sale]);
-    sync([[...$sale, 'status' => 'voided']])->assertJsonPath('results.0.status', 'updated');
+    sync([voidOf($sale)])->assertJsonPath('results.0.status', 'updated');
 
     expect(stockIn($this->tenant))->toBe(['Nyama choma' => 0])
         ->and(dailySalesIn($this->tenant))->toBe([['date' => '2026-10-21', 'orders' => 0, 'voids' => 1, 'total' => 0, 'vat' => 0]])
@@ -149,7 +149,7 @@ it('adds up what each item sold per day, net of voids, and leaves out cancellati
     $voided = saleOf([[$this->water, 3]], sequence: 2);
 
     sync([$kept, $voided, saleOf([[$this->shave, 1]], sequence: 3, overrides: ['status' => 'cancelled'])]);
-    sync([[...$voided, 'status' => 'voided']]);
+    sync([voidOf($voided)]);
 
     expect(itemSalesIn($this->tenant))->toBe([
         // VAT is per line, then summed: 51,034 (2 × 1,850) + 25,517 (1 × 1,850), not 16/116 of 5,550.
@@ -171,7 +171,7 @@ it('nets to zero when a void’s jobs run before its sale’s jobs', function ()
     Queue::fake();
     $sale = saleOf([[$this->nyama, 1]]);
     sync([$sale]);
-    sync([[...$sale, 'status' => 'voided']]);
+    sync([voidOf($sale)]);
 
     $voidJobs = [...Queue::pushed(RestoreStock::class), ...Queue::pushed(UpdateSalesSummaries::class)->filter(
         fn (UpdateSalesSummaries $job) => $job->eventId === eventIdFor($sale['uuid'], 'order.voided'),

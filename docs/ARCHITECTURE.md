@@ -432,6 +432,8 @@ $token = $device->createToken(
 
 The token belongs to the till, not to whoever is using it, because staff switch by PIN while the till may be offline and cannot wait for a new token. The till pulls its branch's staff list (`GET /api/v1/staff`: names, roles, permissions and PIN hashes, never PINs) and checks PINs and permissions locally. Each order records who made it and who approved any void or discount, so the server can check after sync.
 
+**Voids.** Only a whole completed sale is voided, with a reason from a fixed list (`VoidReason`; "other" needs a note) and a manager's or owner's PIN; a manager may approve their own void. The till that made the sale sends the void with the order (`status: voided` plus a `void` block of who voided it, who approved it, why and when), so it works offline. Another till of the same branch voids it online with `POST /api/v1/orders/{id}/void`; sales of other branches answer 404. The server stores the void in `order_voids` and never refuses one for its approver or its day — the money has already gone back over the counter — it records whether the approver could approve voids at that branch and whether the void fell on the sale's business day (Africa/Nairobi), for the owner to check.
+
 ---
 
 ## 11 Infrastructure & deployment

@@ -7,10 +7,9 @@ namespace App\Domain\Orders\Actions;
 use App\Domain\Catalogue\Actions\FindUnknownItems;
 use App\Domain\Orders\Data\SyncResult;
 use App\Domain\Orders\Events\OrderRecorded;
-use App\Domain\Orders\Events\OrderVoided;
 use App\Domain\Orders\Models\Order;
-use App\Domain\Orders\Models\OrderLine;
 use App\Domain\Orders\Models\OrderTender;
+use App\Domain\Orders\Support\OrderSnapshot;
 use App\Domain\Orders\Support\ReceiptNumber;
 use App\Domain\Payments\Actions\FindTenderPayments;
 use App\Domain\Tenancy\Actions\FindUnknownStaff;
@@ -22,7 +21,6 @@ use Illuminate\Support\Facades\DB;
 use VendaPOS\Core\Data\OrderData;
 use VendaPOS\Core\Data\OrderLineData;
 use VendaPOS\Core\Data\TenderData;
-use VendaPOS\Core\Enums\OrderStatus;
 use VendaPOS\Core\Payments\Tenders;
 use VendaPOS\Core\Tax\OrderTotals;
 
@@ -37,6 +35,7 @@ final class RecordOrder
         private readonly FindUnknownItems $findUnknownItems,
         private readonly FindTenderPayments $findTenderPayments,
         private readonly FindUnknownStaff $findUnknownStaff,
+        private readonly VoidOrder $voidOrder,
     ) {}
 
     public function handle(OrderData $data, DeviceContext $context): SyncResult
@@ -59,6 +58,12 @@ final class RecordOrder
 
         if ($this->findUnknownStaff->handle([$data->staff_id]) !== []) {
             return SyncResult::rejected($data->uuid, 'unknown_staff', ['staff_id' => 'No one at this business has this ID.']);
+        }
+
+        $voidProblems = $data->void === null ? null : $this->voidOrder->problems($data->void, $data->placed_at, 'void.');
+
+        if ($voidProblems !== null) {
+            return SyncResult::rejected($data->uuid, $voidProblems['reason'], $voidProblems['errors']);
         }
 
         $tenderProblems = Tenders::problems($data->tenderList(), $data->status, $data->total_cents);
@@ -142,10 +147,17 @@ final class RecordOrder
             'mpesa_reference' => $tender->mpesa_reference,
         ], $data->tenderList(), array_keys($data->tenderList()))));
 
+        // Rung up and voided before the till could sync: recorded voided, with who and why.
+        if ($data->void !== null) {
+            $this->voidOrder->record($order, $data->void, $context->deviceId);
+        } else {
+            $order->setRelation('void', null);
+        }
+
         $event = DomainEvent::record(
             type: 'order.recorded',
             tenantId: $context->tenantId,
-            payload: $this->snapshot($order),
+            payload: OrderSnapshot::of($order),
             aggregateId: $order->id,
             branchId: $context->branchId,
             deviceId: $context->deviceId,
@@ -178,60 +190,11 @@ final class RecordOrder
             ]);
         }
 
-        $order->update(['status' => OrderStatus::Voided]);
+        if ($data->void === null) {
+            return SyncResult::rejected($data->uuid, 'invalid', ['void' => 'A void needs who voided it, who approved it and why.']);
+        }
 
-        $event = DomainEvent::record(
-            type: 'order.voided',
-            tenantId: $context->tenantId,
-            payload: $this->snapshot($order),
-            aggregateId: $order->id,
-            branchId: $context->branchId,
-            deviceId: $context->deviceId,
-        );
-
-        OrderVoided::dispatch($event->event_id, $context->tenantId, $order->id);
-
-        return SyncResult::updated($order->id);
-    }
-
-    /**
-     * The outbox payload for every order event: a full snapshot, so each
-     * listener can act on its own event without reading the Orders tables.
-     *
-     * @return array<string, mixed>
-     */
-    private function snapshot(Order $order): array
-    {
-        return [
-            'order_id' => $order->id,
-            'staff_id' => $order->staff_id,
-            'ticket_id' => $order->ticket_id,
-            'sequence_number' => $order->sequence_number,
-            'receipt_number' => $order->receipt_number,
-            'status' => $order->status->value,
-            'placed_at' => $order->placed_at->toIso8601String(),
-            'payment_type' => $order->payment_type?->value,
-            'subtotal_cents' => $order->subtotal_cents,
-            'vat_cents' => $order->vat_cents,
-            'total_cents' => $order->total_cents,
-            'lines' => $order->lines->map(fn (OrderLine $line) => [
-                'item_id' => $line->item_id,
-                'name' => $line->name,
-                'quantity' => $line->quantity,
-                'unit_price_cents' => $line->unit_price_cents,
-                'vat_category' => $line->vat_category->value,
-                'line_total_cents' => $line->line_total_cents,
-                'vat_cents' => $line->vat_cents,
-            ])->values()->all(),
-            'tenders' => $order->tenders->map(fn (OrderTender $tender) => [
-                'method' => $tender->method->value,
-                'amount_cents' => $tender->amount_cents,
-                'tendered_cents' => $tender->tendered_cents,
-                'change_cents' => $tender->change_cents,
-                'payment_id' => $tender->payment_id,
-                'mpesa_reference' => $tender->mpesa_reference,
-            ])->values()->all(),
-        ];
+        return $this->voidOrder->apply($order, $data->void, $context);
     }
 
     /**

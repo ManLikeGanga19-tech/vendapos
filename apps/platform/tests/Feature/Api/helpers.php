@@ -12,6 +12,7 @@ use App\Domain\Tenancy\Data\DeviceEnrolment;
 use App\Domain\Tenancy\Models\Branch;
 use App\Domain\Tenancy\Models\Staff;
 use App\Domain\Tenancy\Models\Tenant;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use VendaPOS\Core\Data\OrderLineData;
@@ -26,6 +27,19 @@ function sellerFor(Tenant $tenant): string
     return $sellers[$tenant->id] ??= $tenant->run(function () {
         $staff = Staff::create(['name' => 'Achieng Seller']);
         $staff->assignRole('cashier');
+
+        return $staff->id;
+    });
+}
+
+/** An owner at $tenant who approves test voids (owners may approve at every branch), created once per tenant. */
+function approverFor(Tenant $tenant): string
+{
+    static $approvers = [];
+
+    return $approvers[$tenant->id] ??= $tenant->run(function () {
+        $staff = Staff::create(['name' => 'Wanjiru Owner']);
+        $staff->assignRole('owner');
 
         return $staff->id;
     });
@@ -108,7 +122,7 @@ function saleOf(array $lines, int $sequence = 1, array $overrides = []): array
     // Paid in exact cash, unless cancelled (never paid) or the test brings its own tenders.
     $cancelled = ($overrides['status'] ?? 'completed') === 'cancelled';
 
-    return array_merge([
+    $sale = array_merge([
         'uuid' => (string) Str::uuid(),
         'sequence_number' => $sequence,
         'placed_at' => '2026-10-21T19:15:00+03:00',
@@ -120,6 +134,30 @@ function saleOf(array $lines, int $sequence = 1, array $overrides = []): array
         'vat_cents' => $totals->vat->cents,
         'total_cents' => $totals->total->cents,
     ], $overrides);
+
+    // Rung up and voided before it synced: it carries its void, as a till sends it.
+    if ($sale['status'] === 'voided' && ! array_key_exists('void', $overrides)) {
+        $sale['void'] = voidOf($sale)['void'];
+    }
+
+    return $sale;
+}
+
+/**
+ * $sale as its till resends it once voided: who voided it, who approved it and why.
+ *
+ * @param  array<string, mixed>  $sale
+ * @return array<string, mixed>
+ */
+function voidOf(array $sale, array $void = []): array
+{
+    return [...$sale, 'status' => 'voided', 'void' => array_merge([
+        'voided_at' => Carbon::parse($sale['placed_at'])->addMinutes(10)->toIso8601String(),
+        'voided_by' => $sale['staff_id'],
+        'approved_by' => approverFor(saleTenant()),
+        'reason' => 'wrong_item',
+        'note' => null,
+    ], $void)];
 }
 
 /**

@@ -158,7 +158,7 @@ it('voids a completed order on resend, but never un-voids it', function () {
     $sale = saleOf([[$this->nyama, 1]]);
     sync([$sale]);
 
-    sync([[...$sale, 'status' => 'voided']])->assertJsonPath('results.0.status', 'updated');
+    sync([voidOf($sale)])->assertJsonPath('results.0.status', 'updated');
     sync([[...$sale, 'status' => 'completed']])->assertJsonPath('results.0.status', 'duplicate');
 
     expect($this->tenant->run(fn () => Order::findOrFail($sale['uuid'])->status->value))->toBe('voided')
@@ -172,8 +172,10 @@ it('accepts an order cancelled before completion, and never lets it change', fun
     sync([$order])->assertJsonPath('results.0.status', 'accepted');
     sync([$order])->assertJsonPath('results.0.status', 'duplicate');
 
-    foreach (['completed', 'voided'] as $status) {
-        sync([[...$order, 'status' => $status, 'tenders' => [cashTender($order['total_cents'])]]])
+    $paid = [...$order, 'status' => 'completed', 'tenders' => [cashTender($order['total_cents'])]];
+
+    foreach ([$paid, voidOf($paid)] as $resend) {
+        sync([$resend])
             ->assertJsonPath('results.0.status', 'rejected')
             ->assertJsonPath('results.0.reason', 'status_conflict');
     }
@@ -190,7 +192,7 @@ it('rejects cancelling an order that was already completed', function () {
         ->assertJsonPath('results.0.status', 'rejected')
         ->assertJsonPath('results.0.reason', 'status_conflict');
 
-    sync([[...$sale, 'status' => 'voided']]);
+    sync([voidOf($sale)]);
     sync([[...$sale, 'status' => 'cancelled', 'tenders' => []]])->assertJsonPath('results.0.reason', 'status_conflict');
 
     expect($this->tenant->run(fn () => Order::findOrFail($sale['uuid'])->status->value))->toBe('voided');

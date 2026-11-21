@@ -173,7 +173,7 @@ it('keeps a resent sale’s tenders as first recorded', function () {
 
     sync([$sale])->assertJsonPath('results.0.status', 'accepted');
     sync([$sale])->assertJsonPath('results.0.status', 'duplicate');
-    sync([[...$sale, 'status' => 'voided']])->assertJsonPath('results.0.status', 'updated');
+    sync([voidOf($sale)])->assertJsonPath('results.0.status', 'updated');
 
     expect($this->tenant->run(fn () => OrderTender::query()->pluck('payment_id')->all()))->toBe([$paymentId]);
 });

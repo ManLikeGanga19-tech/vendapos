@@ -6,6 +6,7 @@ namespace App\Domain\Orders\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use VendaPOS\Core\Enums\EtimsStatus;
 use VendaPOS\Core\Enums\OrderStatus;
@@ -70,6 +71,12 @@ class Order extends Model
     public function reprints(): HasMany
     {
         return $this->hasMany(ReceiptReprint::class);
+    }
+
+    /** @return HasOne<OrderVoid, $this> who voided it, who approved and why; none unless voided */
+    public function void(): HasOne
+    {
+        return $this->hasOne(OrderVoid::class);
     }
 
     public function total(): Money
