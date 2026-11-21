@@ -20,7 +20,10 @@ use VendaPOS\Core\ValueObjects\Money;
  */
 final class ReconcileShift
 {
-    public function __construct(private readonly ListShiftTenders $listShiftTenders) {}
+    public function __construct(
+        private readonly ListShiftTenders $listShiftTenders,
+        private readonly FlagShift $flagShift,
+    ) {}
 
     public function handle(string $shiftId): ?Shift
     {
@@ -47,6 +50,8 @@ final class ReconcileShift
                 'variance_cents' => $cash->variance(Money::fromCents((int) $shift->counted_cents))->cents,
                 'reconciled_at' => now(),
             ]);
+
+            $this->flagShift->handle($shift);
 
             return $shift;
         });

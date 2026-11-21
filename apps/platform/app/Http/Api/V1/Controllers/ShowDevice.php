@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Api\V1\Controllers;
 
+use App\Domain\CashUp\Actions\FlagShift;
 use App\Domain\Tenancy\Models\Branch;
 use App\Domain\Tenancy\Models\Device;
 use Illuminate\Http\JsonResponse;
@@ -29,6 +30,8 @@ final class ShowDevice
             'token_expires_at' => $device->currentAccessToken()->expires_at?->toIso8601String(),
             // "suspended": keep selling and syncing, but new M-Pesa requests are refused, so offer cash.
             'account_status' => tenant('status'),
+            // Cash-up: how far a drawer count may be off before closing needs a manager's PIN.
+            'cash_up' => ['variance_allowed_cents' => FlagShift::allowedCents()],
             'realtime' => $this->realtime($device),
         ]);
     }

@@ -20,6 +20,7 @@ use VendaPOS\Core\Enums\BusinessType;
  * @property string|null $owner_email
  * @property string $locale en|sw, the language the owner is written to in
  * @property list<string>|null $modules BusinessType values: the business modules this tenant has (T7)
+ * @property int $cash_variance_allowed_cents how far a drawer count may be off before closing needs a manager
  * @property string $status active|suspended|purged
  * @property Carbon|null $suspended_at
  * @property string|null $suspension_reason
@@ -46,7 +47,11 @@ class Tenant extends BaseTenant implements HasLocalePreference, TenantWithDataba
     protected $attributes = [
         'status' => self::ACTIVE,
         'locale' => 'en',
+        'cash_variance_allowed_cents' => self::DEFAULT_CASH_VARIANCE_ALLOWED_CENTS,
     ];
+
+    /** Cash-up: KES 100 either way before closing a shift needs a manager (Daniel). */
+    public const int DEFAULT_CASH_VARIANCE_ALLOWED_CENTS = 10_000;
 
     protected function casts(): array
     {
@@ -54,6 +59,7 @@ class Tenant extends BaseTenant implements HasLocalePreference, TenantWithDataba
             'suspended_at' => 'datetime',
             'purge_after' => 'datetime',
             'modules' => 'array',
+            'cash_variance_allowed_cents' => 'integer',
         ];
     }
 
@@ -101,6 +107,7 @@ class Tenant extends BaseTenant implements HasLocalePreference, TenantWithDataba
             'owner_email',
             'locale',
             'modules',
+            'cash_variance_allowed_cents',
             'status',
             'suspended_at',
             'suspension_reason',

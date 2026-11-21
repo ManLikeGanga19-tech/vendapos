@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Domain\CashUp\Models\CashCheck;
 use App\Domain\CashUp\Models\CashMovement;
 use App\Domain\CashUp\Models\Shift;
 use App\Domain\Catalogue\Models\Item;
 use App\Domain\Orders\Models\Order;
 use App\Domain\Tenancy\Data\DeviceEnrolment;
+use App\Domain\Tenancy\Models\Staff;
 use App\Domain\Tenancy\Models\Tenant;
 use App\Infrastructure\Outbox\DomainEvent;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -248,4 +250,77 @@ it('records the shift a sale was made in, and still takes a sale with none', fun
     sync([$inShift, $older])->assertJsonPath('results.*.status', ['accepted', 'accepted']);
 
     expect($this->tenant->run(fn () => Order::query()->orderBy('sequence_number')->pluck('shift_id')->all()))->toBe([$shift['uuid'], null]);
+});
+
+describe('cash checks', function () {
+    /** @return array<string, string> open checks by kind => dedupe key */
+    function openChecks(): array
+    {
+        return test()->tenant->run(fn () => CashCheck::query()->where('status', CashCheck::OPEN)->orderBy('id')->pluck('dedupe_key', 'kind')->all());
+    }
+
+    it('tells tills how far a count may be off, KES 100 unless the owner changed it', function () {
+        deviceRequest('GET', '/api/v1/device', $this->enrolment->plainTextToken, $this->enrolment->device->id)
+            ->assertJsonPath('cash_up.variance_allowed_cents', 10_000);
+
+        $this->tenant->update(['cash_variance_allowed_cents' => 50_000]);
+
+        deviceRequest('GET', '/api/v1/device', $this->enrolment->plainTextToken, $this->enrolment->device->id)
+            ->assertJsonPath('cash_up.variance_allowed_cents', 50_000);
+    });
+
+    it('opens nothing for a drawer within the allowance', function () {
+        syncShifts([closed(shiftOf(), ['1000' => 4, '500' => 1, '100' => 4], 500_000)])->assertOk(); // KES 100 short
+
+        expect(openChecks())->toBe([]);
+    });
+
+    it('flags a drawer off by more than allowed, approved or not, and an approver who may not close shifts', function () {
+        $waiter = $this->tenant->run(function () {
+            $staff = Staff::create(['name' => 'Otieno Waiter']);
+            $staff->assignRole('waiter');
+
+            return $staff->id;
+        });
+        $shift = shiftOf();
+        syncShifts([closed($shift, ['1000' => 4], 500_000, ['approved_by' => $waiter, 'note' => 'Counted twice'])])->assertOk();
+
+        expect(openChecks())->toBe([
+            CashCheck::VARIANCE_OVER_LIMIT => "variance_over_limit:shift:{$shift['uuid']}",
+            CashCheck::APPROVER_NOT_ALLOWED => "approver_not_allowed:shift:{$shift['uuid']}",
+        ])
+            ->and($this->tenant->run(fn () => CashCheck::query()->where('kind', CashCheck::VARIANCE_OVER_LIMIT)->sole()->only(['amount_cents', 'staff_id', 'approved_by', 'branch_id'])))
+            ->toBe(['amount_cents' => -100_000, 'staff_id' => $this->cashier, 'approved_by' => $waiter, 'branch_id' => $this->branch->id]);
+    });
+
+    it('flags a pay-out approved by someone who may not', function () {
+        $payOut = movement(CashMovementKind::PayOut, 5_000, ['approved_by' => $this->cashier]);
+        syncShifts([closed([...shiftOf(), 'movements' => [$payOut]], ['1000' => 4, '500' => 1, '100' => 4, '50' => 1], 495_000)])->assertOk();
+
+        expect(openChecks())->toBe([CashCheck::APPROVER_NOT_ALLOWED => "approver_not_allowed:movement:{$payOut['uuid']}"]);
+    });
+
+    it('flags figures that differ, and settles them, and the variance, once the late sale arrives', function () {
+        $shift = shiftOf();
+        // KES 2,000 over on the server's figures, because a KES 2,000 cash sale has not synced yet.
+        syncShifts([closed($shift, ['1000' => 7], 700_000)])->assertOk();
+        expect(array_keys(openChecks()))->toBe([CashCheck::VARIANCE_OVER_LIMIT, CashCheck::FIGURES_DIFFER]);
+
+        $bulk = $this->tenant->run(fn () => Item::create(['type' => ItemType::Product, 'name' => 'Crate', 'price_cents' => 200_000, 'vat_category' => VatCategory::Standard]));
+        sync([saleOf([[$bulk, 1]], 1, ['shift_id' => $shift['uuid']])])->assertJsonPath('results.0.status', 'accepted');
+
+        expect(openChecks())->toBe([])
+            ->and($this->tenant->run(fn () => CashCheck::query()->where('status', CashCheck::RESOLVED)->whereNull('resolved_by')->count()))->toBe(2);
+    });
+
+    it('flags a sale made outside a shift on a till that runs cash-up, but not on an older till', function () {
+        $older = saleOf([[$this->soda, 1]], 1);
+        sync([$older])->assertOk();
+
+        syncShifts([shiftOf(['opened_at' => '2026-10-21T18:00:00+03:00'])])->assertOk();
+        $outside = saleOf([[$this->soda, 1]], 2);
+        sync([$outside])->assertOk();
+
+        expect(openChecks())->toBe([CashCheck::SALE_OUTSIDE_SHIFT => "sale_outside_shift:order:{$outside['uuid']}"]);
+    });
 });

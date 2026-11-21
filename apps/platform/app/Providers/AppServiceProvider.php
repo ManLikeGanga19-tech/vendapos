@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Domain\Analytics\Jobs\UpdateSalesSummaries;
 use App\Domain\CashUp\Events\ShiftClosed;
+use App\Domain\CashUp\Jobs\FlagSaleOutsideShift;
 use App\Domain\CashUp\Jobs\ReconcileClosedShift;
 use App\Domain\CashUp\Jobs\ReconcileShiftOfLateSale;
 use App\Domain\Catalogue\Models\Category;
@@ -105,6 +106,7 @@ class AppServiceProvider extends ServiceProvider
             FlagVoidedSalePaid::dispatch($event->tenantId, $event->eventId);
             CloseTicketOnSale::dispatch($event->tenantId, $event->eventId);
             ReconcileShiftOfLateSale::dispatch($event->tenantId, $event->eventId);
+            FlagSaleOutsideShift::dispatch($event->tenantId, $event->eventId);
         });
 
         // Cash-up: a closed drawer shift is counted again by the server from the synced sales.
