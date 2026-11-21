@@ -51,7 +51,7 @@ afterEach(function () {
 });
 
 /** A shift of the test till at $branchId, closed KES 300 short unless $attributes say otherwise. */
-function shiftAt(string $branchId, array $attributes = []): Shift
+function cashUpShiftAt(string $branchId, array $attributes = []): Shift
 {
     return test()->tenant->run(fn () => Shift::create(array_merge([
         'id' => (string) Str::uuid(),
@@ -77,7 +77,7 @@ function shiftAt(string $branchId, array $attributes = []): Shift
     ], $attributes)));
 }
 
-function signInToOwnerPanel(Staff $staff): void
+function signInForCashUp(Staff $staff): void
 {
     tenancy()->initialize(test()->tenant);
     Filament::setCurrentPanel(Filament::getPanel('owner'));
@@ -86,25 +86,25 @@ function signInToOwnerPanel(Staff $staff): void
 
 describe('cash-ups page', function () {
     it('shows owners every branch’s shifts, and managers only their own', function () {
-        $ours = shiftAt($this->branch->id, ['number' => 7]);
-        $theirs = shiftAt($this->otherBranch->id, ['number' => 8]);
+        $ours = cashUpShiftAt($this->branch->id, ['number' => 7]);
+        $theirs = cashUpShiftAt($this->otherBranch->id, ['number' => 8]);
         $till = $this->enrolment->device->tillCode();
 
-        signInToOwnerPanel($this->owner);
+        signInForCashUp($this->owner);
         Livewire::test(CashUps::class)->assertCanSeeTableRecords([$ours, $theirs])->assertSee("{$till}-Z0007")->assertSee('-KES 300.00');
 
-        signInToOwnerPanel($this->manager);
+        signInForCashUp($this->manager);
         Livewire::test(CashUps::class)->assertCanSeeTableRecords([$ours])->assertCanNotSeeTableRecords([$theirs]);
     });
 
     it('opens a shift’s Z detail with the server’s working, the counts and the cash that left the drawer', function () {
-        $shift = shiftAt($this->branch->id, ['number' => 3, 'pay_outs_cents' => 5_000, 'expected_cents' => 495_000, 'till_expected_cents' => 495_000, 'variance_cents' => -25_000]);
+        $shift = cashUpShiftAt($this->branch->id, ['number' => 3, 'pay_outs_cents' => 5_000, 'expected_cents' => 495_000, 'till_expected_cents' => 495_000, 'variance_cents' => -25_000]);
         $this->tenant->run(fn () => CashMovement::create([
             'id' => (string) Str::uuid(), 'shift_id' => $shift->id, 'kind' => CashMovementKind::PayOut, 'amount_cents' => 5_000,
             'moved_at' => now()->subHour(), 'staff_id' => $this->manager->id, 'approved_by' => $this->owner->id, 'reason' => 'Charcoal',
         ]));
 
-        signInToOwnerPanel($this->manager);
+        signInForCashUp($this->manager);
         Livewire::test(CashUps::class)
             ->mountAction(TestAction::make('view')->table($shift))
             ->assertMountedActionModalSee(['KES 4,950.00', '-KES 250.00', '4 × KES 1,000.00', 'Pay-out', 'Charcoal', 'Wanjiru Owner'])
@@ -115,10 +115,10 @@ describe('cash-ups page', function () {
         Log::shouldReceive('channel')->with('security')->andReturnSelf();
         Log::shouldReceive('info')->once()->with('cash_up.allowance_changed', Mockery::on(fn (array $context) => $context['from_cents'] === 10_000 && $context['to_cents'] === 25_000 && $context['staff_id'] === $this->owner->id));
 
-        signInToOwnerPanel($this->manager);
+        signInForCashUp($this->manager);
         Livewire::test(CashUps::class)->assertActionHidden(TestAction::make('allowance')->table());
 
-        signInToOwnerPanel($this->owner);
+        signInForCashUp($this->owner);
         Livewire::test(CashUps::class)
             ->callAction(TestAction::make('allowance')->table(), ['allowance' => '1000000'])
             ->assertHasActionErrors(['allowance']);
@@ -134,8 +134,8 @@ describe('cash-ups page', function () {
 
 describe('cash checks', function () {
     it('lists open checks for the person’s branches, and a person marks one checked with a note', function () {
-        $ours = shiftAt($this->branch->id);
-        $theirs = shiftAt($this->otherBranch->id);
+        $ours = cashUpShiftAt($this->branch->id);
+        $theirs = cashUpShiftAt($this->otherBranch->id);
         $this->tenant->run(function () use ($ours, $theirs) {
             foreach ([$ours, $theirs] as $shift) {
                 CashCheck::open(CashCheck::VARIANCE_OVER_LIMIT, "shift:{$shift->id}", [
@@ -149,7 +149,7 @@ describe('cash checks', function () {
             CashCheck::query()->where('shift_id', $theirs->id)->sole(),
         ]);
 
-        signInToOwnerPanel($this->manager);
+        signInForCashUp($this->manager);
         expect(CashChecks::getNavigationBadge())->toBe('1');
         Livewire::test(CashChecks::class)
             ->assertCanSeeTableRecords([$ourCheck])
@@ -165,8 +165,8 @@ describe('cash checks', function () {
 
 describe('cash-up:check', function () {
     it('flags a shift left open over a day, and a sale naming a shift that never arrived', function () {
-        $stale = shiftAt($this->branch->id, ['opened_at' => now()->subHours(30), 'closed_at' => null, 'closed_by' => null, 'counted_cents' => null, 'expected_cents' => null, 'variance_cents' => null]);
-        $fresh = shiftAt($this->branch->id, ['opened_at' => now()->subHours(2), 'closed_at' => null]);
+        $stale = cashUpShiftAt($this->branch->id, ['opened_at' => now()->subHours(30), 'closed_at' => null, 'closed_by' => null, 'counted_cents' => null, 'expected_cents' => null, 'variance_cents' => null]);
+        $fresh = cashUpShiftAt($this->branch->id, ['opened_at' => now()->subHours(2), 'closed_at' => null]);
         $soda = $this->tenant->run(fn () => Item::create(['type' => ItemType::Product, 'name' => 'Soda', 'price_cents' => 8_000, 'vat_category' => VatCategory::Standard]));
         $lost = saleOf([[$soda, 1]], 1, ['shift_id' => (string) Str::uuid(), 'placed_at' => now()->subHours(2)->toIso8601String()]);
         $recent = saleOf([[$soda, 1]], 2, ['shift_id' => (string) Str::uuid(), 'placed_at' => now()->subMinutes(5)->toIso8601String()]);
@@ -180,7 +180,7 @@ describe('cash-up:check', function () {
     });
 
     it('tells the owner once per new batch, at most every half hour', function () {
-        $shift = shiftAt($this->branch->id);
+        $shift = cashUpShiftAt($this->branch->id);
         $open = fn (string $kind) => $this->tenant->run(fn () => CashCheck::open($kind, "shift:{$shift->id}", ['branch_id' => $shift->branch_id, 'shift_id' => $shift->id]));
 
         $open(CashCheck::VARIANCE_OVER_LIMIT);
@@ -199,7 +199,7 @@ describe('cash-up:check', function () {
 });
 
 it('never shows another business’s shifts or cash checks', function () {
-    $ours = shiftAt($this->branch->id, ['number' => 1]);
+    $ours = cashUpShiftAt($this->branch->id, ['number' => 1]);
 
     [$other, $otherBranch] = tenantWithBranch(BusinessType::Shop);
     $theirTill = enrolFor($other, $otherBranch);
@@ -213,7 +213,7 @@ it('never shows another business’s shifts or cash checks', function () {
         return $shift;
     });
 
-    signInToOwnerPanel($this->owner);
+    signInForCashUp($this->owner);
     Livewire::test(CashUps::class)->assertCanSeeTableRecords([$ours])->assertCanNotSeeTableRecords([$theirs])->assertDontSee('Z0099');
     Livewire::test(CashChecks::class)->assertCountTableRecords(0);
     expect(CashChecks::getNavigationBadge())->toBeNull();
