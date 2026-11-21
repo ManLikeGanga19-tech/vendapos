@@ -226,3 +226,22 @@ it('keeps each business’s M-Pesa checks to itself', function () {
     Livewire::test(MpesaChecks::class)->assertSee(__('owner.mpesa_checks.none'))->assertDontSee('TJL7QW2E9R');
     expect(Str::of(json_encode(MpesaCheck::query()->get()))->contains('TJL7QW2E9R'))->toBeFalse();
 });
+
+it('claims the M-Pesa of a sale rung up and voided before it synced: the money was still taken', function () {
+    $payment = paymentOf(['amount_cents' => 45_000]);
+    requestPayment($payment)->assertAccepted();
+    $this->tenant->run(fn () => Payment::query()->whereKey($payment['uuid'])->update(['status' => PaymentStatus::Succeeded, 'completed_at' => now()]));
+
+    $pushSale = saleOf([[$this->ugali, 1]], 1, ['uuid' => $payment['order_uuid'], 'status' => 'voided']);
+    $pushSale['tenders'] = [['method' => 'mpesa_push', 'amount_cents' => 45_000, 'payment_uuid' => $payment['uuid']]];
+    $codeSale = saleOf([[$this->ugali, 1]], 2, ['status' => 'voided']);
+    $codeSale['tenders'] = [['method' => 'mpesa_code', 'amount_cents' => 45_000, 'mpesa_reference' => 'TJL7QW2E9V']];
+    sync([$pushSale, $codeSale])->assertJsonPath('results.0.status', 'accepted')->assertJsonPath('results.1.status', 'accepted');
+
+    expect($this->tenant->run(fn () => Payment::query()->findOrFail($payment['uuid'])->claimed_at))->not->toBeNull()
+        ->and(claimOf('TJL7QW2E9V')->order_id)->toBe($codeSale['uuid']);
+
+    $this->travel(31)->minutes();
+    $this->artisan('payments:check-mpesa');
+    expect(openChecks())->not->toContain(MpesaCheck::UNCLAIMED_PUSH);
+});

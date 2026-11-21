@@ -10,7 +10,7 @@ use App\Infrastructure\Outbox\DomainEvent;
 use App\Infrastructure\Queue\TenantEventJob;
 
 /**
- * order.recorded → note the sale's M-Pesa tenders: typed codes to confirm,
+ * order.recorded → note the sale's M-Pesa tenders (completed, or voided before it synced): typed codes to confirm,
  * pushes now claimed, and the bill's other QR codes closed. Reads only the
  * event's snapshot, never the Orders tables.
  */
@@ -23,7 +23,8 @@ final class RecordMpesaTenders extends TenantEventJob
 
     protected function process(DomainEvent $event): void
     {
-        if (($event->payload['status'] ?? null) !== 'completed') {
+        // A sale voided before it synced still took the money: its tenders count too.
+        if (! in_array($event->payload['status'] ?? null, ['completed', 'voided'], true)) {
             return;
         }
 
