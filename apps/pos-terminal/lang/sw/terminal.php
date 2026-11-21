@@ -253,4 +253,61 @@ return [
         'thanks' => 'Asante sana. Karibu tena!',
         'test' => 'Majaribio ya printa',
     ],
+
+    // Kutafuta mauzo ya leo na kuyafuta (T5).
+    'sales' => [
+        'title' => 'Mauzo ya leo',
+        'all_tills' => 'Mashine zote za tawi hili.',
+        'offline' => 'Nje ya mtandao: mauzo ya mashine hii tu. Mauzo ya mashine nyingine yanaweza kufutwa mtandao ukirudi.',
+        'search' => 'Nambari ya risiti au msimbo wa M-Pesa',
+        'refresh' => 'Onyesha upya',
+        'none' => 'Hakuna mauzo bado leo.',
+        'no_match' => 'Hakuna mauzo yanayolingana.',
+        'gone' => 'Mauzo hayo hayapo tena kwenye orodha ya leo.',
+        'voided' => 'Yamefutwa',
+        'void' => 'Futa mauzo haya',
+        'already_voided' => 'Yamefutwa: :reason',
+        'why' => 'Kwa nini :number inafutwa?',
+        'note' => 'Nini kilitokea?',
+        'next' => 'Endelea',
+        'who_approves' => 'Meneja au mmiliki aidhinishe ufutaji huu kwa PIN yake.',
+        'no_approvers' => 'Bado hakuna meneja au mmiliki anayeweza kuingia kwenye mashine hii.',
+        'approve_pin' => ':name, weka PIN yako kufuta :number.',
+        'done' => 'Mauzo :number yamefutwa',
+        'give_back' => 'Rudisha pesa taslimu',
+        'mpesa_back' => ':amount zililipwa kwa M-Pesa. Mmiliki atamrudishia mteja.',
+        'back_to_list' => 'Rudi kwenye mauzo ya leo',
+        'new_sale' => 'Mauzo mapya',
+        'refused' => [
+            'not_allowed' => 'Huwezi kufuta mauzo kwenye mashine hii.',
+            'approver_not_allowed' => 'Mtu huyo hawezi kuidhinisha ufutaji.',
+            'note_needed' => 'Eleza kilichotokea (hadi herufi 200).',
+            'not_found' => 'Mauzo hayo si ya leo.',
+            'already_voided' => 'Mauzo hayo yamefutwa tayari.',
+            'offline' => 'Mauzo haya yalifanywa kwenye mashine nyingine. Yafute mashine hii ikiwa mtandaoni.',
+            'refused' => 'Seva imekataa ufutaji huu. Mwombe mmiliki aangalie orodha ya wafanyakazi.',
+        ],
+    ],
+
+    // VendaPOS\Core\Enums\VoidReason, kama till inavyozitoa.
+    'void_reasons' => [
+        'wrong_item' => 'Bidhaa isiyo sahihi',
+        'changed_mind' => 'Mteja amebadili nia',
+        'duplicate' => 'Imeandikwa mara mbili',
+        'payment_problem' => 'Tatizo la malipo',
+        'other' => 'Nyingine',
+    ],
+
+    // Karatasi inayochapishwa mauzo yakifutwa.
+    'void_slip' => [
+        'title' => '*** IMEFUTWA ***',
+        'voided' => 'Imefutwa',
+        'total' => 'JUMLA YA MAUZO',
+        'cash_back' => 'PESA TASLIMU ILIYORUDISHWA',
+        'mpesa_back' => 'M-Pesa :amount: mmiliki atairudisha.',
+        'reason' => 'Sababu: :reason',
+        'note' => 'Maelezo: :note',
+        'voided_by' => 'Imefutwa na: :name',
+        'approved_by' => 'Imeidhinishwa na: :name',
+    ],
 ];

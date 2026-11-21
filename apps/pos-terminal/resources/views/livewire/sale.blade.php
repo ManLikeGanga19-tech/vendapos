@@ -38,6 +38,13 @@
             @if ($tableService)
                 <button type="button" wire:click="showTickets" @class(['key h-12 px-4 text-sm', 'border-primary text-primary' => $step === 'tickets']) @disabled(! in_array($step, ['cart', 'table', 'tickets'], true))>{{ __('terminal.tickets.open', ['count' => $openTicketCount]) }}</button>
             @endif
+            @if ($staff?->can(\App\Models\StaffMember::TAKE_PAYMENTS))
+                @if (in_array($step, ['pay', 'mpesa'], true))
+                    <span class="key h-12 px-4 text-sm opacity-50" aria-disabled="true">{{ __('terminal.sales.title') }}</span>
+                @else
+                    <a href="{{ route('sales') }}" class="key h-12 px-4 text-sm">{{ __('terminal.sales.title') }}</a>
+                @endif
+            @endif
             <x-language-picker />
             @if (in_array($staff?->role, ['manager', 'owner'], true))
                 <a href="{{ route('printer') }}" class="key h-12 px-4 text-sm">{{ __('terminal.printer.title') }}</a>

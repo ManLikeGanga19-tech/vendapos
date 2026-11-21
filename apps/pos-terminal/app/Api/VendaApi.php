@@ -16,6 +16,7 @@ use App\Api\Exceptions\ApiRejected;
 use App\Api\Exceptions\ApiUnavailable;
 use App\Api\Exceptions\TillNotAuthorised;
 use App\Api\Exceptions\TokenStillValid;
+use App\Security\KeyringUnavailable;
 use App\Till\Till;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\ConnectionException;
@@ -305,6 +306,49 @@ final class VendaApi
             $response->successful() => 'held',
             $response->status() === 409 && in_array($code, ['ticket_paid', 'ticket_being_paid'], true) => $code,
             $response->status() === 404 => 'unknown_ticket',
+            in_array($response->status(), [401, 403], true) => throw new TillNotAuthorised('The server refused this till.'),
+            default => throw new ApiUnavailable("The server answered {$response->status()}."),
+        };
+    }
+
+    /**
+     * The branch's sales of the business day from every till, newest first
+     * (GET /api/v1/orders/today), to find one to void.
+     *
+     * @return list<array<string, mixed>>
+     *
+     * @throws ApiUnavailable|TillNotAuthorised|ApiNotConfigured|KeyringUnavailable
+     */
+    public function salesToday(): array
+    {
+        $json = $this->send(fn () => $this->authorised()->get('orders/today'));
+
+        return array_values(array_filter((array) ($json['orders'] ?? []), is_array(...)));
+    }
+
+    /**
+     * Voids a sale another till of the branch made. Its refusals are answers,
+     * not errors: 404 when the server does not have it, 409 when it can no
+     * longer be voided, 422 when the server does not know the staff.
+     *
+     * @param  array{voided_at: string, voided_by: string, approved_by: string, reason: string, note: ?string}  $void
+     * @return 'voided'|'not_found'|'not_voidable'|'refused'
+     *
+     * @throws ApiUnavailable|TillNotAuthorised|ApiNotConfigured|KeyringUnavailable the token is sealed in the OS keyring
+     */
+    public function voidOrder(string $orderId, array $void): string
+    {
+        try {
+            $response = $this->authorised()->post("orders/{$orderId}/void", $void);
+        } catch (ConnectionException $e) {
+            throw new ApiUnavailable('The server could not be reached.', previous: $e);
+        }
+
+        return match (true) {
+            $response->successful() => 'voided',
+            $response->status() === 404 => 'not_found',
+            $response->status() === 409 => 'not_voidable',
+            $response->status() === 422 => 'refused',
             in_array($response->status(), [401, 403], true) => throw new TillNotAuthorised('The server refused this till.'),
             default => throw new ApiUnavailable("The server answered {$response->status()}."),
         };

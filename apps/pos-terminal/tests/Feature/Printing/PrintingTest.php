@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Jobs\PrintBillJob;
 use App\Jobs\PrintReceiptJob;
+use App\Jobs\PrintVoidSlipJob;
 use App\Livewire\PrinterSetup;
 use App\Livewire\Sale;
 use App\Models\Item;
@@ -14,10 +15,12 @@ use App\Models\SyncState;
 use App\Printing\PrinterConnections;
 use App\Printing\PrinterSettings;
 use App\Printing\ReceiptPrinter;
+use App\Sales\VoidedSale;
 use App\Security\SecretBox;
 use App\Staff\TillSession;
 use App\Sync\SyncStaff;
 use App\Till\Till;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -211,4 +214,40 @@ it('lets managers set up the printer and print a test page, and keeps cashiers o
 
     expect(PrinterSettings::current())->connection->toBe(PrinterSettings::NETWORK)->target->toBe('192.168.1.50')
         ->and(RecordingPrinterConnections::$jobs[0] ?? '')->toContain('Printer test')->toContain(PAPER_CUT);
+});
+
+it('prints a VOID slip with what to give back, why and who approved it, and opens the drawer for cash', function () {
+    (new PrinterSettings(PrinterSettings::WINDOWS, 'POS-80', 80))->save();
+    $slip = fn (int $cash, int $mpesa) => new VoidedSale(
+        receiptNumber: 'T1-000004',
+        placedAt: CarbonImmutable::parse('2026-10-26T10:30:00Z'),
+        voidedAt: CarbonImmutable::parse('2026-10-26T11:05:00Z'),
+        lines: [['name' => 'Chai ya tangawizi', 'quantity' => 2, 'line_total_cents' => 10_100]],
+        totalCents: 10_100,
+        cashCents: $cash,
+        mpesaCents: $mpesa,
+        reason: 'other',
+        note: 'Customer walked out',
+        voidedBy: 'Cashier Njeri',
+        approvedBy: 'Manager Baraka',
+    );
+
+    (new PrintVoidSlipJob($slip(10_100, 0)))->handle(app(ReceiptPrinter::class));
+    (new PrintVoidSlipJob($slip(0, 10_100)))->handle(app(ReceiptPrinter::class));
+
+    expect(RecordingPrinterConnections::$jobs[0])
+        ->toContain('*** VOID ***')
+        ->toContain(ReceiptPrinter::row('Receipt No. T1-000004', '26/10/2026 13:30', 48))
+        ->toContain(ReceiptPrinter::row('Voided', '26/10/2026 14:05', 48))
+        ->toContain(ReceiptPrinter::row('2 x Chai ya tangawizi', '101.00', 48))
+        ->toContain(ReceiptPrinter::row('CASH GIVEN BACK', 'KES 101.00', 48))
+        ->toContain('Reason: Other')
+        ->toContain('Note: Customer walked out')
+        ->toContain('Voided by: Cashier Njeri')
+        ->toContain('Approved by: Manager Baraka')
+        ->toContain(DRAWER_PULSE)
+        ->and(RecordingPrinterConnections::$jobs[1])
+        ->toContain('M-Pesa KES 101.00: the owner will refund it.')
+        ->not->toContain('CASH GIVEN BACK')
+        ->not->toContain(DRAWER_PULSE);
 });

@@ -252,4 +252,61 @@ return [
         'thanks' => 'Thank you. Asante!',
         'test' => 'Printer test',
     ],
+
+    // Finding a sale of today and voiding it (T5).
+    'sales' => [
+        'title' => 'Sales today',
+        'all_tills' => 'Every till in this branch.',
+        'offline' => 'Offline: only this till’s sales. Another till’s sale can be voided once the till is back online.',
+        'search' => 'Receipt number or M-Pesa code',
+        'refresh' => 'Refresh',
+        'none' => 'No sales yet today.',
+        'no_match' => 'No sale matches.',
+        'gone' => 'That sale is no longer in today’s list.',
+        'voided' => 'Voided',
+        'void' => 'Void this sale',
+        'already_voided' => 'Voided: :reason',
+        'why' => 'Why is :number being voided?',
+        'note' => 'What happened?',
+        'next' => 'Next',
+        'who_approves' => 'A manager or owner approves this void with their PIN.',
+        'no_approvers' => 'No manager or owner can sign in on this till yet.',
+        'approve_pin' => ':name, enter your PIN to void :number.',
+        'done' => 'Sale :number voided',
+        'give_back' => 'Give back in cash',
+        'mpesa_back' => ':amount was paid by M-Pesa. The owner will send it back to the customer.',
+        'back_to_list' => 'Back to sales today',
+        'new_sale' => 'New sale',
+        'refused' => [
+            'not_allowed' => 'You cannot void sales on this till.',
+            'approver_not_allowed' => 'That person cannot approve voids.',
+            'note_needed' => 'Say what happened (up to 200 characters).',
+            'not_found' => 'That sale is not one of today’s sales.',
+            'already_voided' => 'That sale is already voided.',
+            'offline' => 'This sale was made on another till. Void it when this till is online.',
+            'refused' => 'The server refused this void. Ask the owner to check the staff list.',
+        ],
+    ],
+
+    // VendaPOS\Core\Enums\VoidReason, as the till offers them.
+    'void_reasons' => [
+        'wrong_item' => 'Wrong item',
+        'changed_mind' => 'Customer changed their mind',
+        'duplicate' => 'Rung up twice',
+        'payment_problem' => 'Payment problem',
+        'other' => 'Other',
+    ],
+
+    // The slip printed when a sale is voided.
+    'void_slip' => [
+        'title' => '*** VOID ***',
+        'voided' => 'Voided',
+        'total' => 'SALE TOTAL',
+        'cash_back' => 'CASH GIVEN BACK',
+        'mpesa_back' => 'M-Pesa :amount: the owner will refund it.',
+        'reason' => 'Reason: :reason',
+        'note' => 'Note: :note',
+        'voided_by' => 'Voided by: :name',
+        'approved_by' => 'Approved by: :name',
+    ],
 ];

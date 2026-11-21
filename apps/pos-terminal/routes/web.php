@@ -8,6 +8,7 @@ use App\Livewire\ChangePin;
 use App\Livewire\PairTill;
 use App\Livewire\PrinterSetup;
 use App\Livewire\Sale;
+use App\Livewire\SalesToday;
 use App\Livewire\SignIn;
 use App\Staff\TillSession;
 use App\Till\Till;
@@ -31,4 +32,5 @@ Route::middleware(EnsureStaffSignedIn::class)->group(function () {
     Route::livewire('/home', Sale::class)->name('home');
     Route::livewire('/pin', ChangePin::class)->name('pin');
     Route::livewire('/printer', PrinterSetup::class)->name('printer');
+    Route::livewire('/sales', SalesToday::class)->name('sales');
 });

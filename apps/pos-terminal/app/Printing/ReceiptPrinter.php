@@ -11,6 +11,7 @@ use App\Models\OrderLine;
 use App\Models\OrderTender;
 use App\Models\StaffMember;
 use App\Models\Ticket;
+use App\Sales\VoidedSale;
 use App\Till\Till;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -156,6 +157,65 @@ class ReceiptPrinter
             $printer->text(str_repeat('-', $columns)."\n");
             $printer->setJustification(Printer::JUSTIFY_CENTER);
             $printer->text(self::ascii(__('terminal.bill.footer'))."\n");
+        });
+    }
+
+    /**
+     * Proof of a void for the drawer and the owner: the sale it cancels, what
+     * to give back, why, and whose PIN approved it. Opens the drawer when
+     * cash goes back.
+     *
+     * @throws PrintFailed
+     */
+    public function voidSlip(VoidedSale $sale, bool $openDrawer = false): void
+    {
+        $this->print(function (Printer $printer, int $columns) use ($sale, $openDrawer) {
+            $this->header($printer);
+
+            $printer->selectPrintMode(Printer::MODE_DOUBLE_WIDTH | Printer::MODE_EMPHASIZED);
+            $printer->text(self::ascii(__('terminal.void_slip.title'))."\n");
+            $printer->selectPrintMode();
+
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printer->text(self::row(
+                __('terminal.receipt.number', ['number' => $sale->receiptNumber ?? '-']),
+                $sale->placedAt->setTimezone(StatusBar::TIMEZONE)->format('d/m/Y H:i'),
+                $columns,
+            ));
+            $printer->text(self::row(__('terminal.void_slip.voided'), $sale->voidedAt->setTimezone(StatusBar::TIMEZONE)->format('d/m/Y H:i'), $columns));
+            $printer->text(str_repeat('-', $columns)."\n");
+
+            foreach ($sale->lines as $line) {
+                $printer->text(self::row("{$line['quantity']} x {$line['name']}", self::money($line['line_total_cents']), $columns));
+            }
+
+            $printer->text(str_repeat('-', $columns)."\n");
+            $printer->setEmphasis(true);
+            $printer->text(self::row(__('terminal.void_slip.total'), 'KES '.self::money($sale->totalCents), $columns));
+
+            if ($sale->cashCents > 0) {
+                $printer->text(self::row(__('terminal.void_slip.cash_back'), 'KES '.self::money($sale->cashCents), $columns));
+            }
+
+            $printer->setEmphasis(false);
+
+            if ($sale->mpesaCents > 0) {
+                $printer->text(self::ascii(__('terminal.void_slip.mpesa_back', ['amount' => 'KES '.self::money($sale->mpesaCents)]))."\n");
+            }
+
+            $printer->text(str_repeat('-', $columns)."\n");
+            $printer->text(self::ascii(__('terminal.void_slip.reason', ['reason' => __("terminal.void_reasons.{$sale->reason}")]))."\n");
+
+            if ($sale->note !== null) {
+                $printer->text(self::ascii(__('terminal.void_slip.note', ['note' => $sale->note]))."\n");
+            }
+
+            $printer->text(self::ascii(__('terminal.void_slip.voided_by', ['name' => $sale->voidedBy]))."\n");
+            $printer->text(self::ascii(__('terminal.void_slip.approved_by', ['name' => $sale->approvedBy]))."\n");
+
+            if ($openDrawer) {
+                $printer->pulse();
+            }
         });
     }
 

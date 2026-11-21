@@ -31,6 +31,11 @@ use Illuminate\Support\Carbon;
  * @property string|null $receipt_number "T2-000123", fixed at the sale; null if the till had no code yet
  * @property string|null $table_name the table of the ticket it paid, as it was then
  * @property string|null $ticket_label the takeaway name of the ticket it paid
+ * @property Carbon|null $voided_at
+ * @property string|null $voided_by who voided it
+ * @property string|null $approved_by whose PIN approved the void
+ * @property string|null $void_reason VendaPOS\Core\Enums\VoidReason
+ * @property string|null $void_note
  */
 #[Table(name: 'orders', keyType: 'string', incrementing: false, timestamps: false)]
 #[Unguarded]
@@ -52,6 +57,7 @@ final class Order extends Model
             'total_cents' => 'integer',
             'sync_errors' => 'array',
             'synced_at' => 'datetime',
+            'voided_at' => 'datetime',
         ];
     }
 
@@ -114,6 +120,14 @@ final class Order extends Model
             'total_cents' => $this->total_cents,
             // Only when it paid a ticket; a quick sale sends none.
             ...($this->ticket_id !== null ? ['ticket_uuid' => $this->ticket_id] : []),
+            // Only once voided: who, who approved it and why (VendaPOS\Core\Data\VoidData).
+            ...($this->voided_at !== null ? ['void' => [
+                'voided_at' => $this->voided_at->toIso8601String(),
+                'voided_by' => $this->voided_by,
+                'approved_by' => $this->approved_by,
+                'reason' => $this->void_reason,
+                'note' => $this->void_note,
+            ]] : []),
         ];
     }
 }
