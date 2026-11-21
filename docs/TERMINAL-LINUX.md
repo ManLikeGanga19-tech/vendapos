@@ -96,6 +96,22 @@ because of what is around it:
 4. **A lost or stolen till is revoked** in the Owner panel → **Tills**: its token
    stops working everywhere at once. Staff still need their PINs to sell.
 
+### Quick setup with the script
+
+After 3.1 (firmware) and 3.2's install with **Use LVM and encryption**, copy the
+AppImage and `scripts/terminal/setup-ubuntu-kiosk.sh` to the PC and run, as
+the administrator:
+
+```bash
+sudo bash setup-ubuntu-kiosk.sh --appimage ./VendaPOS-0.1.0.AppImage --reboot-at 04:30
+```
+
+It checks the TPM, Secure Boot and disk encryption, then does 3.2's TPM step
+and 3.3 to 3.6 (packages, the `till` account and printer access, VendaPOS,
+the password-free keyring, the kiosk session with automatic login) and the
+nightly restart. It asks for the disk passphrase once. Then pair (3.7) and set
+up the printer (3.8). The sections below are what it does, step by step.
+
 ### 3.1 Firmware
 
 In the PC's firmware (UEFI) settings: set an administrator password, turn
