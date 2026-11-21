@@ -168,3 +168,34 @@ it('keeps each business’s receipts to itself', function () {
         ->assertDontSee('T1-000007')
         ->assertDontSee('TJL7QW2E9R');
 });
+
+it('shows who voided a sale, who approved it, why, and what to check', function () {
+    $this->enrolment = $this->nyaliTill;
+    // Approved by the Westlands manager's PIN at Nyali, the next business day.
+    $approver = $this->tenant->run(function () {
+        $staff = Staff::create(['name' => 'Manager Zawadi', 'username' => 'zawadi', 'password' => 'correct-horse-9']);
+        $staff->assignRole('manager');
+        $staff->branches()->attach($this->westlands->id);
+
+        return $staff->id;
+    });
+    sync([voidOf($this->cashSale, [
+        'approved_by' => $approver, 'reason' => 'other', 'note' => 'Customer walked out', 'voided_at' => '2026-10-22T08:05:00+03:00',
+    ])])->assertJsonPath('results.0.status', 'updated');
+    $cash = $this->tenant->run(fn () => receiptOf($this->cashSale['uuid']));
+    signInForReceipts($this->tenant, $this->owner);
+
+    Livewire::test(Receipts::class)
+        ->filterTable('status', 'voided')
+        ->assertCanSeeTableRecords([$cash])
+        ->assertSee(__('owner.void_reasons.other'))
+        ->mountAction(TestAction::make('view')->table($cash))
+        ->assertMountedActionModalSee([
+            __('owner.receipts.voided', ['time' => 'Thu 22 Oct 2026, 08:05', 'till' => 'T1 · Till 1']),
+            'Achieng Seller',
+            'Manager Zawadi',
+            'Customer walked out',
+            __('owner.receipts.approver_not_allowed'),
+            __('owner.receipts.voided_another_day'),
+        ]);
+});

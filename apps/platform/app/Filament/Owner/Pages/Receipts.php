@@ -88,7 +88,7 @@ class Receipts extends Page implements HasTable
         return $table
             ->query(fn () => Order::query()
                 ->whereIn('branch_id', $this->visibleBranchIds())
-                ->with('tenders')
+                ->with(['tenders', 'void'])
                 ->withCount('reprints'))
             ->filters([...$this->periodAndBranch(), ...$this->receiptFilters()], layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(['md' => 2, 'xl' => 4])
@@ -119,7 +119,8 @@ class Receipts extends Page implements HasTable
                     ->state(fn (Order $record): string => $this->paidBy($record))
                     ->placeholder('—'),
                 TextColumn::make('status')->label(__('owner.receipts.status'))
-                    ->formatStateUsing(fn (OrderStatus $state): string => __("owner.receipts.statuses.{$state->value}")),
+                    ->formatStateUsing(fn (OrderStatus $state): string => __("owner.receipts.statuses.{$state->value}"))
+                    ->description(fn (Order $record): ?string => $record->void === null ? null : (string) __("owner.void_reasons.{$record->void->reason->value}")),
                 TextColumn::make('reprints_count')->label(__('owner.receipts.reprints'))->alignEnd()
                     ->formatStateUsing(fn (int $state): string => $state === 0 ? '—' : (string) $state),
             ])
@@ -216,7 +217,7 @@ class Receipts extends Page implements HasTable
         // A record from the table query is already scoped; re-check, since the ID came from the browser.
         abort_unless(in_array($order->branch_id, $this->visibleBranchIds(), true), 403);
 
-        $order->loadMissing(['lines', 'tenders', 'reprints']);
+        $order->loadMissing(['lines', 'tenders', 'reprints', 'void']);
         $zone = (string) config('vendapos.business_timezone');
         $bands = VatBreakdown::fromLines($order->lines->map(fn (OrderLine $line) => $line->toOrderLineData())->all());
 
@@ -235,12 +236,42 @@ class Receipts extends Page implements HasTable
                 'vat' => $band->vat->format(),
             ], $bands),
             'paidBy' => $this->paidBy($order),
+            'void' => $this->voidDetails($order, $zone),
             'reprints' => $order->reprints->sortBy('reprinted_at')->map(fn (ReceiptReprint $reprint): string => __('owner.receipts.reprinted', [
                 'time' => $reprint->reprinted_at->setTimezone($zone)->format('D j M Y, H:i'),
                 'name' => $this->staffNames()[$reprint->staff_id] ?? '—',
                 'till' => $this->tillNames()[$reprint->device_id] ?? '—',
             ]))->values()->all(),
         ]);
+    }
+
+    /**
+     * Who voided it, who approved it, why, and anything the owner should check.
+     *
+     * @return array{when: string, by: string, approver: string, reason: string, note: ?string, warnings: list<string>}|null
+     */
+    private function voidDetails(Order $order, string $zone): ?array
+    {
+        $void = $order->void;
+
+        if ($void === null) {
+            return null;
+        }
+
+        return [
+            'when' => (string) __('owner.receipts.voided', [
+                'time' => $void->voided_at->setTimezone($zone)->format('D j M Y, H:i'),
+                'till' => $this->tillNames()[$void->device_id] ?? '—',
+            ]),
+            'by' => $this->staffNames()[$void->voided_by] ?? '—',
+            'approver' => $this->staffNames()[$void->approved_by] ?? '—',
+            'reason' => (string) __("owner.void_reasons.{$void->reason->value}"),
+            'note' => $void->note,
+            'warnings' => array_values(array_filter([
+                $void->approver_allowed ? null : (string) __('owner.receipts.approver_not_allowed'),
+                $void->same_business_day ? null : (string) __('owner.receipts.voided_another_day'),
+            ])),
+        ];
     }
 
     /** "Table 4", "Takeaway: Otieno", or null for a quick sale. */

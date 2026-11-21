@@ -34,6 +34,23 @@
     <div style="{{ $row }};font-weight:700"><span>{{ __('owner.receipts.total') }}</span><span>{{ Money::fromCents($order->total_cents)->format() }}</span></div>
     <div style="{{ $row }}"><span>{{ __('owner.receipts.paid_by') }}</span><span>{{ $paidBy !== '' ? $paidBy : '—' }}</span></div>
 
+    @if ($void !== null)
+        <div style="{{ $rule }}"></div>
+        <div style="font-family:system-ui,sans-serif">
+            <strong>{{ __('owner.receipts.void') }}</strong>
+            <div>{{ $void['when'] }}</div>
+            <div style="{{ $row }}"><span>{{ __('owner.receipts.voided_by') }}</span><span>{{ $void['by'] }}</span></div>
+            <div style="{{ $row }}"><span>{{ __('owner.receipts.approved_by') }}</span><span>{{ $void['approver'] }}</span></div>
+            <div style="{{ $row }}"><span>{{ __('owner.receipts.void_reason') }}</span><span>{{ $void['reason'] }}</span></div>
+            @if ($void['note'] !== null)
+                <div style="{{ $row }}"><span>{{ __('owner.receipts.void_note') }}</span><span>{{ $void['note'] }}</span></div>
+            @endif
+            @foreach ($void['warnings'] as $warning)
+                <div style="font-weight:600">{{ $warning }}</div>
+            @endforeach
+        </div>
+    @endif
+
     <div style="{{ $rule }}"></div>
     <div style="font-family:system-ui,sans-serif">
         <strong>{{ __('owner.receipts.reprints') }}</strong>
