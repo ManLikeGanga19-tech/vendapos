@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use App\Jobs\PrintTicketVoidSlipJob;
 use App\Livewire\Concerns\FollowsTillLanguage;
 use App\Livewire\Concerns\NeedsSignedInStaff;
 use App\Models\StaffMember;
@@ -167,7 +166,7 @@ final class TakeLineOff extends Component
             return;
         }
 
-        PrintTicketVoidSlipJob::dispatch($voided);
+        // No slip until kitchen printing exists: the till only prints at the counter (Daniel, T6).
         session()->flash('notice', __('terminal.tickets.void.taken_off', ['quantity' => $voided->quantity, 'item' => $voided->name, 'ticket' => $voided->ticketTitle]));
         $this->backToTicket();
     }

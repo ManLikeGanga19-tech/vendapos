@@ -182,7 +182,7 @@ return [
             'who_approves' => 'Meneja au mmiliki anaidhinisha kwa PIN yake.',
             'no_approvers' => 'Bado hakuna meneja au mmiliki anayeweza kuingia kwenye till hii.',
             'approve_pin' => ':name, weka PIN yako ili kuondoa :quantity × :item.',
-            'taken_off' => ':quantity × :item imeondolewa kwenye :ticket. Karatasi ya IMEFUTWA inachapishwa. Chapisha bili mpya.',
+            'taken_off' => ':quantity × :item imeondolewa kwenye :ticket. Waambie jikoni au baa, kisha chapisha bili mpya.',
             'voided_count' => ':count zimeondolewa',
             'not_taken_off' => 'Haijaondolewa: :quantity × :item. Tiketi ililipwa, au inalipwa, kwenye till nyingine. Mwambie meneja.',
         ],

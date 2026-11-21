@@ -94,7 +94,7 @@ function takeOff(TicketLine $line, int $quantity = 1, string $reason = 'changed_
     return $screen;
 }
 
-it('lets a waiter take one Tusker off with the manager’s PIN, offline first, and prints a VOID slip', function () {
+it('lets a waiter take one Tusker off with the manager’s PIN, offline first, printing nothing until kitchen printing', function () {
     $this->ticket->update(['status' => Ticket::BILL_REQUESTED, 'sync_status' => Ticket::SYNCED]);
 
     takeOff($this->tuskers)->assertRedirect(route('home', ['ticket' => $this->ticket->id]));
@@ -109,7 +109,7 @@ it('lets a waiter take one Tusker off with the manager’s PIN, offline first, a
         ->and($this->ticket->toSyncPayload()['voids'])->toBe([$void->toSyncPayload()]);
 
     Queue::assertPushed(PushTicketsJob::class);
-    Queue::assertPushed(PrintTicketVoidSlipJob::class, fn (PrintTicketVoidSlipJob $job) => $job->line->quantity === 1 && $job->line->left === 2 && $job->line->approvedBy === 'Baraka');
+    Queue::assertNotPushed(PrintTicketVoidSlipJob::class);
 });
 
 it('comes back to the same ticket, saying what came off', function () {

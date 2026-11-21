@@ -13,7 +13,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 
-/** Prints the VOID slip for the kitchen or bar after a sent line comes off a ticket. No drawer: no money moves. */
+/**
+ * Prints the VOID slip for the kitchen or bar after a sent line comes off a
+ * ticket. No drawer: no money moves. Not sent yet: it waits for kitchen
+ * printing, so orders and their voids print in the kitchen together (Daniel, T6).
+ */
 final class PrintTicketVoidSlipJob implements ShouldQueue
 {
     use Queueable;

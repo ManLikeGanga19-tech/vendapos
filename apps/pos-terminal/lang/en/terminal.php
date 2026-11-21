@@ -181,7 +181,7 @@ return [
             'who_approves' => 'A manager or owner approves this with their PIN.',
             'no_approvers' => 'No manager or owner can sign in on this till yet.',
             'approve_pin' => ':name, enter your PIN to take :quantity × :item off.',
-            'taken_off' => ':quantity × :item taken off :ticket. The VOID slip is printing. Print a fresh bill.',
+            'taken_off' => ':quantity × :item taken off :ticket. Tell the kitchen or bar, and print a fresh bill.',
             'voided_count' => ':count taken off',
             'not_taken_off' => 'Not taken off: :quantity × :item. The ticket was paid, or being paid, on another till. Tell a manager.',
         ],
