@@ -115,6 +115,7 @@ class TenantResource extends Resource
             'devices' => Pages\TenantDevices::route('/{record}/devices'),
             'etims' => Pages\TenantEtims::route('/{record}/etims'),
             'negative-stock' => Pages\TenantNegativeStock::route('/{record}/negative-stock'),
+            'void-rates' => Pages\TenantVoidRates::route('/{record}/void-rates'),
             'exports' => Pages\TenantExports::route('/{record}/exports'),
         ];
     }
@@ -134,6 +135,7 @@ class TenantResource extends Resource
             Pages\TenantDevices::class,
             Pages\TenantEtims::class,
             Pages\TenantNegativeStock::class,
+            Pages\TenantVoidRates::class,
             Pages\TenantExports::class,
         ]);
     }

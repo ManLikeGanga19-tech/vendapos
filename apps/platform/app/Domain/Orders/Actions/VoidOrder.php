@@ -36,6 +36,7 @@ final class VoidOrder
     public function __construct(
         private readonly FindUnknownStaff $findUnknownStaff,
         private readonly StaffMayAtBranch $staffMayAtBranch,
+        private readonly FlagVoid $flagVoid,
     ) {}
 
     /**
@@ -89,6 +90,8 @@ final class VoidOrder
         ]);
 
         $order->setRelation('void', $record);
+        // Recorded either way; the owner is asked to look at one the server would not have allowed.
+        $this->flagVoid->sale($order, $record);
 
         return $record;
     }

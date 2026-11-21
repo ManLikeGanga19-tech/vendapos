@@ -314,6 +314,35 @@ return [
         'settled_automatically' => 'Imejitatua yenyewe Safaricom ilipothibitisha',
     ],
 
+    'void_checks' => [
+        'title' => 'Ufutaji wa kukagua',
+        'description' => 'Ufutaji uliofanywa kwenye till unaohitaji kuangaliwa tena: umeidhinishwa na mtu asiye na ruhusa, umefanywa siku nyingine, au mtu mmoja amefuta mauzo mengi. Ufutaji umeshasimama; kagua kila mmoja, kisha uweke alama umekaguliwa.',
+        'none' => 'Hakuna cha kukagua',
+        'status' => 'Hali',
+        'open' => 'Ya kukagua',
+        'resolved' => 'Imekaguliwa',
+        'found' => 'Imeonekana',
+        'kind' => 'Nini',
+        'kinds' => [
+            'approver_not_allowed' => 'Aliyeidhinisha hana ruhusa',
+            'late_void' => 'Imefutwa siku nyingine',
+            'high_void_rate' => 'Ufutaji mwingi',
+        ],
+        'details' => [
+            'approver_not_allowed_sale' => 'Mauzo :receipt (:reason) yaliidhinishwa na :approver, ambaye hana ruhusa ya kuidhinisha ufutaji kwenye tawi hili.',
+            'approver_not_allowed_line' => ':quantity × :item iliondolewa kwenye tiketi (:reason), ikaidhinishwa na :approver, ambaye hana ruhusa ya kuidhinisha ufutaji kwenye tawi hili.',
+            'late_void' => 'Mauzo :receipt ya :sold_on yalifutwa :voided_on (:reason). Siku ikiisha, ufutaji unapaswa kuwa marejesho.',
+            'high_void_rate' => 'Mauzo :voided kati ya :sales (:percent%) yalifutwa.',
+        ],
+        'branch' => 'Tawi',
+        'day' => 'Siku',
+        'staff' => 'Mfanyakazi',
+        'note' => 'Maelezo',
+        'note_example' => 'mf. Nimeongea na keshia, mteja alirudisha bidhaa',
+        'resolve' => 'Weka alama imekaguliwa',
+        'resolved_notice' => 'Imewekwa alama imekaguliwa',
+    ],
+
     'tables' => [
         'title' => 'Meza',
         'description' => 'Sehemu na meza za kila tawi la mgahawa au baa. Mashine huzionyesha kama gridi ili wahudumu wachague.',

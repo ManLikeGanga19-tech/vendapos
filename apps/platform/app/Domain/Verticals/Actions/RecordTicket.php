@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Verticals\Actions;
 
 use App\Domain\Catalogue\Actions\FindUnknownItems;
+use App\Domain\Orders\Actions\FlagVoid;
 use App\Domain\Orders\Actions\VoidOrder;
 use App\Domain\Tenancy\Actions\FindUnknownStaff;
 use App\Domain\Tenancy\Actions\NotifyTills;
@@ -38,6 +39,7 @@ final class RecordTicket
         private readonly FindUnknownStaff $findUnknownStaff,
         private readonly NotifyTills $notifyTills,
         private readonly StaffMayAtBranch $staffMayAtBranch,
+        private readonly FlagVoid $flagVoid,
     ) {}
 
     public function handle(TicketData $data, DeviceContext $context): TicketSyncResult
@@ -188,7 +190,9 @@ final class RecordTicket
             return null;
         }
 
-        $lines = $ticket->lines()->get(['id', 'quantity'])->pluck('quantity', 'id')->all();
+        $sent = $ticket->lines()->get(['id', 'name', 'quantity']);
+        $lines = $sent->pluck('quantity', 'id')->all();
+        $lineNames = $sent->pluck('name', 'id')->all();
         $voided = TicketLineVoid::query()->where('ticket_id', $ticket->id)->toBase()
             ->selectRaw('ticket_line_id, sum(quantity) as voided')->groupBy('ticket_line_id')
             ->pluck('voided', 'ticket_line_id')->map(fn (mixed $sum): int => (int) $sum)->all();
@@ -213,6 +217,9 @@ final class RecordTicket
                 continue;
             }
 
+            // Checked, never enforced: the kitchen was told when the till accepted the PIN.
+            $approverAllowed = $this->staffMayAtBranch->handle($void->approved_by, VoidOrder::PERMISSION, $ticket->branch_id);
+
             TicketLineVoid::query()->create([
                 'id' => $void->uuid,
                 'ticket_id' => $ticket->id,
@@ -224,9 +231,12 @@ final class RecordTicket
                 'approved_by' => $void->approved_by,
                 'reason' => $void->reason,
                 'note' => $void->note !== null ? trim($void->note) : null,
-                // Checked, never enforced: the kitchen was told when the till accepted the PIN.
-                'approver_allowed' => $this->staffMayAtBranch->handle($void->approved_by, VoidOrder::PERMISSION, $ticket->branch_id),
+                'approver_allowed' => $approverAllowed,
             ]);
+
+            if (! $approverAllowed) {
+                $this->flagVoid->ticketLine($void->uuid, $ticket->id, $ticket->branch_id, $void->voided_by, $void->approved_by, $voidedAt, $lineNames[$void->line_uuid] ?? '', $void->quantity, $void->reason->value);
+            }
 
             $voided[$void->line_uuid] = ($voided[$void->line_uuid] ?? 0) + $void->quantity;
             $recorded++;

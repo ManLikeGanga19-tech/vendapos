@@ -291,6 +291,17 @@ return [
         'email' => env('VENDAPOS_SUPPORT_EMAIL'),
     ],
 
+    // Voids the owner should look at (T5a-2; architecture §10 anomaly rules).
+    'voids' => [
+        // A staff member whose voided sales are more than this share of their sales in a
+        // business day is flagged (Daniel: per person, per day)...
+        'rate_percent' => (int) env('VENDAPOS_VOID_RATE_PERCENT', 10),
+        // ...once they made at least this many, so one void in three sales does not.
+        'rate_min_sales' => (int) env('VENDAPOS_VOID_RATE_MIN_SALES', 20),
+        // orders:check-voids tells the owner in one digest at most this often.
+        'check_digest_minutes' => (int) env('VENDAPOS_VOID_CHECK_DIGEST_MINUTES', 30),
+    ],
+
     // Business days are counted here; storage stays UTC (CLAUDE.md §4).
     'business_timezone' => 'Africa/Nairobi',
 

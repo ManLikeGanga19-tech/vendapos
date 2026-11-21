@@ -62,4 +62,16 @@ return [
         ],
         'where' => 'Open "M-Pesa to check" in the owner panel to see each one and mark it checked.',
     ],
+
+    'void_checks' => [
+        'sms' => '{1} VendaPOS: 1 void at :business needs checking. Open "Voids to check" in the owner panel.|[2,*] VendaPOS: :count voids at :business need checking. Open "Voids to check" in the owner panel.',
+        'subject' => '{1} :business: 1 void to check|[2,*] :business: :count voids to check',
+        'intro' => 'Some voids at your tills need a second look:',
+        'kinds' => [
+            'approver_not_allowed' => '{1} 1 void approved by someone who may not approve voids|[2,*] :count voids approved by someone who may not approve voids',
+            'late_void' => '{1} 1 sale voided on a later day|[2,*] :count sales voided on a later day',
+            'high_void_rate' => '{1} 1 staff member voided many of their sales in a day|[2,*] :count staff members voided many of their sales in a day',
+        ],
+        'where' => 'Open "Voids to check" in the owner panel to see each one and mark it checked.',
+    ],
 ];

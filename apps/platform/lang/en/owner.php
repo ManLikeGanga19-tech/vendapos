@@ -314,6 +314,35 @@ return [
         'settled_automatically' => 'Settled by itself when Safaricom confirmed it',
     ],
 
+    'void_checks' => [
+        'title' => 'Voids to check',
+        'description' => 'Voids the tills made that need a second look: approved by someone who may not approve voids, made on a later day, or one person voiding too many sales. The voids already stand; look into each one, then mark it checked.',
+        'none' => 'Nothing to check',
+        'status' => 'Status',
+        'open' => 'To check',
+        'resolved' => 'Checked',
+        'found' => 'Found',
+        'kind' => 'What',
+        'kinds' => [
+            'approver_not_allowed' => 'Approver not allowed',
+            'late_void' => 'Voided on a later day',
+            'high_void_rate' => 'Many voids',
+        ],
+        'details' => [
+            'approver_not_allowed_sale' => 'Sale :receipt (:reason) was approved by :approver, who may not approve voids at this branch.',
+            'approver_not_allowed_line' => ':quantity × :item was taken off a ticket (:reason), approved by :approver, who may not approve voids at this branch.',
+            'late_void' => 'Sale :receipt from :sold_on was voided on :voided_on (:reason). After the day ends a void should be a refund.',
+            'high_void_rate' => ':voided of :sales sales (:percent%) were voided.',
+        ],
+        'branch' => 'Branch',
+        'day' => 'Day',
+        'staff' => 'Staff',
+        'note' => 'Note',
+        'note_example' => 'e.g. Spoke to the cashier, the customer returned the goods',
+        'resolve' => 'Mark checked',
+        'resolved_notice' => 'Marked checked',
+    ],
+
     'tables' => [
         'title' => 'Tables',
         'description' => 'The areas and tables of each restaurant or bar branch. Tills show them as a grid for waiters to pick from.',

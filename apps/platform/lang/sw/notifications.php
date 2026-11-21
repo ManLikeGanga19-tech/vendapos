@@ -62,4 +62,16 @@ return [
         ],
         'where' => 'Fungua "M-Pesa ya kukagua" kwenye paneli ya mmiliki kuona kila moja na kuliweka kama limekaguliwa.',
     ],
+
+    'void_checks' => [
+        'sms' => '{1} VendaPOS: ufutaji 1 wa :business unahitaji kukaguliwa. Fungua "Ufutaji wa kukagua" kwenye paneli ya mmiliki.|[2,*] VendaPOS: ufutaji :count wa :business unahitaji kukaguliwa. Fungua "Ufutaji wa kukagua" kwenye paneli ya mmiliki.',
+        'subject' => '{1} :business: ufutaji 1 wa kukagua|[2,*] :business: ufutaji :count wa kukagua',
+        'intro' => 'Baadhi ya ufutaji kwenye mashine zako unahitaji kuangaliwa tena:',
+        'kinds' => [
+            'approver_not_allowed' => '{1} ufutaji 1 ulioidhinishwa na mtu asiye na ruhusa|[2,*] ufutaji :count ulioidhinishwa na mtu asiye na ruhusa',
+            'late_void' => '{1} mauzo 1 yaliyofutwa siku nyingine|[2,*] mauzo :count yaliyofutwa siku nyingine',
+            'high_void_rate' => '{1} mfanyakazi 1 alifuta mauzo yake mengi kwa siku moja|[2,*] wafanyakazi :count walifuta mauzo yao mengi kwa siku moja',
+        ],
+        'where' => 'Fungua "Ufutaji wa kukagua" kwenye paneli ya mmiliki kuona kila mmoja na kuuweka kama umekaguliwa.',
+    ],
 ];

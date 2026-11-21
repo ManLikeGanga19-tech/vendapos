@@ -9,6 +9,7 @@ return [
         'devices' => 'Devices',
         'etims' => 'eTIMS',
         'negative_stock' => 'Negative stock',
+        'void_rates' => 'High void rates',
         'exports' => 'Data exports',
     ],
 
@@ -123,6 +124,17 @@ return [
         'retry_confirm' => 'Send this document to KRA again now. A failed document gets one more attempt.',
         'retry_queued' => 'Retry queued.',
         'empty' => 'Nothing waiting: every eTIMS document has been sent or is not required.',
+    ],
+
+    'void_rates' => [
+        'day' => 'Day',
+        'branch' => 'Branch',
+        'staff' => 'Staff',
+        'voided' => 'Voided / sales',
+        'status' => 'Owner',
+        'open' => 'Not checked yet',
+        'resolved' => 'Checked',
+        'empty' => 'No one has voided more than the limit share of their sales.',
     ],
 
     'negative_stock' => [

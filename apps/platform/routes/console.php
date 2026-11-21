@@ -14,6 +14,11 @@ Schedule::command('payments:reconcile')->everyMinute()->withoutOverlapping()->on
 // Flags typed M-Pesa codes never confirmed and paid pushes no sale claims; one owner digest per half hour.
 Schedule::command('payments:check-mpesa')->everyFiveMinutes()->withoutOverlapping()->onOneServer();
 
+// Voids to check (T5a-2): yesterday's void rate per staff member, hourly so tills that sync
+// late still count; then one owner digest per half hour.
+Schedule::command('orders:void-rates')->hourlyAt(10)->withoutOverlapping()->onOneServer();
+Schedule::command('orders:check-voids')->everyFiveMinutes()->withoutOverlapping()->onOneServer();
+
 // Resends eTIMS documents whose retry is due (30 s, 60 s, 120 s, then hourly).
 Schedule::command('etims:retry')->everyMinute()->withoutOverlapping()->onOneServer();
 
