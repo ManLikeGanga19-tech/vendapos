@@ -31,6 +31,10 @@ return [
     // new one is first used), so a lost reply cannot lock the till out.
     'device_token_overlap_minutes' => (int) env('VENDAPOS_DEVICE_TOKEN_OVERLAP_MINUTES', 10),
 
+    // Sign-in with an authenticator app on the Admin and Owner panels.
+    // Only local development may switch it off (App\Filament\TwoFactorRequirement).
+    'require_mfa' => (bool) env('VENDAPOS_REQUIRE_MFA', true),
+
     // How long a one-time till pairing code works after it is shown.
     'pairing_code_minutes' => 15,
 

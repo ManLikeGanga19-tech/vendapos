@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\TwoFactorRequirement;
 use App\Http\Controllers\Admin\DownloadTenantExport;
 use App\Http\Middleware\EnsureCentralDomain;
 use App\Http\Middleware\UseEnglish;
@@ -36,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->multiFactorAuthentication(
                 AppAuthentication::make()->brandName('VendaPOS Admin')->recoverable(),
-                isRequired: true,
+                isRequired: TwoFactorRequirement::applies(),
             )
             ->colors([
                 'primary' => Color::Amber,
@@ -72,7 +73,7 @@ class AdminPanelProvider extends PanelProvider
             // Behind the panel's sign-in and platform-admin check. Filament adds the
             // "authenticator required" check only to its own pages, so add it here.
             ->authenticatedRoutes(fn () => Route::get('tenant-exports/{export}/download', DownloadTenantExport::class)
-                ->middleware($panel->getMultiFactorAuthenticationRequiredMiddleware())
+                ->middleware(TwoFactorRequirement::middleware($panel->getMultiFactorAuthenticationRequiredMiddleware()))
                 ->name('tenant-exports.download'));
     }
 }
