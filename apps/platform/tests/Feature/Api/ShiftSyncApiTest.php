@@ -269,6 +269,16 @@ describe('cash checks', function () {
             ->assertJsonPath('cash_up.variance_allowed_cents', 50_000);
     });
 
+    it('tells a till the last shift number it synced, so a reinstall never reuses one', function () {
+        $device = fn () => deviceRequest('GET', '/api/v1/device', $this->enrolment->plainTextToken, $this->enrolment->device->id);
+
+        $device()->assertJsonPath('cash_up.last_shift_number', 0);
+
+        syncShifts([shiftOf(['number' => 41]), shiftOf(['number' => 42])])->assertOk();
+
+        $device()->assertJsonPath('cash_up.last_shift_number', 42);
+    });
+
     it('opens nothing for a drawer within the allowance', function () {
         syncShifts([closed(shiftOf(), ['1000' => 4, '500' => 1, '100' => 4], 500_000)])->assertOk(); // KES 100 short
 

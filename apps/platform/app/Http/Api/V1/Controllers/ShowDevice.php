@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Api\V1\Controllers;
 
 use App\Domain\CashUp\Actions\FlagShift;
+use App\Domain\CashUp\Actions\LastShiftNumber;
 use App\Domain\Tenancy\Models\Branch;
 use App\Domain\Tenancy\Models\Device;
 use Illuminate\Http\JsonResponse;
@@ -30,8 +31,12 @@ final class ShowDevice
             'token_expires_at' => $device->currentAccessToken()->expires_at?->toIso8601String(),
             // "suspended": keep selling and syncing, but new M-Pesa requests are refused, so offer cash.
             'account_status' => tenant('status'),
-            // Cash-up: how far a drawer count may be off before closing needs a manager's PIN.
-            'cash_up' => ['variance_allowed_cents' => FlagShift::allowedCents()],
+            // Cash-up: how far a drawer count may be off before closing needs a manager's PIN,
+            // and the last shift number synced, so a reinstalled till never reuses one.
+            'cash_up' => [
+                'variance_allowed_cents' => FlagShift::allowedCents(),
+                'last_shift_number' => app(LastShiftNumber::class)->handle($device->id),
+            ],
             'realtime' => $this->realtime($device),
         ]);
     }
