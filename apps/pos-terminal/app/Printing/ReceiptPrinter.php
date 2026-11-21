@@ -203,18 +203,18 @@ class ReceiptPrinter
             $printer->setEmphasis(false);
 
             if ($sale->mpesaCents > 0) {
-                $printer->text(self::ascii(__('terminal.void_slip.mpesa_back', ['amount' => 'KES '.self::money($sale->mpesaCents)]))."\n");
+                $printer->text(self::wrap(__('terminal.void_slip.mpesa_back', ['amount' => 'KES '.self::money($sale->mpesaCents)]), $columns));
             }
 
             $printer->text(str_repeat('-', $columns)."\n");
-            $printer->text(self::ascii(__('terminal.void_slip.reason', ['reason' => __("terminal.void_reasons.{$sale->reason}")]))."\n");
+            $printer->text(self::wrap(__('terminal.void_slip.reason', ['reason' => __("terminal.void_reasons.{$sale->reason}")]), $columns));
 
             if ($sale->note !== null) {
-                $printer->text(self::ascii(__('terminal.void_slip.note', ['note' => $sale->note]))."\n");
+                $printer->text(self::wrap(__('terminal.void_slip.note', ['note' => $sale->note]), $columns));
             }
 
-            $printer->text(self::ascii(__('terminal.void_slip.voided_by', ['name' => $sale->voidedBy]))."\n");
-            $printer->text(self::ascii(__('terminal.void_slip.approved_by', ['name' => $sale->approvedBy]))."\n");
+            $printer->text(self::wrap(__('terminal.void_slip.voided_by', ['name' => $sale->voidedBy]), $columns));
+            $printer->text(self::wrap(__('terminal.void_slip.approved_by', ['name' => $sale->approvedBy]), $columns));
 
             if ($openDrawer) {
                 $printer->pulse();
@@ -234,7 +234,8 @@ class ReceiptPrinter
             $printer->setJustification(Printer::JUSTIFY_CENTER);
             $printer->selectPrintMode(Printer::MODE_DOUBLE_WIDTH | Printer::MODE_EMPHASIZED);
             $printer->text(self::ascii(__('terminal.void_slip.title'))."\n");
-            $printer->text(self::ascii($line->ticketTitle)."\n");
+            // Double width: half as many letters fit on a line.
+            $printer->text(self::wrap($line->ticketTitle, intdiv($columns, 2)));
             $printer->selectPrintMode();
 
             $printer->setJustification(Printer::JUSTIFY_LEFT);
@@ -242,19 +243,19 @@ class ReceiptPrinter
             $printer->text(str_repeat('-', $columns)."\n");
 
             $printer->selectPrintMode(Printer::MODE_DOUBLE_HEIGHT | Printer::MODE_EMPHASIZED);
-            $printer->text(self::ascii(__('terminal.void_slip.line_off', ['quantity' => $line->quantity, 'name' => $line->name]))."\n");
+            $printer->text(self::wrap(__('terminal.void_slip.line_off', ['quantity' => $line->quantity, 'name' => $line->name]), $columns));
             $printer->selectPrintMode();
             $printer->text(self::ascii(__('terminal.void_slip.line_left', ['quantity' => $line->left]))."\n");
 
             $printer->text(str_repeat('-', $columns)."\n");
-            $printer->text(self::ascii(__('terminal.void_slip.reason', ['reason' => __("terminal.void_reasons.{$line->reason}")]))."\n");
+            $printer->text(self::wrap(__('terminal.void_slip.reason', ['reason' => __("terminal.void_reasons.{$line->reason}")]), $columns));
 
             if ($line->note !== null) {
-                $printer->text(self::ascii(__('terminal.void_slip.note', ['note' => $line->note]))."\n");
+                $printer->text(self::wrap(__('terminal.void_slip.note', ['note' => $line->note]), $columns));
             }
 
-            $printer->text(self::ascii(__('terminal.void_slip.voided_by', ['name' => $line->voidedBy]))."\n");
-            $printer->text(self::ascii(__('terminal.void_slip.approved_by', ['name' => $line->approvedBy]))."\n");
+            $printer->text(self::wrap(__('terminal.void_slip.voided_by', ['name' => $line->voidedBy]), $columns));
+            $printer->text(self::wrap(__('terminal.void_slip.approved_by', ['name' => $line->approvedBy]), $columns));
         });
     }
 
@@ -385,12 +386,22 @@ class ReceiptPrinter
     public static function row(string $left, string $right, int $columns): string
     {
         $left = self::ascii($left);
-        $room = $columns - strlen($right) - 1;
-        $lines = str_split($left, max(1, $room));
+        $room = max(1, $columns - strlen($right) - 1);
+        // Long names wrap between words; the amount sits on the last line.
+        $lines = explode("\n", wordwrap($left, $room, "\n", true));
         $last = (string) array_pop($lines);
 
         return implode('', array_map(fn (string $part) => $part."\n", $lines))
             .str_pad($last, $room).' '.$right."\n";
+    }
+
+    /**
+     * Free text in lines of at most $columns, broken between words (a word
+     * longer than a line is split). Halve $columns for double-width text.
+     */
+    public static function wrap(string $text, int $columns): string
+    {
+        return wordwrap(self::ascii($text), max(1, $columns), "\n", true)."\n";
     }
 
     public static function money(int $cents): string

@@ -251,3 +251,10 @@ it('prints a VOID slip with what to give back, why and who approved it, and open
         ->not->toContain('CASH GIVEN BACK')
         ->not->toContain(DRAWER_PULSE);
 });
+
+it('wraps long names and notes between words, keeping the amount on the last line', function () {
+    expect(ReceiptPrinter::row('3 x Mandazi (plain, freshly made this morning)', '60.00', 48))
+        ->toBe("3 x Mandazi (plain, freshly made this\n".str_pad('morning)', 42).' 60.00'."\n")
+        ->and(ReceiptPrinter::wrap('Takeaway: Mama Achieng wa Kongowea', 24))->toBe("Takeaway: Mama Achieng\nwa Kongowea\n")
+        ->and(ReceiptPrinter::wrap(str_repeat('x', 30), 24))->toBe(str_repeat('x', 24)."\n".str_repeat('x', 6)."\n");
+});
