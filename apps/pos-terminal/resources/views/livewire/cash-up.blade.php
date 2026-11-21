@@ -49,11 +49,11 @@
                 <div class="grid grid-cols-2 gap-x-6 gap-y-2">
                     @foreach ($denominations as $denomination)
                         <label wire:key="count-{{ $denomination->value }}" class="flex items-center gap-3">
-                            <span class="w-28 font-mono">{{ $denomination->value()->format() }}</span>
+                            <span class="w-28 font-mono">KES {{ number_format($denomination->value) }}</span>
                             <span class="w-14 text-sm text-muted">{{ $denomination->isNote() ? __('terminal.cash_up.notes') : __('terminal.cash_up.coins') }}</span>
                             <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="5" autocomplete="off"
                                 wire:model.live.debounce.300ms="counts.{{ $denomination->value }}"
-                                aria-label="{{ __('terminal.cash_up.how_many', ['value' => $denomination->value()->format()]) }}"
+                                aria-label="{{ __('terminal.cash_up.how_many', ['value' => 'KES '.number_format($denomination->value)]) }}"
                                 class="h-12 w-24 border border-line bg-panel px-3 text-right font-mono text-white">
                         </label>
                     @endforeach
