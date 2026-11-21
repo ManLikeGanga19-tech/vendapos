@@ -254,7 +254,7 @@ it('records the shift a sale was made in, and still takes a sale with none', fun
 
 describe('cash checks', function () {
     /** @return array<string, string> open checks by kind => dedupe key */
-    function openChecks(): array
+    function openCashChecks(): array
     {
         return test()->tenant->run(fn () => CashCheck::query()->where('status', CashCheck::OPEN)->orderBy('id')->pluck('dedupe_key', 'kind')->all());
     }
@@ -282,7 +282,7 @@ describe('cash checks', function () {
     it('opens nothing for a drawer within the allowance', function () {
         syncShifts([closed(shiftOf(), ['1000' => 4, '500' => 1, '100' => 4], 500_000)])->assertOk(); // KES 100 short
 
-        expect(openChecks())->toBe([]);
+        expect(openCashChecks())->toBe([]);
     });
 
     it('flags a drawer off by more than allowed, approved or not, and an approver who may not close shifts', function () {
@@ -295,7 +295,7 @@ describe('cash checks', function () {
         $shift = shiftOf();
         syncShifts([closed($shift, ['1000' => 4], 500_000, ['approved_by' => $waiter, 'note' => 'Counted twice'])])->assertOk();
 
-        expect(openChecks())->toBe([
+        expect(openCashChecks())->toBe([
             CashCheck::VARIANCE_OVER_LIMIT => "variance_over_limit:shift:{$shift['uuid']}",
             CashCheck::APPROVER_NOT_ALLOWED => "approver_not_allowed:shift:{$shift['uuid']}",
         ])
@@ -307,19 +307,19 @@ describe('cash checks', function () {
         $payOut = movement(CashMovementKind::PayOut, 5_000, ['approved_by' => $this->cashier]);
         syncShifts([closed([...shiftOf(), 'movements' => [$payOut]], ['1000' => 4, '500' => 1, '100' => 4, '50' => 1], 495_000)])->assertOk();
 
-        expect(openChecks())->toBe([CashCheck::APPROVER_NOT_ALLOWED => "approver_not_allowed:movement:{$payOut['uuid']}"]);
+        expect(openCashChecks())->toBe([CashCheck::APPROVER_NOT_ALLOWED => "approver_not_allowed:movement:{$payOut['uuid']}"]);
     });
 
     it('flags figures that differ, and settles them, and the variance, once the late sale arrives', function () {
         $shift = shiftOf();
         // KES 2,000 over on the server's figures, because a KES 2,000 cash sale has not synced yet.
         syncShifts([closed($shift, ['1000' => 7], 700_000)])->assertOk();
-        expect(array_keys(openChecks()))->toBe([CashCheck::VARIANCE_OVER_LIMIT, CashCheck::FIGURES_DIFFER]);
+        expect(array_keys(openCashChecks()))->toBe([CashCheck::VARIANCE_OVER_LIMIT, CashCheck::FIGURES_DIFFER]);
 
         $bulk = $this->tenant->run(fn () => Item::create(['type' => ItemType::Product, 'name' => 'Crate', 'price_cents' => 200_000, 'vat_category' => VatCategory::Standard]));
         sync([saleOf([[$bulk, 1]], 1, ['shift_id' => $shift['uuid']])])->assertJsonPath('results.0.status', 'accepted');
 
-        expect(openChecks())->toBe([])
+        expect(openCashChecks())->toBe([])
             ->and($this->tenant->run(fn () => CashCheck::query()->where('status', CashCheck::RESOLVED)->whereNull('resolved_by')->count()))->toBe(2);
     });
 
@@ -331,6 +331,6 @@ describe('cash checks', function () {
         $outside = saleOf([[$this->soda, 1]], 2);
         sync([$outside])->assertOk();
 
-        expect(openChecks())->toBe([CashCheck::SALE_OUTSIDE_SHIFT => "sale_outside_shift:order:{$outside['uuid']}"]);
+        expect(openCashChecks())->toBe([CashCheck::SALE_OUTSIDE_SHIFT => "sale_outside_shift:order:{$outside['uuid']}"]);
     });
 });
