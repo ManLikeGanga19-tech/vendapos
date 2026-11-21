@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Domain\Analytics\Jobs\UpdateSalesSummaries;
+use App\Domain\CashUp\Events\ShiftClosed;
+use App\Domain\CashUp\Jobs\ReconcileClosedShift;
+use App\Domain\CashUp\Jobs\ReconcileShiftOfLateSale;
 use App\Domain\Catalogue\Models\Category;
 use App\Domain\Catalogue\Models\Item;
 use App\Domain\Catalogue\Observers\TellTillsMenuChanged;
@@ -101,7 +104,11 @@ class AppServiceProvider extends ServiceProvider
             RecordMpesaTenders::dispatch($event->tenantId, $event->eventId);
             FlagVoidedSalePaid::dispatch($event->tenantId, $event->eventId);
             CloseTicketOnSale::dispatch($event->tenantId, $event->eventId);
+            ReconcileShiftOfLateSale::dispatch($event->tenantId, $event->eventId);
         });
+
+        // Cash-up: a closed drawer shift is counted again by the server from the synced sales.
+        Event::listen(ShiftClosed::class, fn (ShiftClosed $event) => ReconcileClosedShift::dispatch($event->tenantId, $event->eventId));
 
         // A C2B confirmation stored: settle the typed codes waiting on it (T3d).
         Event::listen(MpesaConfirmed::class, fn (MpesaConfirmed $event) => MatchMpesaConfirmation::dispatch($event->tenantId, $event->confirmationId));

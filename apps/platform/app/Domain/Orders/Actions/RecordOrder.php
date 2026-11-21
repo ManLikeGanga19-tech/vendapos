@@ -110,6 +110,7 @@ final class RecordOrder
             'device_id' => $context->deviceId,
             'staff_id' => $data->staff_id,
             'ticket_id' => $data->ticket_uuid,
+            'shift_id' => $data->shift_id,
             'sequence_number' => $data->sequence_number,
             'receipt_number' => ReceiptNumber::format($context->tillNumber, $data->sequence_number),
             'status' => $data->status,

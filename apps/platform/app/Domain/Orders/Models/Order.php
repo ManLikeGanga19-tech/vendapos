@@ -21,6 +21,7 @@ use VendaPOS\Core\ValueObjects\Money;
  * @property string $device_id
  * @property string|null $staff_id who made the sale; null only for orders from before tills sent it
  * @property string|null $ticket_id the ticket this sale paid (table service)
+ * @property string|null $shift_id the till drawer's shift it was sold in; null from tills older than cash-up
  * @property int $sequence_number
  * @property string|null $receipt_number "T2-000123"; null only for sales from a till the server no longer knows
  * @property OrderStatus $status

@@ -24,6 +24,7 @@ final class OrderSnapshot
             'order_id' => $order->id,
             'staff_id' => $order->staff_id,
             'ticket_id' => $order->ticket_id,
+            'shift_id' => $order->shift_id,
             'sequence_number' => $order->sequence_number,
             'receipt_number' => $order->receipt_number,
             'status' => $order->status->value,

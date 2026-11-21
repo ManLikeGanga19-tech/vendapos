@@ -17,6 +17,7 @@ use App\Http\Api\V1\Controllers\ShowTickets;
 use App\Http\Api\V1\Controllers\ShowTillStaff;
 use App\Http\Api\V1\Controllers\SyncOrders;
 use App\Http\Api\V1\Controllers\SyncReprints;
+use App\Http\Api\V1\Controllers\SyncShifts;
 use App\Http\Api\V1\Controllers\SyncTickets;
 use App\Http\Api\V1\Controllers\VoidOrderFromTill;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,10 @@ Route::prefix('v1')
             ->middleware(['ability:staff:pin', 'body.limit'])
             ->whereUuid('staffId')
             ->name('api.v1.staff.pin');
+        // A till's drawer shifts and the cash that left them (cash-up); sent before its sales.
+        Route::post('shifts/sync', SyncShifts::class)
+            ->middleware(['ability:orders:sync', 'body.limit'])
+            ->name('api.v1.shifts.sync');
         Route::post('orders/sync', SyncOrders::class)
             ->middleware(['ability:orders:sync', 'body.limit'])
             ->name('api.v1.orders.sync');
