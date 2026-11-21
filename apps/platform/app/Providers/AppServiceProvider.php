@@ -17,6 +17,7 @@ use App\Domain\Payments\Events\MpesaConfirmed;
 use App\Domain\Payments\Events\PaymentAccountChanged;
 use App\Domain\Payments\Events\PaymentRequested;
 use App\Domain\Payments\Jobs\FlagPaymentsForCancelledOrder;
+use App\Domain\Payments\Jobs\FlagVoidedSalePaid;
 use App\Domain\Payments\Jobs\InitiatePayment;
 use App\Domain\Payments\Jobs\MatchMpesaConfirmation;
 use App\Domain\Payments\Jobs\RecordMpesaTenders;
@@ -98,6 +99,7 @@ class AppServiceProvider extends ServiceProvider
             SubmitSaleToEtims::dispatch($event->tenantId, $event->eventId);
             FlagPaymentsForCancelledOrder::dispatch($event->tenantId, $event->eventId);
             RecordMpesaTenders::dispatch($event->tenantId, $event->eventId);
+            FlagVoidedSalePaid::dispatch($event->tenantId, $event->eventId);
             CloseTicketOnSale::dispatch($event->tenantId, $event->eventId);
         });
 
@@ -108,6 +110,7 @@ class AppServiceProvider extends ServiceProvider
             RestoreStock::dispatch($event->tenantId, $event->eventId);
             UpdateSalesSummaries::dispatch($event->tenantId, $event->eventId);
             SubmitCreditNoteToEtims::dispatch($event->tenantId, $event->eventId);
+            FlagVoidedSalePaid::dispatch($event->tenantId, $event->eventId);
         });
 
         Event::listen(NotificationSent::class, RecordNotificationDelivery::class);

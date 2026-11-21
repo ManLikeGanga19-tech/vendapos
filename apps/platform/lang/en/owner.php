@@ -293,6 +293,7 @@ return [
             'unclaimed_push' => 'Paid, no sale',
             'qr_paid_twice' => 'Bill paid twice',
             'ticket_paid_twice' => 'Ticket paid twice',
+            'voided_sale_paid' => 'M-Pesa to refund',
         ],
         'details' => [
             'unconfirmed_code' => 'Safaricom has not confirmed this code for any of your accounts. The customer may have paid someone else.',
@@ -301,6 +302,7 @@ return [
             'unclaimed_push' => 'The customer paid, but no sale took this payment. The cashier may have stopped waiting.',
             'qr_paid_twice' => 'The QR on this bill was paid again after it was already paid. Refund the extra payment.',
             'ticket_paid_twice' => 'Two sales paid the same ticket. Refund one of them.',
+            'voided_sale_paid' => 'Sale :receipt was voided (:reason) after the customer paid by M-Pesa. Send the money back to the customer, then mark this checked.',
         ],
         'branch' => 'Branch',
         'code' => 'M-Pesa code',
@@ -344,6 +346,15 @@ return [
             'bad_names' => 'Use a range such as 1-12, or names separated by commas, each at most 20 characters.',
         ],
     ],
+    // Why a sale was voided (VoidReason), as the till offers them.
+    'void_reasons' => [
+        'wrong_item' => 'Wrong item',
+        'changed_mind' => 'Customer changed their mind',
+        'duplicate' => 'Rung up twice',
+        'payment_problem' => 'Payment problem',
+        'other' => 'Other',
+    ],
+
     'receipts' => [
         'title' => 'Receipts',
         'search' => 'Receipt number or M-Pesa code',

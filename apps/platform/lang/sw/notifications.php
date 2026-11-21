@@ -58,6 +58,7 @@ return [
             'unclaimed_push' => '{1} malipo 1 ya M-Pesa yaliyopokelewa bila mauzo|[2,*] malipo :count ya M-Pesa yaliyopokelewa bila mauzo',
             'qr_paid_twice' => '{1} bili 1 iliyolipwa tena kwa QR baada ya kulipwa tayari|[2,*] bili :count zilizolipwa tena kwa QR baada ya kulipwa tayari',
             'ticket_paid_twice' => '{1} tiketi 1 iliyolipwa na mauzo mawili|[2,*] tiketi :count zilizolipwa na mauzo mawili',
+            'voided_sale_paid' => '{1} mauzo 1 yaliyofutwa yaliyolipwa kwa M-Pesa ya kurudisha|[2,*] mauzo :count yaliyofutwa yaliyolipwa kwa M-Pesa ya kurudisha',
         ],
         'where' => 'Fungua "M-Pesa ya kukagua" kwenye paneli ya mmiliki kuona kila moja na kuliweka kama limekaguliwa.',
     ],

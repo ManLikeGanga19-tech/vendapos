@@ -245,3 +245,72 @@ it('claims the M-Pesa of a sale rung up and voided before it synced: the money w
     $this->artisan('payments:check-mpesa');
     expect(openChecks())->not->toContain(MpesaCheck::UNCLAIMED_PUSH);
 });
+
+/** A synced sale paid by one M-Pesa push the customer completed. */
+function pushSale(int $sequence = 1): array
+{
+    $payment = paymentOf(['amount_cents' => 45_000]);
+    requestPayment($payment)->assertAccepted();
+    test()->tenant->run(fn () => Payment::query()->whereKey($payment['uuid'])->update(['status' => PaymentStatus::Succeeded, 'completed_at' => now()]));
+
+    $sale = saleOf([[test()->ugali, 1]], $sequence, ['uuid' => $payment['order_uuid']]);
+    $sale['tenders'] = [['method' => 'mpesa_push', 'amount_cents' => 45_000, 'payment_uuid' => $payment['uuid']]];
+    sync([$sale])->assertJsonPath('results.0.status', 'accepted');
+
+    return $sale;
+}
+
+it('asks the owner to send the money back when a sale paid by M-Pesa is voided, once', function () {
+    $sale = pushSale();
+
+    sync([voidOf($sale, ['reason' => 'duplicate'])])->assertJsonPath('results.0.status', 'updated');
+    sync([voidOf($sale, ['reason' => 'duplicate'])])->assertJsonPath('results.0.status', 'duplicate');
+
+    $check = $this->tenant->run(fn () => MpesaCheck::query()->where('kind', MpesaCheck::VOIDED_SALE_PAID)->sole());
+    expect(openChecks())->toBe([MpesaCheck::VOIDED_SALE_PAID])
+        ->and($check->order_id)->toBe($sale['uuid'])
+        ->and($check->branch_id)->toBe($this->branch->id)
+        ->and($check->payment_id)->toBe($sale['tenders'][0]['payment_uuid'])
+        ->and($check->amount_cents)->toBe(45_000)
+        ->and($check->details)->toMatchArray(['receipt_number' => 'T1-000001', 'reason' => 'duplicate']);
+
+    $this->artisan('payments:check-mpesa');
+    Notification::assertSentTo($this->tenant, MpesaChecksNotice::class);
+});
+
+it('asks for a refund of a typed-code sale voided before it synced', function () {
+    $sale = saleOf([[$this->ugali, 1]], 1, ['status' => 'voided']);
+    $sale['tenders'] = [['method' => 'mpesa_code', 'amount_cents' => 45_000, 'mpesa_reference' => 'TJL7QW2E9V']];
+    sync([$sale])->assertJsonPath('results.0.status', 'accepted');
+
+    $check = $this->tenant->run(fn () => MpesaCheck::query()->where('kind', MpesaCheck::VOIDED_SALE_PAID)->sole());
+    expect($check->mpesa_code)->toBe('TJL7QW2E9V')
+        ->and($check->amount_cents)->toBe(45_000);
+});
+
+it('asks for no M-Pesa refund when a cash sale is voided', function () {
+    $sale = saleOf([[$this->ugali, 1]]);
+    sync([$sale]);
+    sync([voidOf($sale)])->assertJsonPath('results.0.status', 'updated');
+
+    expect(openChecks())->toBe([]);
+});
+
+it('shows the owner which sale to refund and why it was voided', function () {
+    $sale = pushSale();
+    sync([voidOf($sale, ['reason' => 'changed_mind'])]);
+    $owner = $this->tenant->run(function () {
+        $staff = Staff::create(['name' => 'Owner', 'username' => 'owner', 'password' => 'correct-horse-9']);
+        $staff->assignRole('owner');
+
+        return $staff;
+    });
+
+    tenancy()->initialize($this->tenant);
+    Filament::setCurrentPanel(Filament::getPanel('owner'));
+    $this->actingAs($owner, 'tenant');
+
+    Livewire::test(MpesaChecks::class)
+        ->assertSee(__('owner.mpesa_checks.kinds.voided_sale_paid'))
+        ->assertSee(__('owner.mpesa_checks.details.voided_sale_paid', ['receipt' => 'T1-000001', 'reason' => __('owner.void_reasons.changed_mind')]));
+});

@@ -149,6 +149,10 @@ class MpesaChecks extends Page implements HasTable
                 'confirmed' => Money::fromCents((int) ($check->details['confirmed_cents'] ?? 0))->format(),
             ]),
             MpesaCheck::CODE_REUSED => __('owner.mpesa_checks.details.code_reused', ['count' => count((array) ($check->details['order_ids'] ?? []))]),
+            MpesaCheck::VOIDED_SALE_PAID => __('owner.mpesa_checks.details.voided_sale_paid', [
+                'receipt' => (string) ($check->details['receipt_number'] ?? '—'),
+                'reason' => is_string($reason = $check->details['reason'] ?? null) ? __("owner.void_reasons.{$reason}") : '—',
+            ]),
             default => __("owner.mpesa_checks.details.{$check->kind}"),
         };
     }

@@ -293,6 +293,7 @@ return [
             'unclaimed_push' => 'Imelipwa, hakuna mauzo',
             'qr_paid_twice' => 'Bili imelipwa mara mbili',
             'ticket_paid_twice' => 'Tiketi imelipwa mara mbili',
+            'voided_sale_paid' => 'M-Pesa ya kurudisha',
         ],
         'details' => [
             'unconfirmed_code' => 'Safaricom haijathibitisha msimbo huu kwa akaunti yako yoyote. Huenda mteja alimlipa mtu mwingine.',
@@ -301,6 +302,7 @@ return [
             'unclaimed_push' => 'Mteja alilipa, lakini hakuna mauzo yaliyochukua malipo haya. Huenda keshia aliacha kusubiri.',
             'qr_paid_twice' => 'QR ya bili hii ililipwa tena baada ya kulipwa tayari. Rudisha malipo ya ziada.',
             'ticket_paid_twice' => 'Mauzo mawili yalilipa tiketi moja. Rudisha moja yao.',
+            'voided_sale_paid' => 'Mauzo :receipt yalifutwa (:reason) baada ya mteja kulipa kwa M-Pesa. Mrudishie mteja pesa zake, kisha weka kama imekaguliwa.',
         ],
         'branch' => 'Tawi',
         'code' => 'Msimbo wa M-Pesa',
@@ -344,6 +346,15 @@ return [
             'bad_names' => 'Tumia mfululizo kama 1-12, au majina yaliyotenganishwa kwa koma, kila moja herufi 20 au chini.',
         ],
     ],
+    // Sababu za kufuta mauzo (VoidReason), kama till inavyozitoa.
+    'void_reasons' => [
+        'wrong_item' => 'Bidhaa isiyo sahihi',
+        'changed_mind' => 'Mteja amebadili nia',
+        'duplicate' => 'Imeandikwa mara mbili',
+        'payment_problem' => 'Tatizo la malipo',
+        'other' => 'Nyingine',
+    ],
+
     'receipts' => [
         'title' => 'Risiti',
         'search' => 'Namba ya risiti au msimbo wa M-Pesa',

@@ -58,6 +58,7 @@ return [
             'unclaimed_push' => '{1} 1 M-Pesa payment received with no sale|[2,*] :count M-Pesa payments received with no sale',
             'qr_paid_twice' => '{1} 1 bill paid again by QR after it was already paid|[2,*] :count bills paid again by QR after they were already paid',
             'ticket_paid_twice' => '{1} 1 ticket paid by two sales|[2,*] :count tickets paid by two sales',
+            'voided_sale_paid' => '{1} 1 voided sale paid by M-Pesa to refund|[2,*] :count voided sales paid by M-Pesa to refund',
         ],
         'where' => 'Open "M-Pesa to check" in the owner panel to see each one and mark it checked.',
     ],

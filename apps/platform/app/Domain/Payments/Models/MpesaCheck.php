@@ -47,7 +47,10 @@ class MpesaCheck extends Model
     /** Two sales paid one ticket (table service); both stand, one should be refunded. */
     public const string TICKET_PAID_TWICE = 'ticket_paid_twice';
 
-    public const array KINDS = [self::UNCONFIRMED_CODE, self::AMOUNT_MISMATCH, self::CODE_REUSED, self::UNCLAIMED_PUSH, self::QR_PAID_TWICE, self::TICKET_PAID_TWICE];
+    /** A sale paid by M-Pesa was voided: the customer's money has to be sent back. */
+    public const string VOIDED_SALE_PAID = 'voided_sale_paid';
+
+    public const array KINDS = [self::UNCONFIRMED_CODE, self::AMOUNT_MISMATCH, self::CODE_REUSED, self::UNCLAIMED_PUSH, self::QR_PAID_TWICE, self::TICKET_PAID_TWICE, self::VOIDED_SALE_PAID];
 
     public const string OPEN = 'open';
 
