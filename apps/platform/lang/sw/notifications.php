@@ -56,6 +56,8 @@ return [
             'amount_mismatch' => '{1} msimbo 1 wa M-Pesa uliothibitishwa kwa kiasi tofauti na mauzo|[2,*] misimbo :count ya M-Pesa iliyothibitishwa kwa kiasi tofauti na mauzo',
             'code_reused' => '{1} msimbo 1 wa M-Pesa ulioandikwa kwa mauzo zaidi ya moja|[2,*] misimbo :count ya M-Pesa iliyoandikwa kwa mauzo zaidi ya moja',
             'unclaimed_push' => '{1} malipo 1 ya M-Pesa yaliyopokelewa bila mauzo|[2,*] malipo :count ya M-Pesa yaliyopokelewa bila mauzo',
+            'qr_paid_twice' => '{1} bili 1 iliyolipwa tena kwa QR baada ya kulipwa tayari|[2,*] bili :count zilizolipwa tena kwa QR baada ya kulipwa tayari',
+            'ticket_paid_twice' => '{1} tiketi 1 iliyolipwa na mauzo mawili|[2,*] tiketi :count zilizolipwa na mauzo mawili',
         ],
         'where' => 'Fungua "M-Pesa ya kukagua" kwenye paneli ya mmiliki kuona kila moja na kuliweka kama limekaguliwa.',
     ],
