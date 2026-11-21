@@ -12,6 +12,7 @@ use App\Http\Api\V1\Controllers\ShowCatalogue;
 use App\Http\Api\V1\Controllers\ShowDevice;
 use App\Http\Api\V1\Controllers\ShowFloor;
 use App\Http\Api\V1\Controllers\ShowPayment;
+use App\Http\Api\V1\Controllers\ShowSalesToday;
 use App\Http\Api\V1\Controllers\ShowTickets;
 use App\Http\Api\V1\Controllers\ShowTillStaff;
 use App\Http\Api\V1\Controllers\SyncOrders;
@@ -42,6 +43,10 @@ Route::prefix('v1')
         Route::post('orders/sync', SyncOrders::class)
             ->middleware(['ability:orders:sync', 'body.limit'])
             ->name('api.v1.orders.sync');
+        // The branch's sales today from every till, to find one to void (T5).
+        Route::get('orders/today', ShowSalesToday::class)
+            ->middleware('ability:orders:sync')
+            ->name('api.v1.orders.today');
         // Another till of the branch voids a sale it did not make (T5).
         Route::post('orders/{orderId}/void', VoidOrderFromTill::class)
             ->middleware(['ability:orders:sync', 'body.limit'])
