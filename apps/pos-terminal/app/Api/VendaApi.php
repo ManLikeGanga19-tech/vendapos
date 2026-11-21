@@ -427,6 +427,8 @@ final class VendaApi
         throw match (true) {
             // A suspended account refuses new M-Pesa requests; the till itself is still fine.
             $response->status() === 403 && $code === 'tenant_suspended' => new ApiRejected('This account is suspended.', 'tenant_suspended'),
+            // Tickets are for table service only; the till is fine, its branch just does not keep tickets (T7).
+            $response->status() === 403 && $code === 'not_table_service' => new ApiRejected('This branch does not run table service.', 'not_table_service'),
             default => match ($response->status()) {
                 401, 403 => new TillNotAuthorised('The server refused this till.'),
                 409 => new TokenStillValid('The token has not expired yet.'),

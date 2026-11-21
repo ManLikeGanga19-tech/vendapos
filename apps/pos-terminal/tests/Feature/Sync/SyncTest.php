@@ -212,6 +212,34 @@ describe('a sync round', function () {
             ->and(SyncState::read(SyncTill::ACCOUNT_STATUS))->toBe('suspended');
     });
 
+    it('leaves tickets alone in a branch without table service', function () {
+        pairTill();
+        $shop = deviceResponse();
+        $shop['branch'] = [...$shop['branch'], 'business_type' => 'shop', 'terminal_mode' => 'quick_sale'];
+        fakeServer([
+            'device' => Http::response($shop),
+            'tickets' => Http::response(['message' => 'This till’s branch does not run table service.', 'code' => 'not_table_service'], 403),
+        ]);
+
+        app(SyncTill::class)->handle();
+
+        expect(sentTo('tickets'))->toBe(0)
+            ->and(app(Till::class)->identity()?->terminal_mode)->toBe('quick_sale')
+            ->and(SyncState::read(SyncTill::LAST_SUCCESS))->not->toBeNull()
+            ->and(SyncState::read(SyncTill::LAST_ERROR))->toBeNull();
+    });
+
+    it('takes a refused ticket call as a refusal, not as a till the server removed', function () {
+        pairTill();
+        fakeServer(['tickets' => Http::response(['message' => 'This till’s branch does not run table service.', 'code' => 'not_table_service'], 403)]);
+
+        app(SyncTill::class)->handle();
+
+        expect(app(Till::class)->isPaired())->toBeTrue()
+            ->and(sentTo('device/token/renew'))->toBe(0)
+            ->and(SyncState::read(SyncTill::LAST_ERROR))->toContain('ApiRejected');
+    });
+
     it('treats being offline as normal and keeps everything', function () {
         pairTill();
         Item::query()->create(item('i1'));

@@ -25,6 +25,7 @@ use App\Tickets\SendOrder;
 use App\Tickets\TicketRefused;
 use App\Tickets\VoidedTicketLine;
 use App\Tickets\VoidTicketLine;
+use App\Till\Till;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -295,4 +296,11 @@ it('prints the bill for what is left', function () {
     expect(RecordingPrinterConnections::$jobs[0])
         ->toContain(ReceiptPrinter::row('2 x Tusker', '700.00', 48))
         ->toContain(ReceiptPrinter::row('TO PAY', 'KES 780.00', 48));
+});
+
+it('has no take-off screen in a branch without table service', function () {
+    app(TillSession::class)->signIn($this->manager);
+    app(Till::class)->identity()?->update(['terminal_mode' => 'quick_sale']);
+
+    Livewire::test(TakeLineOff::class, ['ticketId' => $this->ticket->id, 'lineId' => $this->soda->id])->assertNotFound();
 });

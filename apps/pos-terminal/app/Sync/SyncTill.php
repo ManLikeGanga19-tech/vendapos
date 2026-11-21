@@ -14,6 +14,7 @@ use App\Models\SyncState;
 use App\Security\KeyringUnavailable;
 use App\Till\Till;
 use Illuminate\Support\Facades\Log;
+use VendaPOS\Core\Enums\TerminalMode;
 
 /**
  * One background round: keep the token fresh, send unsynced sales and reprints, then
@@ -85,7 +86,10 @@ final class SyncTill
         $this->staff->handle();
         $this->catalogue->handle();
         $this->floor->handle();
-        $this->tickets->handle();
+        // Only a table-service branch keeps tickets; the server refuses the rest (T7).
+        if ($device->branch->terminalMode === TerminalMode::TableService->value) {
+            $this->tickets->handle();
+        }
 
         SyncState::write(self::LAST_SUCCESS, now()->toIso8601String());
         SyncState::write(self::LAST_ERROR, null);

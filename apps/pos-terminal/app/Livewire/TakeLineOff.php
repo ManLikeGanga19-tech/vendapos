@@ -14,9 +14,11 @@ use App\Staff\PinOutcome;
 use App\Staff\TillSession;
 use App\Tickets\TicketRefused;
 use App\Tickets\VoidTicketLine;
+use App\Till\Till;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use VendaPOS\Core\Data\VoidData;
+use VendaPOS\Core\Enums\TerminalMode;
 use VendaPOS\Core\Enums\VoidReason;
 
 /**
@@ -58,6 +60,8 @@ final class TakeLineOff extends Component
     public function mount(TillSession $session, string $ticketId, string $lineId): void
     {
         abort_unless($session->can(StaffMember::TAKE_ORDERS), 403);
+        // Tickets belong to table service only (T7).
+        abort_unless(app(Till::class)->identity()?->terminal_mode === TerminalMode::TableService->value, 404);
 
         $this->ticketId = $ticketId;
         $this->lineId = $lineId;
