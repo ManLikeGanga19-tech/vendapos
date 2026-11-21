@@ -5,7 +5,8 @@ declare(strict_types=1);
 use App\Providers\NativeAppServiceProvider;
 
 return [
-    'version' => env('NATIVEPHP_APP_VERSION', '1.0.0'),
+    // Set by the release build from the tag (terminal-v1.2.3 → 1.2.3); tills compare it to update.
+    'version' => env('NATIVEPHP_APP_VERSION', '0.0.0'),
     'app_id' => env('NATIVEPHP_APP_ID', 'com.vendapos.terminal'),
     'deeplink_scheme' => env('NATIVEPHP_DEEPLINK_SCHEME'),
     'author' => env('NATIVEPHP_APP_AUTHOR', 'VendaPOS'),
@@ -27,10 +28,29 @@ return [
         'node_modules',
         '*/tests',
     ],
+    /*
+     * Tills update themselves from our Cloudflare R2 bucket (Daniel, T6): CI uploads
+     * each build with an S3 key that exists only in CI (AWS_* is stripped from the
+     * app), and tills download from the bucket's public address. Off unless the
+     * build switches it on, so a developer's till never updates itself.
+     */
     'updater' => [
-        'enabled' => env('NATIVEPHP_UPDATER_ENABLED', true),
-        'default' => env('NATIVEPHP_UPDATER_PROVIDER', 'github'),
+        'enabled' => (bool) env('NATIVEPHP_UPDATER_ENABLED', false),
+        'default' => env('NATIVEPHP_UPDATER_PROVIDER', 's3'),
         'providers' => [
+            's3' => [
+                'driver' => 's3',
+                'key' => env('AWS_ACCESS_KEY_ID'),
+                'secret' => env('AWS_SECRET_ACCESS_KEY'),
+                'region' => env('AWS_DEFAULT_REGION', 'auto'),
+                'bucket' => env('AWS_BUCKET'),
+                // R2's S3 API address, for uploading in CI only.
+                'endpoint' => env('AWS_ENDPOINT'),
+                'path' => env('NATIVEPHP_UPDATER_PATH', 'terminal/linux'),
+                // Where tills download from: the bucket's public address plus the path above.
+                // Not an AWS_* name, so it survives the build's .env clean-up.
+                'public_url' => env('VENDAPOS_UPDATES_URL'),
+            ],
             'github' => [
                 'driver' => 'github',
                 'repo' => env('GITHUB_REPO'),

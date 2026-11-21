@@ -1,0 +1,135 @@
+name: Terminal release
+
+# Builds the Linux till (AppImage + .deb). A tag terminal-vX.Y.Z builds that
+# version and uploads it to the R2 bucket tills update from; a manual run
+# builds without publishing, to try a build on a test PC first.
+
+on:
+  push:
+    tags: ['terminal-v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terminal-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  linux:
+    name: Linux till
+    # The oldest supported runner: an AppImage runs on this glibc and newer (Ubuntu 24.04 pilot).
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+
+    env:
+      PUBLISH: ${{ startsWith(github.ref, 'refs/tags/terminal-v') }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version from the tag
+        id: version
+        run: |
+          if [ "$PUBLISH" = "true" ]; then
+            version="${GITHUB_REF_NAME#terminal-v}"
+          else
+            version="0.0.0-test.${GITHUB_RUN_NUMBER}"
+          fi
+          if ! echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'; then
+            echo "::error::Tag must look like terminal-v1.2.3"; exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Check the publishing settings
+        if: env.PUBLISH == 'true'
+        env:
+          HAS_KEY: ${{ secrets.R2_ACCESS_KEY_ID != '' && secrets.R2_SECRET_ACCESS_KEY != '' }}
+          ENDPOINT: ${{ vars.R2_ENDPOINT }}
+          BUCKET: ${{ vars.R2_BUCKET }}
+          UPDATES_URL: ${{ vars.VENDAPOS_UPDATES_URL }}
+          API_URL: ${{ vars.VENDAPOS_API_URL }}
+        run: |
+          missing=""
+          [ "$HAS_KEY" = "true" ] || missing="$missing R2_ACCESS_KEY_ID/R2_SECRET_ACCESS_KEY (secrets)"
+          for name in ENDPOINT BUCKET UPDATES_URL API_URL; do
+            [ -n "${!name}" ] || missing="$missing $name (variable)"
+          done
+          if [ -n "$missing" ]; then echo "::error::Missing:$missing"; exit 1; fi
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_sqlite, intl, gd, zip
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/pos-terminal/package-lock.json
+
+      - name: Install Composer dependencies
+        working-directory: apps/pos-terminal
+        run: composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
+
+      - name: Build front-end assets
+        working-directory: apps/pos-terminal
+        run: |
+          npm ci
+          npm run build
+
+      # The .env that ships inside the app. No secrets: the R2 key is passed to the
+      # build step only, and the build strips AWS_* from the bundle anyway.
+      - name: Write the till's .env
+        working-directory: apps/pos-terminal
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          API_URL: ${{ vars.VENDAPOS_API_URL }}
+          UPDATES_URL: ${{ vars.VENDAPOS_UPDATES_URL }}
+        run: |
+          cp .env.example .env
+          set_env() {
+            if grep -q "^$1=" .env; then sed -i "s|^$1=.*|$1=$2|" .env; else echo "$1=$2" >> .env; fi
+          }
+          set_env APP_NAME VendaPOS
+          set_env APP_ENV production
+          set_env APP_DEBUG false
+          set_env LOG_LEVEL warning
+          set_env NATIVEPHP_APP_VERSION "$VERSION"
+          set_env VENDAPOS_API_URL "$API_URL"
+          set_env VENDAPOS_UPDATES_URL "$UPDATES_URL"
+          set_env NATIVEPHP_UPDATER_ENABLED "$PUBLISH"
+          php artisan key:generate --force
+
+      - name: Build (and publish on a tag)
+        working-directory: apps/pos-terminal
+        env:
+          NATIVEPHP_APP_VERSION: ${{ steps.version.outputs.version }}
+          NATIVEPHP_UPDATER_ENABLED: ${{ env.PUBLISH }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          AWS_ENDPOINT: ${{ vars.R2_ENDPOINT }}
+          AWS_BUCKET: ${{ vars.R2_BUCKET }}
+          VENDAPOS_UPDATES_URL: ${{ vars.VENDAPOS_UPDATES_URL }}
+        run: |
+          if [ "$PUBLISH" = "true" ]; then
+            php artisan native:build linux x64 --publish --no-interaction
+          else
+            php artisan native:build linux x64 --no-interaction
+          fi
+
+      - name: Keep the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: vendapos-terminal-${{ steps.version.outputs.version }}-linux
+          path: |
+            apps/pos-terminal/vendor/nativephp/desktop/resources/electron/dist/*.AppImage
+            apps/pos-terminal/vendor/nativephp/desktop/resources/electron/dist/*.deb
+            apps/pos-terminal/vendor/nativephp/desktop/resources/electron/dist/latest-linux.yml
+          if-no-files-found: error
+          retention-days: 30
