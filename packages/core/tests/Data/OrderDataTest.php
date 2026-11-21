@@ -99,3 +99,12 @@ it('requires the tenders key, even when empty, and caps how many', function () {
         ->and(Validator::make(orderPayload(['status' => 'cancelled', 'tenders' => []]), OrderData::validationRules())->passes())->toBeTrue()
         ->and(Validator::make($tooMany, OrderData::validationRules())->errors()->keys())->toContain('tenders');
 });
+
+it('names the drawer shift it was sold in, and still reads a sale from a till older than cash-up', function () {
+    $shift = fake()->uuid();
+
+    expect(OrderData::from(orderPayload(['shift_id' => $shift]))->shift_id)->toBe($shift)
+        ->and(OrderData::from(orderPayload())->shift_id)->toBeNull()
+        ->and(Validator::make(orderPayload(), OrderData::validationRules())->passes())->toBeTrue()
+        ->and(Validator::make(orderPayload(['shift_id' => 'not-a-uuid']), OrderData::validationRules())->errors()->keys())->toContain('shift_id');
+});

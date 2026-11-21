@@ -46,6 +46,10 @@ final class OrderData extends Data
         public ?string $ticket_uuid = null,
         // Who voided it, who approved it and why: sent with a voided order, and only then.
         public ?VoidData $void = null,
+        // The till drawer's shift the sale was made in. Null only from tills older than
+        // cash-up: the server flags such a sale for the owner rather than refusing it,
+        // because by the time it syncs the money has already changed hands.
+        public ?string $shift_id = null,
     ) {}
 
     /** @return list<TenderData> */
@@ -90,6 +94,7 @@ final class OrderData extends Data
             'vat_cents' => ['required', 'integer', 'min:0'],
             'total_cents' => ['required', 'integer', 'min:0'],
             'ticket_uuid' => ['sometimes', 'nullable', 'string', 'uuid'],
+            'shift_id' => ['sometimes', 'nullable', 'string', 'uuid'],
             'void' => ['required_if:status,'.OrderStatus::Voided->value, 'prohibited_unless:status,'.OrderStatus::Voided->value, 'array'],
         ];
     }
