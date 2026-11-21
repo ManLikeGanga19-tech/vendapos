@@ -92,6 +92,13 @@ return [
 
     'menu' => [
         'group' => 'Menyu',
+        // Biashara isiyo na moduli ya mgahawa ina bidhaa, si menyu (T7).
+        'shop' => [
+            'group' => 'Bidhaa',
+            'items' => 'Bidhaa',
+            'read_only' => 'Mmiliki pekee ndiye anaweza kubadilisha bidhaa. Mabadiliko yanafika kwenye mashine za mauzo za kila tawi zinaposawazisha tena.',
+            'delete_category_confirm' => 'Kundi litaondolewa. Bidhaa zake zinaendelea kuuzwa bila kundi.',
+        ],
         'items' => 'Bidhaa',
         'categories' => 'Makundi',
         'read_only' => 'Mmiliki pekee ndiye anaweza kubadilisha menyu. Mabadiliko yanafika kwenye mashine za mauzo za kila tawi zinaposawazisha tena.',
@@ -274,6 +281,29 @@ return [
             'invalid_option' => 'Chagua paybill au till.',
             'keys_refused' => 'Safaricom imekataa funguo hizi. Zikague kisha ujaribu tena. Hakuna kilichohifadhiwa.',
             'unreachable' => 'Safaricom haikupatikana kukagua funguo hizi. Jaribu tena baada ya dakika chache. Hakuna kilichohifadhiwa.',
+        ],
+    ],
+
+    'branches' => [
+        'title' => 'Matawi',
+        'description' => 'Kila tawi linaendesha moja ya moduli za biashara yako, inayoamua kinachoonekana kwenye till zake. Kuongeza moduli, wasiliana na VendaPOS.',
+        'name' => 'Jina la tawi',
+        'type' => 'Aina ya biashara',
+        'type_help' => 'Moduli za biashara yako pekee ndizo zinazoonyeshwa.',
+        'type_not_allowed' => 'Biashara yako bado haina moduli hiyo.',
+        'name_taken' => 'Tayari una tawi lenye jina hilo.',
+        'add' => 'Ongeza tawi',
+        'added' => 'Tawi limeongezwa',
+        'types' => [
+            'restaurant' => 'Mgahawa, kahawa',
+            'bar' => 'Baa, klabu',
+            'salon' => 'Saluni, spa, kinyozi',
+            'shop' => 'Duka, kioski',
+            'supermarket' => 'Supamaketi',
+            'hardware' => 'Duka la vifaa',
+            'pharmacy' => 'Duka la dawa',
+            'liquor' => 'Duka la vileo',
+            'general' => 'Biashara nyingine',
         ],
     ],
 

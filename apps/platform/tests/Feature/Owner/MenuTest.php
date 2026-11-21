@@ -280,3 +280,18 @@ it('never shows or changes another tenant’s menu', function () {
     tenancy()->end();
     expect($other->run(fn () => $theirs->fresh()?->is_active))->toBeTrue();
 });
+
+it('says products, not menu, to a business without the restaurant module', function (array $modules, string $group, string $items, string $whatChanges) {
+    $this->tenant->update(['modules' => $modules]);
+    signInToMenu($this->tenant, $this->manager);
+
+    expect(MenuItems::getNavigationGroup())->toBe($group)
+        ->and(MenuCategories::getNavigationGroup())->toBe($group)
+        ->and(MenuItems::getNavigationLabel())->toBe($items);
+
+    Livewire::test(MenuItems::class)->assertSee("Only the owner can change {$whatChanges}.");
+})->with([
+    'restaurant' => [['restaurant'], 'Menu', 'Items', 'the menu'],
+    'restaurant and shop' => [['restaurant', 'shop'], 'Menu', 'Items', 'the menu'],
+    'shop only' => [['shop', 'general'], 'Products', 'Products', 'products'],
+]);

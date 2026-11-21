@@ -52,17 +52,17 @@ class MenuItems extends Page implements HasTable
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('owner.menu.group');
+        return self::menuWord('group');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('owner.menu.items');
+        return self::menuWord('items');
     }
 
     public function getTitle(): string|Htmlable
     {
-        return __('owner.menu.items');
+        return self::menuWord('items');
     }
 
     public function content(Schema $schema): Schema
@@ -78,7 +78,7 @@ class MenuItems extends Page implements HasTable
             ->defaultPaginationPageOption(25)
             ->searchable()
             ->searchPlaceholder(__('owner.menu.search'))
-            ->description(fn (): ?string => $this->canManageMenu() ? null : (string) __('owner.menu.read_only'))
+            ->description(fn (): ?string => $this->canManageMenu() ? null : self::menuWord('read_only'))
             ->emptyStateHeading(fn (): string => filled($this->getTableSearch())
                 ? __('owner.menu.no_match', ['search' => $this->getTableSearch()])
                 : __('owner.menu.no_items'))

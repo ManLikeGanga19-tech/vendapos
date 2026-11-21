@@ -35,7 +35,7 @@ class MenuCategories extends Page implements HasTable
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('owner.menu.group');
+        return self::menuWord('group');
     }
 
     public static function getNavigationLabel(): string
@@ -58,7 +58,7 @@ class MenuCategories extends Page implements HasTable
         return $table
             ->records(fn (): array => array_column(app(ListCategories::class)->handle(), null, 'id'))
             ->paginated(false)
-            ->description(fn (): ?string => $this->canManageMenu() ? null : (string) __('owner.menu.read_only'))
+            ->description(fn (): ?string => $this->canManageMenu() ? null : self::menuWord('read_only'))
             ->emptyStateHeading(__('owner.menu.no_categories'))
             ->columns([
                 TextColumn::make('name')->label(__('owner.menu.name')),
@@ -93,7 +93,7 @@ class MenuCategories extends Page implements HasTable
                     ->label(__('owner.menu.delete_category'))
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->modalDescription(__('owner.menu.delete_category_confirm'))
+                    ->modalDescription(self::menuWord('delete_category_confirm'))
                     ->visible(fn () => $this->canManageMenu())
                     ->authorize(fn () => $this->canManageMenu())
                     ->action(fn (Action $action, array $record) => $this->changeMenu(

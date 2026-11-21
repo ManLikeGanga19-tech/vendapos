@@ -56,7 +56,7 @@ function saleTenant(): Tenant
 /** @return array{0: Tenant, 1: Branch} */
 function tenantWithBranch(BusinessType $type = BusinessType::Restaurant): array
 {
-    $tenant = Tenant::create(['id' => 't'.Str::lower(Str::random(10))]);
+    $tenant = Tenant::create(['id' => 't'.Str::lower(Str::random(10)), 'modules' => [$type->value]]);
 
     $branch = $tenant->run(fn () => Branch::create(['name' => 'Nyali '.$tenant->id, 'business_type' => $type]));
     paymentAccountFor($tenant, ['name' => 'Default', 'is_default' => true]);

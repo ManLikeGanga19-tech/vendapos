@@ -92,6 +92,13 @@ return [
 
     'menu' => [
         'group' => 'Menu',
+        // A business without the restaurant module has products, not a menu (T7).
+        'shop' => [
+            'group' => 'Products',
+            'items' => 'Products',
+            'read_only' => 'Only the owner can change products. Changes reach every branch’s tills on their next sync.',
+            'delete_category_confirm' => 'The category is removed. Its products stay on sale without a category.',
+        ],
         'items' => 'Items',
         'categories' => 'Categories',
         'read_only' => 'Only the owner can change the menu. Changes reach every branch’s tills on their next sync.',
@@ -274,6 +281,29 @@ return [
             'invalid_option' => 'Choose paybill or till.',
             'keys_refused' => 'Safaricom refused these keys. Check them and try again. Nothing was saved.',
             'unreachable' => 'Safaricom could not be reached to check these keys. Try again in a few minutes. Nothing was saved.',
+        ],
+    ],
+
+    'branches' => [
+        'title' => 'Branches',
+        'description' => 'Each branch runs one of your business modules, which decides what its tills show. To add a module, contact VendaPOS.',
+        'name' => 'Branch name',
+        'type' => 'Business type',
+        'type_help' => 'Only your business modules are listed.',
+        'type_not_allowed' => 'Your business does not have that module yet.',
+        'name_taken' => 'You already have a branch with that name.',
+        'add' => 'Add branch',
+        'added' => 'Branch added',
+        'types' => [
+            'restaurant' => 'Restaurant, cafe',
+            'bar' => 'Bar, club, lounge',
+            'salon' => 'Salon, spa, kinyozi',
+            'shop' => 'Shop, duka, kiosk',
+            'supermarket' => 'Supermarket, minimart',
+            'hardware' => 'Hardware shop',
+            'pharmacy' => 'Chemist, pharmacy',
+            'liquor' => 'Liquor store',
+            'general' => 'Other business',
         ],
     ],
 
