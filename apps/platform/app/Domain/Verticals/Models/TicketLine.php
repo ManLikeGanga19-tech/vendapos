@@ -6,11 +6,12 @@ namespace App\Domain\Verticals\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use VendaPOS\Core\Data\OrderLineData;
 use VendaPOS\Core\Enums\VatCategory;
 
 /**
  * One sent line of a ticket, at the menu price when it was sent. Never
- * edited; taking one off is a manager void (T5).
+ * edited; taking some or all of it off is a manager void (TicketLineVoid).
  *
  * @property string $id
  * @property string $ticket_id
@@ -40,5 +41,20 @@ class TicketLine extends Model
             'vat_category' => VatCategory::class,
             'sent_at' => 'datetime',
         ];
+    }
+
+    /** As a sale line, for $quantity of it (all of it by default). */
+    public function toOrderLine(?int $quantity = null): OrderLineData
+    {
+        $quantity ??= $this->quantity;
+
+        return new OrderLineData(
+            item_id: $this->item_id,
+            name: $this->name,
+            quantity: $quantity,
+            unit_price_cents: $this->unit_price_cents,
+            vat_category: $this->vat_category,
+            line_total_cents: $this->unit_price_cents * $quantity,
+        );
     }
 }

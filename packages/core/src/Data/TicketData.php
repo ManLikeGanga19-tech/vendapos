@@ -19,7 +19,10 @@ final class TicketData extends Data
     /** Lines one ticket may hold, the same as one sale. */
     public const int MAX_LINES = 500;
 
-    /** @param  DataCollection<int, TicketLineData>  $lines */
+    /**
+     * @param  DataCollection<int, TicketLineData>  $lines
+     * @param  DataCollection<int, TicketLineVoidData>|null  $voids
+     */
     public function __construct(
         // Client-generated; the idempotency key.
         public string $uuid,
@@ -34,12 +37,21 @@ final class TicketData extends Data
         public DataCollection $lines,
         // When the bill was printed for the guest; null while still ordering.
         public ?string $bill_requested_at = null,
+        // Lines (or part of them) a manager took off; only ever added, like lines.
+        #[DataCollectionOf(TicketLineVoidData::class)]
+        public ?DataCollection $voids = null,
     ) {}
 
     /** @return list<TicketLineData> */
     public function lineList(): array
     {
         return array_values($this->lines->all());
+    }
+
+    /** @return list<TicketLineVoidData> */
+    public function voidList(): array
+    {
+        return $this->voids === null ? [] : array_values($this->voids->all());
     }
 
     /** @return array<string, mixed> */
@@ -53,6 +65,7 @@ final class TicketData extends Data
             'label' => ['present', 'nullable', 'string', 'max:40'],
             'lines' => ['present', 'array', 'max:'.self::MAX_LINES],
             'bill_requested_at' => ['sometimes', 'nullable', 'date'],
+            'voids' => ['sometimes', 'array', 'max:'.self::MAX_LINES],
         ];
     }
 
@@ -67,6 +80,14 @@ final class TicketData extends Data
 
         foreach (TicketLineData::rules() as $field => $lineRules) {
             $rules["lines.*.{$field}"] = $lineRules;
+        }
+
+        foreach (TicketLineVoidData::rules() as $field => $voidRules) {
+            // required_if names a sibling field: point it at the same void.
+            $rules["voids.*.{$field}"] = array_map(
+                fn (mixed $rule) => is_string($rule) && str_starts_with($rule, 'required_if:reason,') ? str_replace('required_if:reason,', 'required_if:voids.*.reason,', $rule) : $rule,
+                $voidRules,
+            );
         }
 
         return $rules;

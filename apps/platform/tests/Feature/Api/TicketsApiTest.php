@@ -12,6 +12,7 @@ use App\Domain\Verticals\Actions\ManageFloor;
 use App\Domain\Verticals\Models\DiningTable;
 use App\Domain\Verticals\Models\Ticket;
 use App\Domain\Verticals\Models\TicketLine;
+use App\Domain\Verticals\Models\TicketLineVoid;
 use App\Infrastructure\Realtime\TillsShouldSync;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\Event;
@@ -330,5 +331,135 @@ describe('paid once', function () {
 
     it('needs a sale UUID and nothing else', function () {
         holdTicket($this->ticket['uuid'], 'not-a-uuid')->assertUnprocessable()->assertJsonValidationErrors('sale_uuid');
+    });
+});
+
+describe('taking sent lines off', function () {
+    /** @return array<string, mixed> */
+    function lineVoid(array $line, int $quantity = 1, string $voidedAt = '2026-10-27T13:20:00+03:00', array $overrides = []): array
+    {
+        return array_merge([
+            'uuid' => (string) Str::uuid(),
+            'line_uuid' => $line['uuid'],
+            'quantity' => $quantity,
+            'voided_at' => $voidedAt,
+            'voided_by' => sellerFor(saleTenant()),
+            'approved_by' => approverFor(saleTenant()),
+            'reason' => 'changed_mind',
+            'note' => null,
+        ], $overrides);
+    }
+
+    beforeEach(function () {
+        $this->beers = ticketLine($this->tusker, 3);
+        $this->water1 = ticketLine($this->water, 1);
+        $this->ticket = ticketOf([$this->beers, $this->water1]);
+        syncTickets([$this->ticket])->assertOk();
+    });
+
+    it('takes some of a line off, once however often it is sent, and tells the branch’s tills', function () {
+        $oneLess = lineVoid($this->beers);
+        $withVoid = ticketOf([], ['uuid' => $this->ticket['uuid'], 'voids' => [$oneLess]]);
+        Event::fake([TillsShouldSync::class]);
+
+        syncTickets([$withVoid])->assertJsonPath('results.0.status', 'updated')->assertJsonMissingPath('results.0.refused_voids');
+        syncTickets([$withVoid])->assertJsonPath('results.0.status', 'duplicate');
+        expect(Event::dispatched(TillsShouldSync::class, fn (TillsShouldSync $e) => $e->what === TillsShouldSync::TICKETS))->toHaveCount(1);
+
+        // Two Tusker and the water are left to pay; the line itself still says three.
+        openTickets()
+            ->assertJsonPath('tickets.0.total_cents', 2 * 35_000 + 5_000)
+            ->assertJsonPath('tickets.0.lines.0.quantity', 3)
+            ->assertJsonPath('tickets.0.voids.0', [
+                'id' => $oneLess['uuid'], 'line_id' => $this->beers['uuid'], 'quantity' => 1, 'voided_at' => '2026-10-27T10:20:00+00:00',
+                'voided_by' => $oneLess['voided_by'], 'approved_by' => $oneLess['approved_by'], 'reason' => 'changed_mind', 'note' => null,
+            ]);
+
+        expect($this->tenant->run(fn () => TicketLineVoid::query()->sole()->approver_allowed))->toBeTrue();
+    });
+
+    it('takes a whole line off in steps, never more than was sent', function () {
+        $tooMany = lineVoid($this->beers, 2);
+
+        $result = syncTickets([ticketOf([], ['uuid' => $this->ticket['uuid'], 'voids' => [
+            lineVoid($this->beers, 2),
+            $tooMany,
+            lineVoid($this->beers, 1),
+            lineVoid($this->water1, 1, overrides: ['reason' => 'other', 'note' => 'Spilled']),
+        ]])])->assertOk()->json('results.0');
+
+        expect($result['refused_voids'])->toBe([$tooMany['uuid']]);
+        openTickets()->assertJsonPath('tickets.0.total_cents', 0)->assertJsonCount(3, 'tickets.0.voids');
+    });
+
+    it('reopens a billed ticket when a line comes off after the bill was printed', function () {
+        syncTickets([ticketOf([], ['uuid' => $this->ticket['uuid'], 'bill_requested_at' => '2026-10-27T13:15:00+03:00'])])
+            ->assertJsonPath('results.0.ticket_status', 'bill_requested');
+
+        syncTickets([ticketOf([], ['uuid' => $this->ticket['uuid'], 'voids' => [lineVoid($this->beers)]])])
+            ->assertJsonPath('results.0.ticket_status', 'open');
+
+        // A fresh bill after the void stands.
+        syncTickets([ticketOf([], ['uuid' => $this->ticket['uuid'], 'bill_requested_at' => '2026-10-27T13:25:00+03:00'])])
+            ->assertJsonPath('results.0.ticket_status', 'bill_requested');
+    });
+
+    it('refuses a void once the ticket is paid, or while another till takes its payment', function () {
+        $otherTill = enrolFor($this->tenant, $this->branch);
+        $sale = (string) Str::uuid();
+        app('auth')->forgetGuards();
+        $this->withHeaders(['Authorization' => 'Bearer '.$otherTill->plainTextToken, 'X-Device-ID' => $otherTill->device->id])
+            ->postJson("/api/v1/tickets/{$this->ticket['uuid']}/hold", ['sale_uuid' => $sale])->assertJsonPath('status', 'held');
+
+        $whileHeld = lineVoid($this->beers);
+        syncTickets([ticketOf([], ['uuid' => $this->ticket['uuid'], 'voids' => [$whileHeld]])])->assertJsonPath('results.0.refused_voids', [$whileHeld['uuid']]);
+
+        // The till holding it may still take a line off before it takes the money.
+        syncTickets([ticketOf([], ['uuid' => $this->ticket['uuid'], 'voids' => [lineVoid($this->water1)]])], $otherTill)->assertJsonMissingPath('results.0.refused_voids');
+
+        sync([saleOf([[$this->tusker, 3]], overrides: ['uuid' => $sale, 'ticket_uuid' => $this->ticket['uuid'], 'placed_at' => '2026-10-27T13:50:00+03:00'])])->assertOk();
+
+        $late = lineVoid($this->beers, voidedAt: '2026-10-27T13:55:00+03:00');
+        syncTickets([ticketOf([], ['uuid' => $this->ticket['uuid'], 'voids' => [$late]])])->assertJsonPath('results.0.refused_voids', [$late['uuid']]);
+
+        expect($this->tenant->run(fn () => TicketLineVoid::query()->count()))->toBe(1);
+    });
+
+    it('keeps a void made before an offline payment on the same till, when the ticket arrives after the sale', function () {
+        $line = ticketLine($this->tusker, 2);
+        $void = lineVoid($line, 1, '2026-10-27T13:20:00+03:00');
+        $ticket = ticketOf([$line], ['voids' => [$void]]);
+        sync([saleOf([[$this->tusker, 1]], overrides: ['ticket_uuid' => $ticket['uuid'], 'placed_at' => '2026-10-27T13:50:00+03:00'])])->assertOk();
+
+        syncTickets([$ticket])->assertJsonPath('results.0.ticket_status', 'closed')->assertJsonMissingPath('results.0.refused_voids');
+        expect($this->tenant->run(fn () => TicketLineVoid::query()->whereKey($void['uuid'])->exists()))->toBeTrue();
+    });
+
+    it('records, and flags, a void approved by someone who may not void', function () {
+        syncTickets([ticketOf([], ['uuid' => $this->ticket['uuid'], 'voids' => [lineVoid($this->beers, overrides: ['approved_by' => sellerFor(saleTenant())])]])])
+            ->assertJsonMissingPath('results.0.refused_voids');
+
+        expect($this->tenant->run(fn () => TicketLineVoid::query()->sole()->approver_allowed))->toBeFalse();
+    });
+
+    it('refuses a line of another ticket, a reused void UUID, unknown staff, unknown fields and the payment reason', function () {
+        $otherLine = ticketLine($this->water, 1);
+        $other = ticketOf([$otherLine], ['table_id' => null]);
+        syncTickets([$other])->assertOk();
+        $void = lineVoid($this->beers);
+        syncTickets([ticketOf([], ['uuid' => $this->ticket['uuid'], 'voids' => [$void]])])->assertOk();
+        $stray = lineVoid($otherLine);
+
+        $results = syncTickets([
+            ticketOf([], ['uuid' => $this->ticket['uuid'], 'voids' => [$stray]]),
+            ticketOf([], ['uuid' => $other['uuid'], 'table_id' => null, 'voids' => [lineVoid($otherLine, overrides: ['uuid' => $void['uuid']])]]),
+            ticketOf([], ['uuid' => $this->ticket['uuid'], 'voids' => [lineVoid($this->beers, overrides: ['approved_by' => (string) Str::uuid()])]]),
+            ticketOf([], ['uuid' => $this->ticket['uuid'], 'voids' => [lineVoid($this->beers, overrides: ['reason' => 'payment_problem', 'branch_id' => (string) Str::uuid()])]]),
+        ])->assertOk()->json('results');
+
+        expect($results[0]['refused_voids'])->toBe([$stray['uuid']])
+            ->and(array_column(array_slice($results, 1), 'reason'))->toBe(['void_conflict', 'unknown_staff', 'invalid'])
+            ->and(array_keys($results[3]['errors']))->toEqualCanonicalizing(['voids.0.reason', 'voids.0.branch_id'])
+            ->and($this->tenant->run(fn () => TicketLineVoid::query()->count()))->toBe(1);
     });
 });

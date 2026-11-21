@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace VendaPOS\Core\Enums;
 
-/** Why a completed sale was voided: a fixed list, so owners can compare tills and staff. */
+/**
+ * Why a completed sale, or a sent ticket line, was voided: a fixed list, so
+ * owners can compare tills and staff.
+ */
 enum VoidReason: string
 {
     case WrongItem = 'wrong_item';
@@ -17,5 +20,16 @@ enum VoidReason: string
     public function needsNote(): bool
     {
         return $this === self::Other;
+    }
+
+    /**
+     * Reasons for taking a sent line off a ticket: nothing is paid yet, so
+     * "payment problem" does not apply (Daniel, T5c).
+     *
+     * @return list<self>
+     */
+    public static function forTicketLines(): array
+    {
+        return array_values(array_filter(self::cases(), fn (self $reason) => $reason !== self::PaymentProblem));
     }
 }

@@ -8,10 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use VendaPOS\Core\Data\OrderLineData;
+use VendaPOS\Core\Tax\OrderTotals;
 
 /**
  * An open order at a table or the counter (table service), keyed by the
- * till's UUID. Lines are only ever added; paying it records an ordinary sale.
+ * till's UUID. Lines are only ever added, and taken off only by a manager's
+ * void (T5c); paying it records an ordinary sale.
  *
  * @property string $id
  * @property string $branch_id
@@ -56,6 +60,33 @@ class Ticket extends Model
     public function lines(): HasMany
     {
         return $this->hasMany(TicketLine::class)->orderBy('sent_at')->orderBy('created_at');
+    }
+
+    /** @return HasMany<TicketLineVoid, $this> */
+    public function voids(): HasMany
+    {
+        return $this->hasMany(TicketLineVoid::class)->orderBy('voided_at')->orderBy('created_at');
+    }
+
+    /**
+     * How much of each line has been voided, by line id (needs voids loaded).
+     *
+     * @return Collection<string, int>
+     */
+    public function voidedQuantities(): Collection
+    {
+        return $this->voids->groupBy('ticket_line_id')->map(fn (Collection $voids): int => (int) $voids->sum('quantity'));
+    }
+
+    /** What is left to pay: each line less what was voided (needs lines and voids loaded). */
+    public function totalCents(): int
+    {
+        $voided = $this->voidedQuantities();
+
+        return OrderTotals::fromLines($this->lines
+            ->map(fn (TicketLine $line) => $line->toOrderLine($line->quantity - $voided->get($line->id, 0)))
+            ->filter(fn (OrderLineData $line) => $line->quantity > 0)
+            ->values()->all())->total->cents;
     }
 
     /** @return BelongsTo<DiningTable, $this> */

@@ -5,25 +5,31 @@ declare(strict_types=1);
 namespace App\Domain\Verticals\Actions;
 
 use App\Domain\Catalogue\Actions\FindUnknownItems;
+use App\Domain\Orders\Actions\VoidOrder;
 use App\Domain\Tenancy\Actions\FindUnknownStaff;
 use App\Domain\Tenancy\Actions\NotifyTills;
+use App\Domain\Tenancy\Actions\StaffMayAtBranch;
 use App\Domain\Tenancy\Data\DeviceContext;
 use App\Domain\Verticals\Data\TicketSyncResult;
 use App\Domain\Verticals\Models\DiningTable;
 use App\Domain\Verticals\Models\Ticket;
 use App\Domain\Verticals\Models\TicketLine;
+use App\Domain\Verticals\Models\TicketLineVoid;
 use App\Infrastructure\Realtime\TillsShouldSync;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use VendaPOS\Core\Data\TicketData;
 use VendaPOS\Core\Data\TicketLineData;
+use VendaPOS\Core\Data\TicketLineVoidData;
 
 /**
  * Saves one ticket a till sent (table service, T4b). Lines are only ever
- * added and keep the price they were sent at; resending a ticket or a line is
- * a no-op. Any till of the branch may add to any of its tickets, so a waiter's
- * order and the cashier's queue are one list.
+ * added and keep the price they were sent at; resending a ticket, a line or a
+ * void is a no-op. Taking a sent line off is a void, approved on the till with
+ * a manager's PIN (T5c). Any till of the branch may add to any of its tickets,
+ * so a waiter's order and the cashier's queue are one list.
  */
 final class RecordTicket
 {
@@ -31,13 +37,20 @@ final class RecordTicket
         private readonly FindUnknownItems $findUnknownItems,
         private readonly FindUnknownStaff $findUnknownStaff,
         private readonly NotifyTills $notifyTills,
+        private readonly StaffMayAtBranch $staffMayAtBranch,
     ) {}
 
     public function handle(TicketData $data, DeviceContext $context): TicketSyncResult
     {
         $lines = $data->lineList();
 
-        $staffIds = array_values(array_unique([$data->staff_id, ...array_map(fn (TicketLineData $line) => $line->staff_id, $lines)]));
+        $voids = $data->voidList();
+
+        $staffIds = array_values(array_unique([
+            $data->staff_id,
+            ...array_map(fn (TicketLineData $line) => $line->staff_id, $lines),
+            ...array_merge(...array_map(fn (TicketLineVoidData $void) => [$void->voided_by, $void->approved_by], $voids)),
+        ]));
 
         if ($this->findUnknownStaff->handle($staffIds) !== []) {
             return TicketSyncResult::rejected($data->uuid, 'unknown_staff');
@@ -131,11 +144,17 @@ final class RecordTicket
             ]);
         }
 
+        $voids = $this->recordVoids($ticket, $data->voidList(), $context);
+
+        if ($voids === null) {
+            return TicketSyncResult::rejected($data->uuid, 'void_conflict');
+        }
+
         if ($ticket->status !== Ticket::CLOSED) {
             $this->applyBill($ticket, $data->bill_requested_at);
         }
 
-        $changed = $isNew || $new !== [] || $ticket->isDirty(['status', 'bill_requested_at']);
+        $changed = $isNew || $new !== [] || $voids['recorded'] > 0 || $ticket->isDirty(['status', 'bill_requested_at']);
         $ticket->save();
 
         return TicketSyncResult::saved(
@@ -143,12 +162,87 @@ final class RecordTicket
             $isNew ? TicketSyncResult::ACCEPTED : ($changed ? TicketSyncResult::UPDATED : TicketSyncResult::DUPLICATE),
             $ticket->status,
             array_map(fn (TicketLineData $line) => $line->uuid, $refused),
+            $voids['refused'],
         );
     }
 
     /**
-     * The bill stands only while nothing was sent after it was printed; a
-     * round ordered after the bill reopens the ticket.
+     * Takes voided quantities off the ticket's lines (T5c). A void stands
+     * only while there is something left to take off and nobody has paid or
+     * is paying: one that arrives after the payment is refused, unless the
+     * same till made it before paying offline. Resending a void is a no-op;
+     * a void UUID already on another ticket refuses the whole ticket (null).
+     *
+     * @param  list<TicketLineVoidData>  $voids
+     * @return array{recorded: int, refused: list<string>}|null
+     */
+    private function recordVoids(Ticket $ticket, array $voids, DeviceContext $context): ?array
+    {
+        if ($voids === []) {
+            return ['recorded' => 0, 'refused' => []];
+        }
+
+        $known = TicketLineVoid::query()->whereKey(array_map(fn (TicketLineVoidData $void) => $void->uuid, $voids))->pluck('ticket_id', 'id')->all();
+
+        if (array_filter($known, fn (string $ticketId) => $ticketId !== $ticket->id) !== []) {
+            return null;
+        }
+
+        $lines = $ticket->lines()->get(['id', 'quantity'])->pluck('quantity', 'id')->all();
+        $voided = TicketLineVoid::query()->where('ticket_id', $ticket->id)->toBase()
+            ->selectRaw('ticket_line_id, sum(quantity) as voided')->groupBy('ticket_line_id')
+            ->pluck('voided', 'ticket_line_id')->map(fn (mixed $sum): int => (int) $sum)->all();
+        $count = TicketLineVoid::query()->where('ticket_id', $ticket->id)->count();
+        $beingPaidElsewhere = $ticket->held_for_order_id !== null && $ticket->held_by_device_id !== $context->deviceId && $ticket->held_until?->isFuture() === true;
+
+        $recorded = 0;
+        $refused = [];
+
+        foreach ($voids as $void) {
+            if (array_key_exists($void->uuid, $known)) {
+                continue;
+            }
+
+            $voidedAt = Carbon::parse($void->voided_at)->utc();
+            $left = ($lines[$void->line_uuid] ?? 0) - ($voided[$void->line_uuid] ?? 0);
+            $afterPayment = $ticket->status === Ticket::CLOSED && ($ticket->closed_at === null || $voidedAt->greaterThan($ticket->closed_at));
+
+            if ($left < $void->quantity || $afterPayment || $beingPaidElsewhere || $count >= TicketData::MAX_LINES) {
+                $refused[] = $void->uuid;
+
+                continue;
+            }
+
+            TicketLineVoid::query()->create([
+                'id' => $void->uuid,
+                'ticket_id' => $ticket->id,
+                'ticket_line_id' => $void->line_uuid,
+                'device_id' => $context->deviceId,
+                'quantity' => $void->quantity,
+                'voided_at' => $voidedAt,
+                'voided_by' => $void->voided_by,
+                'approved_by' => $void->approved_by,
+                'reason' => $void->reason,
+                'note' => $void->note !== null ? trim($void->note) : null,
+                // Checked, never enforced: the kitchen was told when the till accepted the PIN.
+                'approver_allowed' => $this->staffMayAtBranch->handle($void->approved_by, VoidOrder::PERMISSION, $ticket->branch_id),
+            ]);
+
+            $voided[$void->line_uuid] = ($voided[$void->line_uuid] ?? 0) + $void->quantity;
+            $recorded++;
+            $count++;
+        }
+
+        if ($refused !== []) {
+            Log::warning('tickets.voids_refused', ['ticket_id' => $ticket->id, 'voids' => $refused]);
+        }
+
+        return ['recorded' => $recorded, 'refused' => $refused];
+    }
+
+    /**
+     * The bill stands only while nothing changed after it was printed: a
+     * round ordered, or a line taken off, after the bill reopens the ticket.
      */
     private function applyBill(Ticket $ticket, ?string $billRequestedAt): void
     {
@@ -158,9 +252,12 @@ final class RecordTicket
             $ticket->bill_requested_at = $sent;
         }
 
-        $lastLine = $ticket->lines()->max('sent_at');
+        $lastChange = collect([$ticket->lines()->max('sent_at'), TicketLineVoid::query()->where('ticket_id', $ticket->id)->max('voided_at')])
+            ->filter()
+            ->map(fn (mixed $moment) => Carbon::parse((string) $moment))
+            ->max();
 
-        $ticket->status = $ticket->bill_requested_at !== null && ($lastLine === null || ! Carbon::parse($lastLine)->greaterThan($ticket->bill_requested_at))
+        $ticket->status = $ticket->bill_requested_at !== null && ($lastChange === null || ! $lastChange->greaterThan($ticket->bill_requested_at))
             ? Ticket::BILL_REQUESTED
             : Ticket::OPEN;
     }

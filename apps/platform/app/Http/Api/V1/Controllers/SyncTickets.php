@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use VendaPOS\Core\Data\TicketData;
 use VendaPOS\Core\Data\TicketLineData;
+use VendaPOS\Core\Data\TicketLineVoidData;
 
 /**
  * POST /api/v1/tickets/sync — up to 50 tickets a till opened or added to. The
@@ -49,6 +50,12 @@ final class SyncTickets
         foreach (is_array($raw['lines'] ?? null) ? $raw['lines'] : [] as $index => $line) {
             foreach (array_diff(array_keys(is_array($line) ? $line : []), array_keys(TicketLineData::rules())) as $key) {
                 $errors["lines.{$index}.{$key}"] = ['Unknown field.'];
+            }
+        }
+
+        foreach (is_array($raw['voids'] ?? null) ? $raw['voids'] : [] as $index => $void) {
+            foreach (array_diff(array_keys(is_array($void) ? $void : []), array_keys(TicketLineVoidData::rules())) as $key) {
+                $errors["voids.{$index}.{$key}"] = ['Unknown field.'];
             }
         }
 
