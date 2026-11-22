@@ -9,7 +9,9 @@ on:
 jobs:
   platform:
     name: Platform (PHP ${{ matrix.php }})
-    runs-on: ubuntu-latest
+    # Pinned: postgresql-client-16 (for the export tests) is in 24.04's archive;
+    # ubuntu-latest moved to 26.04, which does not carry it.
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         php: ['8.4']
