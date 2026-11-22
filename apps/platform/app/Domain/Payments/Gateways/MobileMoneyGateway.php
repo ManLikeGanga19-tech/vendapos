@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Domain\Payments\Gateways;
 
 use App\Domain\Payments\Data\GatewayResult;
+use App\Domain\Payments\Exceptions\ProviderUnreachable;
 use App\Domain\Payments\Models\Payment;
+use App\Domain\Payments\Models\PaymentAccount;
 
 /**
  * One mobile-money provider's API. An abstract class rather than an interface
@@ -13,8 +15,24 @@ use App\Domain\Payments\Models\Payment;
  */
 abstract class MobileMoneyGateway
 {
+    /** checkCredentials(): the provider refused the keys. */
+    public const string KEYS_REFUSED = 'keys_refused';
+
+    /** checkCredentials(): the provider could not be reached, so the keys are unchecked. */
+    public const string UNREACHABLE = 'unreachable';
+
     /** Pushes the payment request to the customer's phone. Never retried automatically. */
     abstract public function initiate(Payment $payment): GatewayResult;
+
+    /**
+     * Asks the provider for a QR code the customer scans to pay the payment's
+     * account, with the payment's reference as the account number.
+     *
+     * @return string the QR image, base64 PNG
+     *
+     * @throws ProviderUnreachable|\RuntimeException when no QR could be made
+     */
+    abstract public function generateQr(Payment $payment, string $merchantName): string;
 
     /** Asks the provider for the payment's current state (late or missing callbacks). */
     abstract public function query(Payment $payment): GatewayResult;
@@ -28,4 +46,22 @@ abstract class MobileMoneyGateway
      * @return array{requestId: string, result: GatewayResult}|null
      */
     abstract public function parseCallback(array $body): ?array;
+
+    /**
+     * Tries keys an owner is about to save, without taking a payment.
+     *
+     * @param  array<string, string>  $credentials
+     * @return self::KEYS_REFUSED|self::UNREACHABLE|null null when the provider accepted them
+     */
+    abstract public function checkCredentials(array $credentials, string $environment): ?string;
+
+    /**
+     * Tells the provider where to confirm money paid straight into the
+     * account (C2B), using the account's own keys.
+     *
+     * @return string|null null when registered, otherwise the provider's reason
+     *
+     * @throws ProviderUnreachable when the provider is down; the caller tries again later
+     */
+    abstract public function registerConfirmationUrls(PaymentAccount $account): ?string;
 }

@@ -34,4 +34,58 @@ return [
         'subject' => ':business: your VendaPOS data has been deleted',
         'body' => 'As we notified you, the data of :business has been permanently deleted from VendaPOS. An encrypted copy is kept until :date; contact us if you need it.',
     ],
+
+    'payment_account_changed' => [
+        'sms' => 'VendaPOS: :name changed payment account ":account" of :business (:change) on :date at :time. If this was not you, sign in and check it now.',
+        'subject' => ':business: payment account ":account" was changed',
+        'body' => ':name changed the payment account ":account" (:change) on :date at :time.',
+        'not_you' => 'If you did not expect this, sign in to VendaPOS and check your payment accounts now: customers’ payments may be going to another paybill or till.',
+        'actions' => [
+            'added' => 'added',
+            'updated' => 'keys or details changed',
+            'branches_changed' => 'branches changed',
+        ],
+    ],
+
+    'mpesa_checks' => [
+        'sms' => '{1} VendaPOS: 1 M-Pesa payment at :business needs checking. Open "M-Pesa to check" in the owner panel.|[2,*] VendaPOS: :count M-Pesa payments at :business need checking. Open "M-Pesa to check" in the owner panel.',
+        'subject' => '{1} :business: 1 M-Pesa payment to check|[2,*] :business: :count M-Pesa payments to check',
+        'intro' => 'Some M-Pesa money at your tills does not add up yet:',
+        'kinds' => [
+            'unconfirmed_code' => '{1} 1 typed M-Pesa code that Safaricom has not confirmed|[2,*] :count typed M-Pesa codes that Safaricom has not confirmed',
+            'amount_mismatch' => '{1} 1 M-Pesa code confirmed for a different amount than the sale|[2,*] :count M-Pesa codes confirmed for a different amount than the sale',
+            'code_reused' => '{1} 1 M-Pesa code typed for more than one sale|[2,*] :count M-Pesa codes typed for more than one sale',
+            'unclaimed_push' => '{1} 1 M-Pesa payment received with no sale|[2,*] :count M-Pesa payments received with no sale',
+            'qr_paid_twice' => '{1} 1 bill paid again by QR after it was already paid|[2,*] :count bills paid again by QR after they were already paid',
+            'ticket_paid_twice' => '{1} 1 ticket paid by two sales|[2,*] :count tickets paid by two sales',
+            'voided_sale_paid' => '{1} 1 voided sale paid by M-Pesa to refund|[2,*] :count voided sales paid by M-Pesa to refund',
+        ],
+        'where' => 'Open "M-Pesa to check" in the owner panel to see each one and mark it checked.',
+    ],
+
+    'void_checks' => [
+        'sms' => '{1} VendaPOS: 1 void at :business needs checking. Open "Voids to check" in the owner panel.|[2,*] VendaPOS: :count voids at :business need checking. Open "Voids to check" in the owner panel.',
+        'subject' => '{1} :business: 1 void to check|[2,*] :business: :count voids to check',
+        'intro' => 'Some voids at your tills need a second look:',
+        'kinds' => [
+            'approver_not_allowed' => '{1} 1 void approved by someone who may not approve voids|[2,*] :count voids approved by someone who may not approve voids',
+            'late_void' => '{1} 1 sale voided on a later day|[2,*] :count sales voided on a later day',
+            'high_void_rate' => '{1} 1 staff member voided many of their sales in a day|[2,*] :count staff members voided many of their sales in a day',
+        ],
+        'where' => 'Open "Voids to check" in the owner panel to see each one and mark it checked.',
+    ],
+
+    'cash_checks' => [
+        'sms' => '{1} VendaPOS: 1 cash-up at :business needs checking. Open "Cash to check" in the owner panel.|[2,*] VendaPOS: :count cash-ups at :business need checking. Open "Cash to check" in the owner panel.',
+        'subject' => '{1} :business: 1 cash-up to check|[2,*] :business: :count cash-ups to check',
+        'intro' => 'Some till drawers need a second look:',
+        'kinds' => [
+            'variance_over_limit' => '{1} 1 drawer off by more than you allow|[2,*] :count drawers off by more than you allow',
+            'figures_differ' => '{1} 1 shift where the till and the server count differently|[2,*] :count shifts where the till and the server count differently',
+            'approver_not_allowed' => '{1} 1 approval by someone who may not close shifts|[2,*] :count approvals by someone who may not close shifts',
+            'open_too_long' => '{1} 1 shift left open for over a day|[2,*] :count shifts left open for over a day',
+            'sale_outside_shift' => '{1} 1 sale made outside a shift|[2,*] :count sales made outside a shift',
+        ],
+        'where' => 'Open "Cash to check" in the owner panel to see each one and mark it checked.',
+    ],
 ];

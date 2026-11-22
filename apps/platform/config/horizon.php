@@ -200,6 +200,7 @@ return [
         'supervisor-1' => [
             'connection' => 'redis',
             'queue' => [
+                'broadcasts', // till sync signals: tiny, and tills wait on them
                 'default',
                 'payments',
                 'etims',

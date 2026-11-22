@@ -12,6 +12,7 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
+use VendaPOS\Core\Enums\PaymentChannel;
 use VendaPOS\Core\Enums\PaymentStatus;
 
 #[Signature('payments:reconcile')]
@@ -25,12 +26,19 @@ final class ReconcilePaymentsCommand extends Command
         tenancy()->runForMultiple(LiveTenants::all(), function (Tenant $tenant) use (&$queued) {
             Payment::query()
                 ->where('status', PaymentStatus::Pending)
+                // QR payments have no request to ask about: their C2B confirmation settles them.
+                ->where('channel', PaymentChannel::Push)
                 ->where('created_at', '>=', now()->subHours((int) config('vendapos.payments.reconcile.stop_after_hours')))
                 ->where(fn (Builder $query) => $query
                     ->where('initiated_at', '<=', now()->subSeconds((int) config('vendapos.payments.reconcile.first_query_after_seconds')))
                     ->orWhere(fn (Builder $query) => $query
                         ->whereNull('provider_request_id')
                         ->where('created_at', '<=', now()->subMinutes((int) config('vendapos.payments.reconcile.never_pushed_after_minutes')))))
+                // Safaricom asked us to slow down: wait, unless it is time to give up on the payment.
+                ->where(fn (Builder $query) => $query
+                    ->whereNull('query_backoff_until')
+                    ->orWhere('query_backoff_until', '<=', now())
+                    ->orWhere('initiated_at', '<=', now()->subMinutes((int) config('vendapos.payments.reconcile.give_up_after_minutes'))))
                 ->pluck('id')
                 ->each(function (string $paymentId) use ($tenant, &$queued) {
                     QueryPaymentStatus::dispatch((string) $tenant->getTenantKey(), $paymentId);

@@ -13,6 +13,7 @@ services:
     ports:
       - "8000:8000"
       - "8001:8001"
+      - "8080:8080" # Reverb: tills listen here for "sync now"
     depends_on:
       postgres:
         condition: service_healthy

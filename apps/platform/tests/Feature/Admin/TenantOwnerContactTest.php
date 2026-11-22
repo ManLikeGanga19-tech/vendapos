@@ -25,6 +25,12 @@ afterEach(function () {
     Tenant::all()->each->delete();
 });
 
+/** @return array<string, mixed> the modules and first branch every new business is set up with (T7) */
+function firstBranch(): array
+{
+    return ['modules' => ['general'], 'first_branch_name' => 'Main', 'first_branch_type' => 'general'];
+}
+
 it('stores the owner contact in real columns with the phone in E.164', function () {
     Livewire::test(CreateTenant::class)
         ->fillForm([
@@ -33,6 +39,7 @@ it('stores the owner contact in real columns with the phone in E.164', function 
             'owner_name' => 'Achieng Otieno',
             'owner_phone' => '0712 345 678',
             'owner_email' => 'achieng@example.com',
+            ...firstBranch(),
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -54,6 +61,7 @@ it('rejects a phone number that cannot be normalised', function () {
             'owner_name' => 'Someone',
             'owner_phone' => '12345',
             'owner_email' => 'someone@example.com',
+            ...firstBranch(),
         ])
         ->call('create')
         ->assertHasFormErrors(['owner_phone']);
@@ -76,7 +84,7 @@ it('lets an admin add an owner to a tenant created before contacts existed', fun
 
     Livewire::test(EditTenant::class, ['record' => $tenant->id])
         ->assertSchemaStateSet(['name' => 'Older Kiosk', 'owner_phone' => null])
-        ->fillForm(['owner_name' => 'Juma', 'owner_phone' => '+255 712 345 678', 'owner_email' => 'juma@example.com'])
+        ->fillForm(['owner_name' => 'Juma', 'owner_phone' => '+255 712 345 678', 'owner_email' => 'juma@example.com', 'modules' => ['shop']])
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -91,7 +99,7 @@ it('stores the owner’s language, English unless chosen', function (?string $lo
             'owner_name' => 'Juma Hamisi',
             'owner_phone' => '0722 000 111',
             'locale' => $locale,
-        ]))
+        ]) + firstBranch())
         ->call('create')
         ->assertHasNoFormErrors();
 
@@ -104,7 +112,7 @@ it('stores the owner’s language, English unless chosen', function (?string $lo
 
 it('refuses a language we do not write in', function () {
     Livewire::test(CreateTenant::class)
-        ->fillForm(['id' => 'tfr', 'name' => 'French', 'owner_name' => 'X', 'owner_phone' => '0722 000 112', 'locale' => 'fr'])
+        ->fillForm(['id' => 'tfr', 'name' => 'French', 'owner_name' => 'X', 'owner_phone' => '0722 000 112', 'locale' => 'fr', ...firstBranch()])
         ->call('create')
         ->assertHasFormErrors(['locale']);
 });

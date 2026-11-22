@@ -6,6 +6,7 @@ namespace App\Domain\Orders\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use VendaPOS\Core\Enums\EtimsStatus;
 use VendaPOS\Core\Enums\OrderStatus;
@@ -18,10 +19,14 @@ use VendaPOS\Core\ValueObjects\Money;
  * @property string $id
  * @property string $branch_id
  * @property string $device_id
+ * @property string|null $staff_id who made the sale; null only for orders from before tills sent it
+ * @property string|null $ticket_id the ticket this sale paid (table service)
+ * @property string|null $shift_id the till drawer's shift it was sold in; null from tills older than cash-up
  * @property int $sequence_number
+ * @property string|null $receipt_number "T2-000123"; null only for sales from a till the server no longer knows
  * @property OrderStatus $status
  * @property Carbon $placed_at
- * @property PaymentType $payment_type
+ * @property PaymentType|null $payment_type
  * @property int $subtotal_cents
  * @property int $vat_cents
  * @property int $total_cents
@@ -55,6 +60,24 @@ class Order extends Model
     public function lines(): HasMany
     {
         return $this->hasMany(OrderLine::class)->orderBy('position');
+    }
+
+    /** @return HasMany<OrderTender, $this> */
+    public function tenders(): HasMany
+    {
+        return $this->hasMany(OrderTender::class)->orderBy('position');
+    }
+
+    /** @return HasMany<ReceiptReprint, $this> */
+    public function reprints(): HasMany
+    {
+        return $this->hasMany(ReceiptReprint::class);
+    }
+
+    /** @return HasOne<OrderVoid, $this> who voided it, who approved and why; none unless voided */
+    public function void(): HasOne
+    {
+        return $this->hasOne(OrderVoid::class);
     }
 
     public function total(): Money

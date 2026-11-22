@@ -7,7 +7,9 @@ use App\Domain\Etims\Contracts\EtimsClient;
 use App\Domain\Etims\Data\EtimsResult;
 use App\Domain\Etims\Features\EtimsEnabled;
 use App\Domain\Etims\Models\EtimsSubmission;
+use App\Domain\Orders\Models\VoidCheck;
 use App\Domain\Tenancy\Models\Device;
+use App\Domain\Tenancy\Models\Staff;
 use App\Domain\Tenancy\Models\Tenant;
 use App\Filament\Admin\Resources\TenantResource\Pages\EditTenant;
 use App\Filament\Admin\Resources\TenantResource\Pages\ListTenants;
@@ -15,6 +17,7 @@ use App\Filament\Admin\Resources\TenantResource\Pages\TenantBranches;
 use App\Filament\Admin\Resources\TenantResource\Pages\TenantDevices;
 use App\Filament\Admin\Resources\TenantResource\Pages\TenantEtims;
 use App\Filament\Admin\Resources\TenantResource\Pages\TenantNegativeStock;
+use App\Filament\Admin\Resources\TenantResource\Pages\TenantVoidRates;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Filament\Actions\Testing\TestAction;
@@ -155,6 +158,25 @@ it('flags items below zero in the tenant’s branches', function () {
     Livewire::test(TenantNegativeStock::class, ['record' => $this->tenant->id])
         ->assertSee('Nyama choma')
         ->assertSee('-2');
+});
+
+it('flags the tenant’s own staff who voided too many sales, and no one else’s', function () {
+    $flag = fn (Tenant $tenant, string $branchId, string $name) => $tenant->run(function () use ($branchId, $name) {
+        $staff = Staff::create(['name' => $name]);
+        $staff->assignRole('cashier');
+        VoidCheck::open(VoidCheck::HIGH_VOID_RATE, "{$branchId}:{$staff->id}:2026-10-21", [
+            'branch_id' => $branchId, 'staff_id' => $staff->id, 'business_date' => '2026-10-21',
+            'details' => ['sales' => 20, 'voided' => 4, 'percent' => 20],
+        ]);
+    });
+    $flag($this->tenant, $this->branch->id, 'Wanjiku Mwangi');
+    $flag($this->other, $this->otherBranch->id, 'Other Cashier');
+
+    Livewire::test(TenantVoidRates::class, ['record' => $this->tenant->id])
+        ->assertSee(['Wanjiku Mwangi', 'Danamo Nyali', '4 / 20 (20%)', '2026-10-21'])
+        ->assertDontSee('Other Cashier');
+
+    expect(tenancy()->initialized)->toBeFalse();
 });
 
 it('offers no way to delete a tenant from the panel', function () {

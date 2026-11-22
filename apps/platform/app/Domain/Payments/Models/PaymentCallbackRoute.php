@@ -28,8 +28,8 @@ class PaymentCallbackRoute extends Model
 
     protected $keyType = 'string';
 
-    public static function forToken(string $provider, string $token): ?self
+    public static function forToken(string $token): ?self
     {
-        return self::query()->whereKey(hash('sha256', $token))->where('provider', $provider)->first();
+        return self::query()->whereKey(hash('sha256', $token))->first();
     }
 }

@@ -9,7 +9,7 @@ use App\Domain\Tenancy\Models\Device;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/** Rolls a still-valid device token over to a new one and revokes the old. */
+/** Rolls a still-valid device token over to a new one; the old one lapses after a short overlap. */
 final class RefreshDeviceToken
 {
     public function __invoke(Request $request, IssueDeviceToken $issueToken): JsonResponse

@@ -13,6 +13,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use VendaPOS\Core\Data\OrderData;
 use VendaPOS\Core\Data\OrderLineData;
+use VendaPOS\Core\Data\TenderData;
+use VendaPOS\Core\Data\VoidData;
 
 /**
  * POST /api/v1/orders/sync — a batch of up to 50 terminal orders. The reply
@@ -25,7 +27,7 @@ final class SyncOrders
     {
         /** @var Device $device */
         $device = $request->user('sanctum');
-        $context = new DeviceContext($device->tenant_id, $device->branch_id, $device->id);
+        $context = DeviceContext::of($device);
 
         /** @var list<array<string, mixed>> $orders */
         $orders = $request->validated('orders');
@@ -51,6 +53,16 @@ final class SyncOrders
             foreach (array_diff(array_keys(is_array($line) ? $line : []), array_keys(OrderLineData::rules())) as $key) {
                 $errors["lines.{$index}.{$key}"] = ['Unknown field.'];
             }
+        }
+
+        foreach (is_array($raw['tenders'] ?? null) ? $raw['tenders'] : [] as $index => $tender) {
+            foreach (array_diff(array_keys(is_array($tender) ? $tender : []), array_keys(TenderData::rules())) as $key) {
+                $errors["tenders.{$index}.{$key}"] = ['Unknown field.'];
+            }
+        }
+
+        foreach (array_diff(array_keys(is_array($raw['void'] ?? null) ? $raw['void'] : []), VoidData::fields()) as $key) {
+            $errors["void.{$key}"] = ['Unknown field.'];
         }
 
         if ($errors !== []) {

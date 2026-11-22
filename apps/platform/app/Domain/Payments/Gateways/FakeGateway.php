@@ -6,6 +6,7 @@ namespace App\Domain\Payments\Gateways;
 
 use App\Domain\Payments\Data\GatewayResult;
 use App\Domain\Payments\Models\Payment;
+use App\Domain\Payments\Models\PaymentAccount;
 use VendaPOS\Core\Enums\PaymentStatus;
 
 /** Stands in for every provider in tests, demos and local work without sandbox keys. */
@@ -14,6 +15,14 @@ final class FakeGateway extends MobileMoneyGateway
     public function initiate(Payment $payment): GatewayResult
     {
         return GatewayResult::accepted('fake-'.$payment->id);
+    }
+
+    /** An 8×8 PNG: enough for the till to print and the tests to check. */
+    public const string QR_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///8AAABVwtN+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAADklEQVQImWP4wACBUAAALRADwQ6OuycAAAAASUVORK5CYII=';
+
+    public function generateQr(Payment $payment, string $merchantName): string
+    {
+        return self::QR_PNG;
     }
 
     public function query(Payment $payment): GatewayResult
@@ -40,5 +49,15 @@ final class FakeGateway extends MobileMoneyGateway
                 ? GatewayResult::succeeded((string) ($body['reference'] ?? ''), isset($body['amount_cents']) ? (int) $body['amount_cents'] : null)
                 : GatewayResult::unsuccessful($status, 'fake_'.$status->value, 'Reported by the fake gateway.'),
         ];
+    }
+
+    public function checkCredentials(array $credentials, string $environment): ?string
+    {
+        return null;
+    }
+
+    public function registerConfirmationUrls(PaymentAccount $account): ?string
+    {
+        return null;
     }
 }

@@ -6,6 +6,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Owner\Auth\Login;
 use App\Filament\Owner\Auth\SetUpAccount;
+use App\Filament\TwoFactorRequirement;
 use App\Http\Controllers\Owner\SwitchLanguage;
 use App\Http\Middleware\BlockSuspendedTenant;
 use App\Http\Middleware\EnsureSessionBelongsToTenant;
@@ -51,7 +52,7 @@ class OwnerPanelProvider extends PanelProvider
             ->login(Login::class)
             ->multiFactorAuthentication(
                 AppAuthentication::make()->brandName('VendaPOS')->recoverable(),
-                isRequired: true,
+                isRequired: TwoFactorRequirement::applies(),
             )
             ->colors([
                 'primary' => Color::Amber,
@@ -59,7 +60,7 @@ class OwnerPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::STYLES_AFTER, fn () => view('filament.square-corners'))
             ->routes(fn () => Route::get('setup/{token}', SetUpAccount::class)->name('auth.setup'))
             ->authenticatedRoutes(fn () => Route::post('language/{locale}', SwitchLanguage::class)
-                ->middleware($panel->getMultiFactorAuthenticationRequiredMiddleware())
+                ->middleware(TwoFactorRequirement::middleware($panel->getMultiFactorAuthenticationRequiredMiddleware()))
                 ->name('language'))
             // One switch to the other language, each named in its own language.
             ->userMenuItems(array_map(

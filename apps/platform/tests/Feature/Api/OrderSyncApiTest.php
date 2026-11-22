@@ -8,6 +8,7 @@ use App\Domain\Orders\Events\OrderRecorded;
 use App\Domain\Orders\Events\OrderVoided;
 use App\Domain\Orders\Models\Order;
 use App\Domain\Tenancy\Data\DeviceContext;
+use App\Domain\Tenancy\Models\Staff;
 use App\Domain\Tenancy\Models\Tenant;
 use App\Infrastructure\Outbox\DomainEvent;
 use Illuminate\Database\QueryException;
@@ -109,6 +110,39 @@ it('rejects items that are not in the tenant’s catalogue', function () {
         ->assertJsonPath('results.0.errors.item_ids.0', $foreign->id);
 });
 
+it('records who made the sale, and keeps it in the outbox event', function () {
+    $sale = saleOf([[$this->nyama, 1]]);
+
+    sync([$sale])->assertOk()->assertJsonPath('results.0.status', 'accepted');
+
+    expect($this->tenant->run(fn () => Order::query()->findOrFail($sale['uuid'])->staff_id))->toBe($sale['staff_id'])
+        ->and(DomainEvent::query()->where('aggregate_id', $sale['uuid'])->sole()->payload['staff_id'])->toBe($sale['staff_id']);
+});
+
+it('rejects a sale by no one at this business, including staff of another business', function () {
+    [$other] = tenantWithBranch();
+    $theirs = sellerFor($other);
+
+    $stranger = saleOf([[$this->nyama, 1]], 1, ['staff_id' => (string) Str::uuid()]);
+    $foreign = saleOf([[$this->nyama, 1]], 2, ['staff_id' => $theirs]);
+    $missing = saleOf([[$this->nyama, 1]], 3);
+    unset($missing['staff_id']);
+
+    sync([$stranger, $foreign, $missing])->assertOk()
+        ->assertJsonPath('results.0.reason', 'unknown_staff')
+        ->assertJsonPath('results.1.reason', 'unknown_staff')
+        ->assertJsonPath('results.2.status', 'rejected');
+
+    expect($this->tenant->run(fn () => Order::query()->count()))->toBe(0);
+});
+
+it('accepts a sale made offline by someone switched off since', function () {
+    $sale = saleOf([[$this->nyama, 1]]);
+    $this->tenant->run(fn () => Staff::query()->whereKey($sale['staff_id'])->update(['is_active' => false]));
+
+    sync([$sale])->assertOk()->assertJsonPath('results.0.status', 'accepted');
+});
+
 it('rejects unknown fields, including a tenant in the body', function () {
     $sale = saleOf([[$this->nyama, 1]], overrides: ['tenant_id' => 'someone-else', 'branch_id' => (string) Str::uuid()]);
     $sale['lines'][0]['discount_cents'] = 500;
@@ -124,7 +158,7 @@ it('voids a completed order on resend, but never un-voids it', function () {
     $sale = saleOf([[$this->nyama, 1]]);
     sync([$sale]);
 
-    sync([[...$sale, 'status' => 'voided']])->assertJsonPath('results.0.status', 'updated');
+    sync([voidOf($sale)])->assertJsonPath('results.0.status', 'updated');
     sync([[...$sale, 'status' => 'completed']])->assertJsonPath('results.0.status', 'duplicate');
 
     expect($this->tenant->run(fn () => Order::findOrFail($sale['uuid'])->status->value))->toBe('voided')
@@ -138,8 +172,10 @@ it('accepts an order cancelled before completion, and never lets it change', fun
     sync([$order])->assertJsonPath('results.0.status', 'accepted');
     sync([$order])->assertJsonPath('results.0.status', 'duplicate');
 
-    foreach (['completed', 'voided'] as $status) {
-        sync([[...$order, 'status' => $status]])
+    $paid = [...$order, 'status' => 'completed', 'tenders' => [cashTender($order['total_cents'])]];
+
+    foreach ([$paid, voidOf($paid)] as $resend) {
+        sync([$resend])
             ->assertJsonPath('results.0.status', 'rejected')
             ->assertJsonPath('results.0.reason', 'status_conflict');
     }
@@ -152,12 +188,12 @@ it('rejects cancelling an order that was already completed', function () {
     $sale = saleOf([[$this->nyama, 1]]);
     sync([$sale]);
 
-    sync([[...$sale, 'status' => 'cancelled']])
+    sync([[...$sale, 'status' => 'cancelled', 'tenders' => []]])
         ->assertJsonPath('results.0.status', 'rejected')
         ->assertJsonPath('results.0.reason', 'status_conflict');
 
-    sync([[...$sale, 'status' => 'voided']]);
-    sync([[...$sale, 'status' => 'cancelled']])->assertJsonPath('results.0.reason', 'status_conflict');
+    sync([voidOf($sale)]);
+    sync([[...$sale, 'status' => 'cancelled', 'tenders' => []]])->assertJsonPath('results.0.reason', 'status_conflict');
 
     expect($this->tenant->run(fn () => Order::findOrFail($sale['uuid'])->status->value))->toBe('voided');
 });
@@ -182,7 +218,7 @@ it('keeps each tenant’s orders in its own schema', function () {
 it('commits nothing when the outbox write fails', function () {
     $sale = OrderData::from(saleOf([[$this->nyama, 1]]));
     // tenant_id is varchar(255): an over-long value makes the outbox insert fail mid-transaction.
-    $context = new DeviceContext(str_repeat('x', 300), $this->branch->id, $this->enrolment->device->id);
+    $context = new DeviceContext(str_repeat('x', 300), $this->branch->id, $this->enrolment->device->id, $this->enrolment->device->till_number);
 
     expect(fn () => $this->tenant->run(fn () => app(RecordOrder::class)->handle($sale, $context)))
         ->toThrow(QueryException::class);

@@ -16,6 +16,22 @@ enum BusinessType: string
     case Liquor = 'liquor';
     case General = 'general';
 
+    /**
+     * Whether this business type's module is built, so it can be given to a
+     * tenant and picked for a branch. The rest show as "coming soon" and
+     * switch on as each module is built (Daniel, T7).
+     */
+    public function isAvailable(): bool
+    {
+        return in_array($this, [self::Restaurant, self::Shop, self::General], true);
+    }
+
+    /** @return list<self> */
+    public static function available(): array
+    {
+        return array_values(array_filter(self::cases(), fn (self $type) => $type->isAvailable()));
+    }
+
     public function terminalMode(): TerminalMode
     {
         return match ($this) {

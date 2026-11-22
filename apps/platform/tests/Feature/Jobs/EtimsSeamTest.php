@@ -266,7 +266,7 @@ it('sends a credit note carrying the sale’s receipt when an order is voided', 
     $sale = saleOf([[$this->nyama, 1]]);
 
     sync([$sale]);
-    sync([[...$sale, 'status' => 'voided']])->assertJsonPath('results.0.status', 'updated');
+    sync([voidOf($sale)])->assertJsonPath('results.0.status', 'updated');
 
     $creditNote = submissionIn($this->tenant, $sale['uuid'], EtimsDocumentType::CreditNote);
     expect($creditNote->status)->toBe(EtimsStatus::Submitted)
@@ -282,7 +282,7 @@ it('needs no credit note for a sale that was never reported', function () {
     sync([$sale]);
 
     enableEtims($this->branch); // switched on between the sale and its void
-    sync([[...$sale, 'status' => 'voided']]);
+    sync([voidOf($sale)]);
 
     expect(submissionIn($this->tenant, $sale['uuid'], EtimsDocumentType::CreditNote)->status)->toBe(EtimsStatus::NotRequired)
         ->and($this->client->sent)->toBe([]);
@@ -294,7 +294,7 @@ it('holds a credit note back until its sale has been accepted', function () {
     $sale = saleOf([[$this->nyama, 1]]);
 
     sync([$sale]);
-    sync([[...$sale, 'status' => 'voided']]);
+    sync([voidOf($sale)]);
 
     expect(submissionIn($this->tenant, $sale['uuid'], EtimsDocumentType::CreditNote)->status)->toBe(EtimsStatus::Pending)
         ->and(array_column(etimsFailuresIn($this->tenant), 'code'))->toBe(['kra_down', 'sale_not_submitted'])

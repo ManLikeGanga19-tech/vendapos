@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace App\Domain\Payments\Gateways;
 
 use App\Domain\Payments\Data\GatewayResult;
+use App\Domain\Payments\Exceptions\ProviderUnreachable;
 use App\Domain\Payments\Models\Payment;
-use App\Domain\Payments\Models\PaymentCredential;
+use App\Domain\Payments\Models\PaymentAccount;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use LogicException;
+use RuntimeException;
 use VendaPOS\Core\Enums\MobileMoneyProvider;
 use VendaPOS\Core\Enums\PaymentStatus;
 
@@ -23,8 +26,15 @@ use VendaPOS\Core\Enums\PaymentStatus;
  */
 final class DarajaGateway extends MobileMoneyGateway
 {
-    /** What `payments:credentials` asks for. */
+    /** What an account holds: asked for by `payments:credentials` and the Owner panel. */
     public const array CREDENTIAL_FIELDS = ['consumer_key', 'consumer_secret', 'passkey', 'shortcode', 'party_b', 'transaction_type'];
+
+    /**
+     * Fields an account may leave out. c2b_shortcode is for when money paid
+     * straight in arrives under another shortcode than STK (Daraja's sandbox
+     * gives 174379 for STK and a 600xxx one for C2B); without it C2B uses shortcode.
+     */
+    public const array OPTIONAL_FIELDS = ['c2b_shortcode'];
 
     /** Fields Daraja only accepts fixed values for: paybill or till (buy goods). */
     public const array CREDENTIAL_OPTIONS = [
@@ -32,18 +42,21 @@ final class DarajaGateway extends MobileMoneyGateway
     ];
 
     private const array BASE_URLS = [
-        PaymentCredential::SANDBOX => 'https://sandbox.safaricom.co.ke',
-        PaymentCredential::PRODUCTION => 'https://api.safaricom.co.ke',
+        PaymentAccount::SANDBOX => 'https://sandbox.safaricom.co.ke',
+        PaymentAccount::PRODUCTION => 'https://api.safaricom.co.ke',
     ];
+
+    /** Width of the QR image in pixels: about half of the 576 dots across 80 mm paper. */
+    private const int QR_SIZE = 300;
 
     /** STK query error while the customer has not answered yet. */
     private const string STILL_PROCESSING = '500.001.1001';
 
     public function initiate(Payment $payment): GatewayResult
     {
-        $credentials = $this->credentials();
+        $credentials = $this->credentials($payment);
         $timestamp = $this->timestamp();
-        $phone = ltrim($payment->phone, '+');
+        $phone = ltrim((string) $payment->phone, '+');
 
         $response = $this->client($credentials)->post('/mpesa/stkpush/v1/processrequest', [
             'BusinessShortCode' => $credentials['shortcode'],
@@ -78,13 +91,46 @@ final class DarajaGateway extends MobileMoneyGateway
         );
     }
 
+    /**
+     * Dynamic QR (docs/DARAJA-DYNAMIC-QR.md): a paybill (PB) QR for the
+     * payment's amount, with its reference as the account number, so the
+     * customer's payment comes back on the C2B confirmation with it.
+     */
+    public function generateQr(Payment $payment, string $merchantName): string
+    {
+        $account = ($payment->payment_account_id !== null ? PaymentAccount::query()->find($payment->payment_account_id) : null)
+            ?? throw new LogicException("Payment {$payment->id} has no account.");
+
+        try {
+            $response = $this->client([...$account->credentials, 'environment' => $account->environment])->post('/mpesa/qrcode/v1/generate', [
+                'MerchantName' => mb_substr($merchantName, 0, 30),
+                'RefNo' => $payment->reference,
+                'Amount' => $payment->amount()->toWholeShillings(),
+                'TrxCode' => 'PB',
+                'CPI' => $account->payInNumber(),
+                'Size' => (string) self::QR_SIZE,
+            ]);
+        } catch (ConnectionException) {
+            throw new ProviderUnreachable('Safaricom could not be reached.');
+        }
+
+        $body = (array) $response->json();
+        $png = $body['QRCode'] ?? null;
+
+        if (! $response->successful() || ! is_string($png) || $png === '') {
+            throw new RuntimeException((string) ($body['errorMessage'] ?? $body['ResponseDescription'] ?? "Safaricom answered {$response->status()}."));
+        }
+
+        return $png;
+    }
+
     public function query(Payment $payment): GatewayResult
     {
         if ($payment->provider_request_id === null) {
             return GatewayResult::pending();
         }
 
-        $credentials = $this->credentials();
+        $credentials = $this->credentials($payment);
         $timestamp = $this->timestamp();
 
         $response = $this->client($credentials)->post('/mpesa/stkpushquery/v1/query', [
@@ -148,13 +194,76 @@ final class DarajaGateway extends MobileMoneyGateway
         };
     }
 
-    /** @return array<string, string> */
-    private function credentials(): array
+    public function checkCredentials(array $credentials, string $environment): ?string
     {
-        $credential = PaymentCredential::activeFor(MobileMoneyProvider::MpesaKe)
+        try {
+            // Asked fresh, never from the token cache: the point is to try these keys.
+            $response = Http::withBasicAuth($credentials['consumer_key'] ?? '', $credentials['consumer_secret'] ?? '')
+                ->acceptJson()
+                ->connectTimeout(5)
+                ->timeout(10)
+                ->get($this->baseUrl(['environment' => $environment]).'/oauth/v1/generate', ['grant_type' => 'client_credentials']);
+        } catch (ConnectionException) {
+            return self::UNREACHABLE;
+        }
+
+        if ($response->serverError()) {
+            return self::UNREACHABLE;
+        }
+
+        return $response->successful() && is_string($response->json('access_token')) ? null : self::KEYS_REFUSED;
+    }
+
+    /**
+     * C2B Register URL. In production Safaricom takes this once per shortcode;
+     * changing the URLs later means deleting them on the Daraja portal first,
+     * so a refusal is reported to the owner rather than retried. Safaricom being
+     * down (no answer, or a 5xx such as the sandbox's "Service is currently
+     * unreachable") is thrown so the job tries again.
+     */
+    public function registerConfirmationUrls(PaymentAccount $account): ?string
+    {
+        $credentials = [...$account->credentials, 'environment' => $account->environment];
+
+        try {
+            $response = $this->client($credentials)->post('/mpesa/c2b/v1/registerurl', [
+                'ShortCode' => $credentials['c2b_shortcode'] ?? $credentials['shortcode'],
+                // If our server cannot be reached, Safaricom still completes the customer's payment.
+                'ResponseType' => 'Completed',
+                'ConfirmationURL' => $account->confirmationUrl(),
+                'ValidationURL' => $account->validationUrl(),
+            ]);
+        } catch (ConnectionException) {
+            throw new ProviderUnreachable('Safaricom could not be reached.');
+        }
+
+        $body = (array) $response->json();
+
+        if ($response->serverError()) {
+            throw new ProviderUnreachable((string) ($body['errorMessage'] ?? "Safaricom answered {$response->status()}."));
+        }
+
+        // Safaricom answers "0" or "00000000".
+        if ($response->successful() && preg_match('/^0+$/', (string) ($body['ResponseCode'] ?? '')) === 1) {
+            return null;
+        }
+
+        return (string) ($body['errorMessage'] ?? $body['ResponseDescription'] ?? "Safaricom answered {$response->status()}.");
+    }
+
+    /**
+     * The keys of the account the payment was pushed with. Payments from
+     * before accounts existed carry none and use the default account.
+     *
+     * @return array<string, string>
+     */
+    private function credentials(Payment $payment): array
+    {
+        $account = ($payment->payment_account_id !== null ? PaymentAccount::query()->find($payment->payment_account_id) : null)
+            ?? PaymentAccount::defaultFor(MobileMoneyProvider::MpesaKe)
             ?? throw new LogicException('M-Pesa is not set up for this business.');
 
-        return [...$credential->credentials, 'environment' => $credential->environment];
+        return [...$account->credentials, 'environment' => $account->environment];
     }
 
     /** @param array<string, string> $credentials */

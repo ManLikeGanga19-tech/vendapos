@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Api\V1\Controllers;
 
+use App\Domain\CashUp\Actions\FlagShift;
+use App\Domain\CashUp\Actions\LastShiftNumber;
 use App\Domain\Tenancy\Models\Branch;
 use App\Domain\Tenancy\Models\Device;
 use Illuminate\Http\JsonResponse;
@@ -19,7 +21,7 @@ final class ShowDevice
         $branch = Branch::query()->findOrFail($device->branch_id);
 
         return response()->json([
-            'device' => ['id' => $device->id, 'name' => $device->name],
+            'device' => ['id' => $device->id, 'name' => $device->name, 'till_code' => $device->tillCode()],
             'branch' => [
                 'id' => $branch->id,
                 'name' => $branch->name,
@@ -29,6 +31,38 @@ final class ShowDevice
             'token_expires_at' => $device->currentAccessToken()->expires_at?->toIso8601String(),
             // "suspended": keep selling and syncing, but new M-Pesa requests are refused, so offer cash.
             'account_status' => tenant('status'),
+            // Cash-up: how far a drawer count may be off before closing needs a manager's PIN,
+            // and the last shift number synced, so a reinstalled till never reuses one.
+            'cash_up' => [
+                'variance_allowed_cents' => FlagShift::allowedCents(),
+                'last_shift_number' => app(LastShiftNumber::class)->handle($device->id),
+            ],
+            'realtime' => $this->realtime($device),
         ]);
+    }
+
+    /**
+     * Where to listen for "sync now", or null while broadcasting is off.
+     * Subscriptions are signed at POST /api/broadcasting/auth.
+     *
+     * @return array{key: string, host: string, port: int, scheme: string, channel: string, event: string}|null
+     */
+    private function realtime(Device $device): ?array
+    {
+        $key = config('broadcasting.connections.reverb.key');
+        $host = config('vendapos.realtime.host');
+
+        if (config('broadcasting.default') !== 'reverb' || ! is_string($key) || ! is_string($host)) {
+            return null;
+        }
+
+        return [
+            'key' => $key,
+            'host' => $host,
+            'port' => (int) config('vendapos.realtime.port'),
+            'scheme' => (string) config('vendapos.realtime.scheme'),
+            'channel' => "till.{$device->id}",
+            'event' => 'till.sync',
+        ];
     }
 }

@@ -11,6 +11,7 @@ use Stancl\Tenancy\Contracts\TenantWithDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDomains;
 use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
+use VendaPOS\Core\Enums\BusinessType;
 
 /**
  * @property string|null $name
@@ -18,6 +19,8 @@ use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
  * @property string|null $owner_phone E.164
  * @property string|null $owner_email
  * @property string $locale en|sw, the language the owner is written to in
+ * @property list<string>|null $modules BusinessType values: the business modules this tenant has (T7)
+ * @property int $cash_variance_allowed_cents how far a drawer count may be off before closing needs a manager
  * @property string $status active|suspended|purged
  * @property Carbon|null $suspended_at
  * @property string|null $suspension_reason
@@ -44,14 +47,39 @@ class Tenant extends BaseTenant implements HasLocalePreference, TenantWithDataba
     protected $attributes = [
         'status' => self::ACTIVE,
         'locale' => 'en',
+        'cash_variance_allowed_cents' => self::DEFAULT_CASH_VARIANCE_ALLOWED_CENTS,
     ];
+
+    /** Cash-up: KES 100 either way before closing a shift needs a manager (Daniel). */
+    public const int DEFAULT_CASH_VARIANCE_ALLOWED_CENTS = 10_000;
 
     protected function casts(): array
     {
         return [
             'suspended_at' => 'datetime',
             'purge_after' => 'datetime',
+            'modules' => 'array',
+            'cash_variance_allowed_cents' => 'integer',
         ];
+    }
+
+    /**
+     * The business modules this tenant has; each branch runs one of them.
+     *
+     * @return list<BusinessType>
+     */
+    public function moduleTypes(): array
+    {
+        // A module name this version does not know is skipped, not an error.
+        return array_values(array_filter(array_map(
+            fn (string $value) => BusinessType::tryFrom($value),
+            $this->modules ?? [],
+        )));
+    }
+
+    public function hasModule(BusinessType $type): bool
+    {
+        return in_array($type, $this->moduleTypes(), true);
     }
 
     public function isActive(): bool
@@ -78,6 +106,8 @@ class Tenant extends BaseTenant implements HasLocalePreference, TenantWithDataba
             'owner_phone',
             'owner_email',
             'locale',
+            'modules',
+            'cash_variance_allowed_cents',
             'status',
             'suspended_at',
             'suspension_reason',

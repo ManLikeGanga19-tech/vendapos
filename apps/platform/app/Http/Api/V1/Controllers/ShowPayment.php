@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Api\V1\Controllers;
 
 use App\Domain\Payments\Models\Payment;
+use App\Domain\Payments\Models\PaymentAccount;
 use App\Domain\Tenancy\Models\Device;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use VendaPOS\Core\Enums\PaymentChannel;
 
 /** GET /api/v1/payments/{uuid} — a payment's state, for the device that asked for it only. */
 final class ShowPayment
@@ -35,6 +37,21 @@ final class ShowPayment
             'provider_reference' => $payment->provider_reference,
             'failure_code' => $payment->failure_code,
             'failure_reason' => $payment->failure_reason,
+            'channel' => $payment->channel->value,
+            // What the bill prints: the image once Safaricom made it, and the paybill and
+            // account number for customers who type them instead of scanning.
+            'qr' => $payment->channel === PaymentChannel::Qr ? [
+                'png' => $payment->qr_png,
+                'paybill' => self::payInNumber($payment),
+                'account' => $payment->reference,
+            ] : null,
         ];
+    }
+
+    private static function payInNumber(Payment $payment): ?string
+    {
+        $account = $payment->payment_account_id !== null ? PaymentAccount::query()->find($payment->payment_account_id) : null;
+
+        return $account?->payInNumber();
     }
 }

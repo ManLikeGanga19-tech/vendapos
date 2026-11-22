@@ -1,58 +1,66 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# VendaPOS Terminal
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+The till app: Laravel + Livewire packaged with NativePHP Desktop (Electron), with
+its own SQLite database so it keeps selling offline. See `docs/ARCHITECTURE.md`
+sections 3.1 and 12.
 
-## About Laravel
+## Developing on Windows
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+The terminal runs natively on Windows. The platform it talks to (Octane,
+Postgres, Redis, Horizon, Reverb) stays in Docker: Horizon needs the `pcntl` and
+`posix` extensions, which Windows does not have.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Live updates (a menu or staff change, a revoked till) reach the till through
+Reverb on port 8080: run `php artisan reverb:start --host=0.0.0.0 --port=8080`
+in the platform container. Without it the till still catches up through its
+60-second sync.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Needs PHP 8.4 (NTS x64 from php.net, with `curl fileinfo intl mbstring openssl
+pdo_sqlite sodium sqlite3 zip` enabled), Composer and Node 22.
 
-## Learning Laravel
+```powershell
+cd apps\pos-terminal
+composer install
+npm install
+npm run build
+php artisan native:install -n   # first time: downloads Electron for this OS
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+# The till has no field for the server address; set it per environment.
+# A process variable wins over .env, so nothing in .env needs changing.
+$env:VENDAPOS_API_URL = 'http://localhost:8000'
+php artisan native:migrate --force   # native:run does not apply new migrations by itself
+php artisan native:run
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+`native:install` adds `native:install --force` to `post-update-cmd` in
+`composer.json`. Don't commit that: `--force` would overwrite our
+`NativeAppServiceProvider` and `config/nativephp.php` on every `composer update`.
+Run `git checkout -- composer.json` after installing.
 
-## Contributing
+`node_modules` and Electron are built for one operating system. After switching
+between Windows and Linux, delete `node_modules` and
+`vendor/nativephp/desktop/resources/electron/node_modules`, then repeat the
+install steps.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+To pair the till, open the Owner panel (`http://danamo.localhost:8000`), go to
+**Tills**, press **Pair a till** and type the code into the terminal window.
 
-## Code of Conduct
+## Tests and checks
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Run in the Docker app container, as CI does:
 
-## Security Vulnerabilities
+```bash
+make terminal-test      # Pest
+make terminal-analyse   # Larastan level 8
+make terminal-lint      # Pint
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Linux pilot builds
 
-## License
+The pilot till is a Linux touch PC. Production builds open in kiosk mode and
+refuse to store the device token unless a secret service (gnome-keyring) is
+running; launch the app with `--password-store=gnome-libsecret` so Electron
+uses it.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Builds, releases, self-updates from our VPS and the Ubuntu 24.04 kiosk setup
+are in [docs/TERMINAL-LINUX.md](../../docs/TERMINAL-LINUX.md).

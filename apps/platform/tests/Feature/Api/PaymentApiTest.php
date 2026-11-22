@@ -8,6 +8,7 @@ use App\Domain\Payments\Events\PaymentCompleted;
 use App\Domain\Payments\Gateways\MobileMoneyGateway;
 use App\Domain\Payments\Jobs\InitiatePayment;
 use App\Domain\Payments\Models\Payment;
+use App\Domain\Payments\Models\PaymentAccount;
 use App\Domain\Tenancy\Models\Tenant;
 use App\Infrastructure\Outbox\DomainEvent;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -26,6 +27,11 @@ final class UnreachableGateway extends MobileMoneyGateway
         throw new RuntimeException('Connection timed out');
     }
 
+    public function generateQr(Payment $payment, string $merchantName): string
+    {
+        throw new RuntimeException('No QR from this gateway');
+    }
+
     public function query(Payment $payment): GatewayResult
     {
         throw new RuntimeException('Connection timed out');
@@ -34,6 +40,16 @@ final class UnreachableGateway extends MobileMoneyGateway
     public function parseCallback(array $body): ?array
     {
         return null;
+    }
+
+    public function registerConfirmationUrls(PaymentAccount $account): ?string
+    {
+        return null;
+    }
+
+    public function checkCredentials(array $credentials, string $environment): ?string
+    {
+        return self::UNREACHABLE;
     }
 }
 
@@ -45,6 +61,11 @@ final class RejectingGateway extends MobileMoneyGateway
         return GatewayResult::unsuccessful(PaymentStatus::Failed, '400.002.02', 'Invalid BusinessShortCode');
     }
 
+    public function generateQr(Payment $payment, string $merchantName): string
+    {
+        throw new RuntimeException('No QR from this gateway');
+    }
+
     public function query(Payment $payment): GatewayResult
     {
         return GatewayResult::pending();
@@ -53,6 +74,16 @@ final class RejectingGateway extends MobileMoneyGateway
     public function parseCallback(array $body): ?array
     {
         return null;
+    }
+
+    public function registerConfirmationUrls(PaymentAccount $account): ?string
+    {
+        return null;
+    }
+
+    public function checkCredentials(array $credentials, string $environment): ?string
+    {
+        return self::KEYS_REFUSED;
     }
 }
 
@@ -87,7 +118,7 @@ it('records a pending payment, its callback route and its outbox event, then que
         ->and($payment->order_id)->toBe($request['order_uuid'])
         ->and($route->tenant_id)->toBe($this->tenant->id)
         ->and($route->token_hash)->toBe(hash('sha256', $payment->callback_token))
-        ->and($payment->callbackUrl())->toEndWith("/webhooks/payments/mpesa_ke/{$payment->callback_token}")
+        ->and($payment->callbackUrl())->toEndWith("/webhooks/payments/{$payment->callback_token}")
         ->and($event->event_type)->toBe('payment.requested')
         ->and($event->payload)->not->toHaveKey('phone');
 

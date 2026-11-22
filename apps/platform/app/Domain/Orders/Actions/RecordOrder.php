@@ -7,9 +7,12 @@ namespace App\Domain\Orders\Actions;
 use App\Domain\Catalogue\Actions\FindUnknownItems;
 use App\Domain\Orders\Data\SyncResult;
 use App\Domain\Orders\Events\OrderRecorded;
-use App\Domain\Orders\Events\OrderVoided;
 use App\Domain\Orders\Models\Order;
-use App\Domain\Orders\Models\OrderLine;
+use App\Domain\Orders\Models\OrderTender;
+use App\Domain\Orders\Support\OrderSnapshot;
+use App\Domain\Orders\Support\ReceiptNumber;
+use App\Domain\Payments\Actions\FindTenderPayments;
+use App\Domain\Tenancy\Actions\FindUnknownStaff;
 use App\Domain\Tenancy\Data\DeviceContext;
 use App\Infrastructure\Outbox\DomainEvent;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -17,7 +20,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use VendaPOS\Core\Data\OrderData;
 use VendaPOS\Core\Data\OrderLineData;
-use VendaPOS\Core\Enums\OrderStatus;
+use VendaPOS\Core\Data\TenderData;
+use VendaPOS\Core\Payments\Tenders;
 use VendaPOS\Core\Tax\OrderTotals;
 
 /**
@@ -27,7 +31,12 @@ use VendaPOS\Core\Tax\OrderTotals;
  */
 final class RecordOrder
 {
-    public function __construct(private readonly FindUnknownItems $findUnknownItems) {}
+    public function __construct(
+        private readonly FindUnknownItems $findUnknownItems,
+        private readonly FindTenderPayments $findTenderPayments,
+        private readonly FindUnknownStaff $findUnknownStaff,
+        private readonly VoidOrder $voidOrder,
+    ) {}
 
     public function handle(OrderData $data, DeviceContext $context): SyncResult
     {
@@ -47,12 +56,40 @@ final class RecordOrder
             return SyncResult::rejected($data->uuid, 'unknown_items', ['item_ids' => $unknownItems]);
         }
 
+        if ($this->findUnknownStaff->handle([$data->staff_id]) !== []) {
+            return SyncResult::rejected($data->uuid, 'unknown_staff', ['staff_id' => 'No one at this business has this ID.']);
+        }
+
+        $voidProblems = $data->void === null ? null : $this->voidOrder->problems($data->void, $data->placed_at, 'void.');
+
+        if ($voidProblems !== null) {
+            return SyncResult::rejected($data->uuid, $voidProblems['reason'], $voidProblems['errors']);
+        }
+
+        $tenderProblems = Tenders::problems($data->tenderList(), $data->status, $data->total_cents);
+
+        if ($tenderProblems !== []) {
+            return SyncResult::rejected($data->uuid, 'tenders_mismatch', $tenderProblems);
+        }
+
+        $paymentProblems = $this->paymentProblems($data, $context);
+
+        if ($paymentProblems !== []) {
+            return SyncResult::rejected($data->uuid, 'payment_mismatch', $paymentProblems);
+        }
+
         try {
             return DB::transaction(fn () => $this->write($data, $context));
         } catch (UniqueConstraintViolationException) {
-            // A concurrent request committed the same UUID or sequence number first.
-            return Order::query()->whereKey($data->uuid)->exists()
-                ? SyncResult::duplicate($data->uuid)
+            // A concurrent request committed the same UUID, sequence number or payment first.
+            if (Order::query()->whereKey($data->uuid)->exists()) {
+                return SyncResult::duplicate($data->uuid);
+            }
+
+            $paymentProblems = $this->paymentProblems($data, $context);
+
+            return $paymentProblems !== []
+                ? SyncResult::rejected($data->uuid, 'payment_mismatch', $paymentProblems)
                 : SyncResult::rejected($data->uuid, 'sequence_conflict');
         }
     }
@@ -71,10 +108,14 @@ final class RecordOrder
             'id' => $data->uuid,
             'branch_id' => $context->branchId,
             'device_id' => $context->deviceId,
+            'staff_id' => $data->staff_id,
+            'ticket_id' => $data->ticket_uuid,
+            'shift_id' => $data->shift_id,
             'sequence_number' => $data->sequence_number,
+            'receipt_number' => ReceiptNumber::format($context->tillNumber, $data->sequence_number),
             'status' => $data->status,
             'placed_at' => Carbon::parse($data->placed_at)->utc(),
-            'payment_type' => $data->payment_type,
+            'payment_type' => $data->paymentType(),
             'subtotal_cents' => $totals->subtotal->cents,
             'vat_cents' => $totals->vat->cents,
             'total_cents' => $totals->total->cents,
@@ -97,10 +138,27 @@ final class RecordOrder
 
         $order->setRelation('lines', $order->lines()->createMany($lines));
 
+        $order->setRelation('tenders', $order->tenders()->createMany(array_map(fn (TenderData $tender, int $position) => [
+            'position' => $position + 1,
+            'method' => $tender->method,
+            'amount_cents' => $tender->amount_cents,
+            'tendered_cents' => $tender->tendered_cents,
+            'change_cents' => $tender->change_cents,
+            'payment_id' => $tender->payment_uuid,
+            'mpesa_reference' => $tender->mpesa_reference,
+        ], $data->tenderList(), array_keys($data->tenderList()))));
+
+        // Rung up and voided before the till could sync: recorded voided, with who and why.
+        if ($data->void !== null) {
+            $this->voidOrder->record($order, $data->void, $context->deviceId);
+        } else {
+            $order->setRelation('void', null);
+        }
+
         $event = DomainEvent::record(
             type: 'order.recorded',
             tenantId: $context->tenantId,
-            payload: $this->snapshot($order),
+            payload: OrderSnapshot::of($order),
             aggregateId: $order->id,
             branchId: $context->branchId,
             deviceId: $context->deviceId,
@@ -133,48 +191,52 @@ final class RecordOrder
             ]);
         }
 
-        $order->update(['status' => OrderStatus::Voided]);
+        if ($data->void === null) {
+            return SyncResult::rejected($data->uuid, 'invalid', ['void' => 'A void needs who voided it, who approved it and why.']);
+        }
 
-        $event = DomainEvent::record(
-            type: 'order.voided',
-            tenantId: $context->tenantId,
-            payload: $this->snapshot($order),
-            aggregateId: $order->id,
-            branchId: $context->branchId,
-            deviceId: $context->deviceId,
-        );
-
-        OrderVoided::dispatch($event->event_id, $context->tenantId, $order->id);
-
-        return SyncResult::updated($order->id);
+        return $this->voidOrder->apply($order, $data->void, $context);
     }
 
     /**
-     * The outbox payload for every order event: a full snapshot, so each
-     * listener can act on its own event without reading the Orders tables.
+     * Each M-Pesa push tender must name a payment this till started, for the
+     * same amount, that succeeded and is not already paying another sale.
      *
-     * @return array<string, mixed>
+     * @return array<string, string>
      */
-    private function snapshot(Order $order): array
+    private function paymentProblems(OrderData $data, DeviceContext $context): array
     {
-        return [
-            'order_id' => $order->id,
-            'sequence_number' => $order->sequence_number,
-            'status' => $order->status->value,
-            'placed_at' => $order->placed_at->toIso8601String(),
-            'payment_type' => $order->payment_type->value,
-            'subtotal_cents' => $order->subtotal_cents,
-            'vat_cents' => $order->vat_cents,
-            'total_cents' => $order->total_cents,
-            'lines' => $order->lines->map(fn (OrderLine $line) => [
-                'item_id' => $line->item_id,
-                'name' => $line->name,
-                'quantity' => $line->quantity,
-                'unit_price_cents' => $line->unit_price_cents,
-                'vat_category' => $line->vat_category->value,
-                'line_total_cents' => $line->line_total_cents,
-                'vat_cents' => $line->vat_cents,
-            ])->values()->all(),
-        ];
+        $paymentIds = array_values(array_filter(array_map(fn (TenderData $tender) => $tender->payment_uuid, $data->tenderList())));
+
+        if ($paymentIds === []) {
+            return [];
+        }
+
+        $payments = $this->findTenderPayments->handle($paymentIds, $context->deviceId);
+        $claimed = OrderTender::query()->whereIn('payment_id', $paymentIds)->where('order_id', '!=', $data->uuid)->pluck('payment_id')->all();
+        $errors = [];
+
+        foreach ($data->tenderList() as $index => $tender) {
+            if ($tender->payment_uuid === null) {
+                continue;
+            }
+
+            $payment = $payments[$tender->payment_uuid] ?? null;
+
+            $problem = match (true) {
+                $payment === null => 'No payment of this till has this UUID.',
+                $payment['amount_cents'] !== $tender->amount_cents => "The payment is for {$payment['amount_cents']}, the tender for {$tender->amount_cents}.",
+                ! $payment['succeeded'] => 'The payment has not succeeded.',
+                $payment['order_id'] !== null && $payment['order_id'] !== $data->uuid => 'The payment was requested for another sale.',
+                in_array($tender->payment_uuid, $claimed, true) => 'The payment already pays another sale.',
+                default => null,
+            };
+
+            if ($problem !== null) {
+                $errors["tenders.{$index}.payment_uuid"] = $problem;
+            }
+        }
+
+        return $errors;
     }
 }

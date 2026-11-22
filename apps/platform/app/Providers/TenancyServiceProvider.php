@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\PermissionRegistrar;
 use Stancl\JobPipeline\JobPipeline;
+use Stancl\Tenancy\Contracts\Tenant as TenantContract;
 use Stancl\Tenancy\Events;
 use Stancl\Tenancy\Jobs;
 use Stancl\Tenancy\Listeners;
@@ -117,13 +118,29 @@ class TenancyServiceProvider extends ServiceProvider
         Middleware\InitializeTenancyByDomain::$onFail = fn () => abort(404);
     }
 
+    /** The permission cache key outside any tenant, as configured. */
+    private ?string $centralPermissionCacheKey = null;
+
     /**
-     * Each tenant schema has its own roles. The permission registrar is a
-     * long-lived singleton under Octane, so drop whatever it loaded for the
-     * previous context and re-read the (tenant-tagged) cache store.
+     * Each tenant schema has its own roles and permissions, so each gets its
+     * own permission cache key. Spatie reads `cache->store()`, which stancl's
+     * tenant cache manager does not tag: one shared Redis key would hand every
+     * business whichever set was cached first (outside any business, an empty
+     * one). The registrar is a long-lived singleton under Octane and in queue
+     * workers; initializeCache() also drops what it loaded for the last context.
      */
-    protected function resetPermissionCache(): void
+    protected function resetPermissionCache(Events\TenancyBootstrapped|Events\RevertedToCentralContext $event): void
     {
+        $this->centralPermissionCacheKey ??= (string) config('permission.cache.key');
+        // By event, not tenancy()->initialized: stancl still reports the tenant
+        // while RevertedToCentralContext runs.
+        $tenant = $event instanceof Events\TenancyBootstrapped ? $event->tenancy->tenant : null;
+        $tenantKey = $tenant instanceof TenantContract ? $tenant->getTenantKey() : null;
+
+        config(['permission.cache.key' => $tenantKey === null
+            ? $this->centralPermissionCacheKey
+            : "{$this->centralPermissionCacheKey}.tenant.{$tenantKey}"]);
+
         $this->app->make(PermissionRegistrar::class)->initializeCache();
     }
 

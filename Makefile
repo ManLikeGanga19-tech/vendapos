@@ -48,6 +48,9 @@ terminal-install:
 terminal-test:
 	docker compose exec app bash -c "cd apps/pos-terminal && vendor/bin/pest"
 
+terminal-analyse:
+	docker compose exec app bash -c "cd apps/pos-terminal && vendor/bin/phpstan analyse"
+
 terminal-lint:
 	docker compose exec app bash -c "cd apps/pos-terminal && vendor/bin/pint --test"
 

@@ -38,3 +38,9 @@ it('has 9 business types', function () {
 it('is string-backed', function () {
     expect(BusinessType::Restaurant->value)->toBe('restaurant');
 });
+
+it('offers only the modules that are built, the rest coming soon', function () {
+    expect(BusinessType::available())->toBe([BusinessType::Restaurant, BusinessType::Shop, BusinessType::General])
+        ->and(BusinessType::Bar->isAvailable())->toBeFalse()
+        ->and(BusinessType::Pharmacy->isAvailable())->toBeFalse();
+});

@@ -5,19 +5,24 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\TenantResource\Pages;
 
 use App\Domain\Etims\Actions\SwitchBranchEtims;
+use App\Domain\Tenancy\Actions\CreateBranch;
 use App\Domain\Tenancy\Actions\ListBranches;
 use App\Domain\Tenancy\Actions\SetEtimsBranchId;
+use App\Domain\Tenancy\Models\Tenant;
+use App\Filament\Admin\Resources\TenantResource;
 use BackedEnum;
 use DomainException;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
+use VendaPOS\Core\Enums\BusinessType;
 
-/** A tenant's branches: KRA branch ID and the per-branch eTIMS switch. */
+/** A tenant's branches: opening one with one of its modules, KRA branch ID and the per-branch eTIMS switch. */
 class TenantBranches extends TenantDataPage
 {
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-storefront';
@@ -45,9 +50,28 @@ class TenantBranches extends TenantDataPage
             }))
             ->columns([
                 TextColumn::make('name')->label(__('admin.branches.name')),
-                TextColumn::make('business_type')->label(__('admin.branches.business_type')),
+                TextColumn::make('business_type')->label(__('admin.branches.business_type'))
+                    ->formatStateUsing(fn (string $state): string => TenantResource::moduleOptions()[$state] ?? $state),
                 TextColumn::make('etims_branch_id')->label(__('admin.branches.etims_branch_id'))->placeholder('—'),
                 IconColumn::make('etims_enabled')->label(__('admin.branches.etims_enabled'))->boolean(),
+            ])
+            ->headerActions([
+                Action::make('addBranch')
+                    ->label(__('admin.branches.add'))
+                    ->authorize(fn () => static::isStaff())
+                    ->schema([
+                        TextInput::make('name')->label(__('admin.modules.branch_name'))->required()->maxLength(CreateBranch::NAME_MAX),
+                        Select::make('business_type')
+                            ->label(__('admin.modules.branch_type'))
+                            ->helperText(__('admin.branches.add_help'))
+                            ->options(fn (): array => $this->tenantModules())
+                            ->required(),
+                    ])
+                    ->action(function (array $data) {
+                        $this->inTenant(fn () => app(CreateBranch::class)->handle((string) $data['name'], BusinessType::from((string) $data['business_type'])));
+                        $this->flushCachedTableRecords();
+                        Notification::make()->title(__('admin.branches.added'))->success()->send();
+                    }),
             ])
             ->recordActions([
                 Action::make('setEtimsBranchId')
@@ -83,6 +107,22 @@ class TenantBranches extends TenantDataPage
                     ->authorize(fn () => static::isStaff())
                     ->action(fn (array $record) => $this->switchEtims($record['id'], false)),
             ]);
+    }
+
+    /** @return array<string, string> the tenant's modules that are built, to open a branch with */
+    private function tenantModules(): array
+    {
+        /** @var Tenant $tenant */
+        $tenant = $this->getRecord();
+        $options = [];
+
+        foreach ($tenant->moduleTypes() as $type) {
+            if ($type->isAvailable()) {
+                $options[$type->value] = TenantResource::moduleOptions()[$type->value];
+            }
+        }
+
+        return $options;
     }
 
     private function switchEtims(string $branchId, bool $on): void

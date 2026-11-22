@@ -37,7 +37,7 @@ final class DevTenantSeeder extends Seeder
         }
 
         /** @var Tenant $tenant */
-        $tenant = Tenant::create(['id' => self::TENANT_ID, 'name' => 'Danamo Restaurant']);
+        $tenant = Tenant::create(['id' => self::TENANT_ID, 'name' => 'Danamo Restaurant', 'modules' => [BusinessType::Restaurant->value]]);
         $tenant->domains()->create(['domain' => 'danamo.localhost']);
 
         $branch = $tenant->run(function () {

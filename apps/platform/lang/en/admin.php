@@ -9,6 +9,7 @@ return [
         'devices' => 'Devices',
         'etims' => 'eTIMS',
         'negative_stock' => 'Negative stock',
+        'void_rates' => 'High void rates',
         'exports' => 'Data exports',
     ],
 
@@ -50,6 +51,29 @@ return [
         ],
     ],
 
+    'modules' => [
+        'title' => 'Business modules',
+        'help' => 'What this business can run. Each branch runs one module, which decides its tills’ screens and the owner panel’s pages.',
+        'coming_soon' => 'Coming soon',
+        'not_available' => 'Only modules that are built can be given; the others are coming soon.',
+        'first_branch' => 'First branch',
+        'first_branch_help' => 'The owner can add more branches later, choosing from these modules.',
+        'branch_name' => 'Branch name',
+        'branch_type' => 'Runs',
+        'in_use' => 'A branch still runs :modules: it cannot be removed.',
+        'types' => [
+            'restaurant' => 'Restaurant, cafe',
+            'bar' => 'Bar, club, lounge',
+            'salon' => 'Salon, spa, kinyozi',
+            'shop' => 'Shop, duka, kiosk',
+            'supermarket' => 'Supermarket, minimart',
+            'hardware' => 'Hardware shop',
+            'pharmacy' => 'Chemist, pharmacy',
+            'liquor' => 'Liquor store',
+            'general' => 'Other business',
+        ],
+    ],
+
     'suspension' => [
         'status' => 'Status',
         'statuses' => [
@@ -79,6 +103,9 @@ return [
     ],
 
     'branches' => [
+        'add' => 'Add branch',
+        'add_help' => 'Only this business’s built modules are listed; add a module on the tenant first.',
+        'added' => 'Branch added',
         'name' => 'Branch',
         'business_type' => 'Business type',
         'etims_branch_id' => 'KRA branch ID',
@@ -123,6 +150,17 @@ return [
         'retry_confirm' => 'Send this document to KRA again now. A failed document gets one more attempt.',
         'retry_queued' => 'Retry queued.',
         'empty' => 'Nothing waiting: every eTIMS document has been sent or is not required.',
+    ],
+
+    'void_rates' => [
+        'day' => 'Day',
+        'branch' => 'Branch',
+        'staff' => 'Staff',
+        'voided' => 'Voided / sales',
+        'status' => 'Owner',
+        'open' => 'Not checked yet',
+        'resolved' => 'Checked',
+        'empty' => 'No one has voided more than the limit share of their sales.',
     ],
 
     'negative_stock' => [

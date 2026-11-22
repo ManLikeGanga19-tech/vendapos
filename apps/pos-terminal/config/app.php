@@ -13,7 +13,8 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    // Also the installed app's name and file name (VendaPOS, vendapos).
+    'name' => env('APP_NAME', 'VendaPOS'),
 
     /*
     |--------------------------------------------------------------------------

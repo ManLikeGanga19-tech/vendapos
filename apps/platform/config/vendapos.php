@@ -27,8 +27,36 @@ return [
 
     'device_token_grace_days' => (int) env('VENDAPOS_DEVICE_TOKEN_GRACE_DAYS', 7),
 
+    // After a refresh, the old token keeps working this long (or until the
+    // new one is first used), so a lost reply cannot lock the till out.
+    'device_token_overlap_minutes' => (int) env('VENDAPOS_DEVICE_TOKEN_OVERLAP_MINUTES', 10),
+
+    // Sign-in with an authenticator app on the Admin and Owner panels.
+    // Only local development may switch it off (App\Filament\TwoFactorRequirement).
+    'require_mfa' => (bool) env('VENDAPOS_REQUIRE_MFA', true),
+
+    // How long a one-time till pairing code works after it is shown.
+    'pairing_code_minutes' => 15,
+
     // Abilities granted to a terminal's token.
-    'device_abilities' => ['orders:sync', 'payments:initiate', 'staff:read'],
+    'device_abilities' => ['orders:sync', 'payments:initiate', 'staff:read', 'staff:pin'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Real-time
+    |--------------------------------------------------------------------------
+    |
+    | Where tills open their Reverb connection. This is the public address,
+    | which in production differs from the one the app uses to publish
+    | (REVERB_HOST). The key is Reverb's public app key, never the secret.
+    |
+    */
+
+    'realtime' => [
+        'host' => env('VENDAPOS_REALTIME_HOST', env('REVERB_HOST')),
+        'port' => (int) env('VENDAPOS_REALTIME_PORT', env('REVERB_PORT', 443)),
+        'scheme' => env('VENDAPOS_REALTIME_SCHEME', env('REVERB_SCHEME', 'https')),
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -45,8 +73,21 @@ return [
         'token_renewal' => [
             'per_minute' => (int) env('VENDAPOS_RATE_LIMIT_TOKEN_RENEWAL_MINUTE', 10),
             'per_hour' => (int) env('VENDAPOS_RATE_LIMIT_TOKEN_RENEWAL_HOUR', 30),
+            'subjects' => ['ip', 'device'],
             'redis_connection' => 'cache',
             'key_prefix' => 'rate:token-renewal:',
+        ],
+
+        // Pairing a till with a one-time code: per client IP, plus a ceiling
+        // across all callers so many addresses together can't guess codes.
+        'device_pairing' => [
+            'per_minute' => (int) env('VENDAPOS_RATE_LIMIT_PAIRING_MINUTE', 5),
+            'per_hour' => (int) env('VENDAPOS_RATE_LIMIT_PAIRING_HOUR', 20),
+            'all_per_minute' => (int) env('VENDAPOS_RATE_LIMIT_PAIRING_ALL_MINUTE', 300),
+            'all_per_hour' => (int) env('VENDAPOS_RATE_LIMIT_PAIRING_ALL_HOUR', 3000),
+            'subjects' => ['ip', 'all'],
+            'redis_connection' => 'cache',
+            'key_prefix' => 'rate:device-pairing:',
         ],
     ],
 
@@ -89,7 +130,8 @@ return [
     |
     | Each provider maps to a gateway class. With `fake` on, every provider
     | uses FakeGateway (tests, demos, local work without sandbox keys).
-    | Callbacks reach {callback_base_url}/webhooks/payments/{provider}/{token}.
+    | Callbacks reach {callback_base_url}/webhooks/payments/{token}; Safaricom
+    | refuses URLs containing words such as "mpesa", so keep the base URL free of them.
     |
     */
 
@@ -119,6 +161,12 @@ return [
         // Callbacks per minute per source IP.
         'callback_rate_limit' => (int) env('VENDAPOS_PAYMENTS_CALLBACK_RATE_LIMIT', 600),
 
+        // payments:check-mpesa (every 5 minutes): a typed code Safaricom has not confirmed after
+        // this long, or a paid push no sale has claimed, becomes a check for the owner (T3d)...
+        'typed_code_grace_minutes' => (int) env('VENDAPOS_TYPED_CODE_GRACE_MINUTES', 30),
+        // ...who is told in one digest at most this often.
+        'check_digest_minutes' => (int) env('VENDAPOS_MPESA_CHECK_DIGEST_MINUTES', 30),
+
         // payments:reconcile (every minute) for late or missing callbacks.
         'reconcile' => [
             // Ask the provider once the customer has had time to answer the prompt.
@@ -129,7 +177,24 @@ return [
             'never_pushed_after_minutes' => 10,
             // Older pending payments are left for manual review.
             'stop_after_hours' => 24,
+            // After Safaricom answers 429 (too many requests), ask about that payment again only after this.
+            'backoff_seconds' => 180,
         ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tickets (table service)
+    |--------------------------------------------------------------------------
+    |
+    | A ticket is paid once (Daniel, 2026-10-30): a till holds it on the server
+    | before taking payment. The hold lapses after this long, so a till that
+    | went away cannot keep the table from paying elsewhere.
+    |
+    */
+
+    'tickets' => [
+        'payment_hold_minutes' => (int) env('VENDAPOS_TICKET_HOLD_MINUTES', 15),
     ],
 
     /*
@@ -224,6 +289,27 @@ return [
     'support' => [
         'phone' => env('VENDAPOS_SUPPORT_PHONE'),
         'email' => env('VENDAPOS_SUPPORT_EMAIL'),
+    ],
+
+    // Voids the owner should look at (T5a-2; architecture §10 anomaly rules).
+    'voids' => [
+        // A staff member whose voided sales are more than this share of their sales in a
+        // business day is flagged (Daniel: per person, per day)...
+        'rate_percent' => (int) env('VENDAPOS_VOID_RATE_PERCENT', 10),
+        // ...once they made at least this many, so one void in three sales does not.
+        'rate_min_sales' => (int) env('VENDAPOS_VOID_RATE_MIN_SALES', 20),
+        // orders:check-voids tells the owner in one digest at most this often.
+        'check_digest_minutes' => (int) env('VENDAPOS_VOID_CHECK_DIGEST_MINUTES', 30),
+    ],
+
+    // Till drawer shifts (cash-up). The allowance for a count is per business, on the tenant.
+    'cash_up' => [
+        // A shift still open this long after it opened is flagged: a till left running, lost or broken.
+        'open_too_long_hours' => (int) env('VENDAPOS_CASH_UP_OPEN_TOO_LONG_HOURS', 24),
+        // Tills send shifts before sales, so a sale naming a shift still unknown after this is flagged.
+        'missing_shift_grace_minutes' => (int) env('VENDAPOS_CASH_UP_MISSING_SHIFT_GRACE_MINUTES', 60),
+        // cash-up:check tells the owner in one digest at most this often.
+        'check_digest_minutes' => (int) env('VENDAPOS_CASH_UP_CHECK_DIGEST_MINUTES', 30),
     ],
 
     // Business days are counted here; storage stays UTC (CLAUDE.md §4).

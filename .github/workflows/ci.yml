@@ -9,7 +9,9 @@ on:
 jobs:
   platform:
     name: Platform (PHP ${{ matrix.php }})
-    runs-on: ubuntu-latest
+    # Pinned: postgresql-client-16 (for the export tests) is in 24.04's archive;
+    # ubuntu-latest moved to 26.04, which does not carry it.
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         php: ['8.4']
@@ -196,6 +198,14 @@ jobs:
           php artisan key:generate
           touch database/database.sqlite
 
-      - name: Tests
+      - name: Pint (code style)
         working-directory: apps/pos-terminal
-        run: php artisan test
+        run: ./vendor/bin/pint --test
+
+      - name: Larastan (static analysis)
+        working-directory: apps/pos-terminal
+        run: ./vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+
+      - name: Pest (tests)
+        working-directory: apps/pos-terminal
+        run: ./vendor/bin/pest
